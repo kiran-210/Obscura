@@ -1,0 +1,39 @@
+{
+  "name": "@wraith/matcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Wraith off-chain order-matching service — price-time matching that mirrors the match_orders circuit, plus match_orders proof assembly and Soroban submission.",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@wraith/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@stellar/stellar-sdk": "^14.6.1",
+    "@zkpassport/poseidon2": "^0.6.2",
+    "@types/node": "^20.19.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

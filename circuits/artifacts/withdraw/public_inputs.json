@@ -1,0 +1,13 @@
+{
+  "circuit": "withdraw",
+  "public_input_count": 5,
+  "public_inputs_bytes": 160,
+  "order": "SHARED.md sec 7 -- contract parses 32-byte big-endian Fr in this exact order",
+  "public_inputs": [
+    { "index": 0, "name": "merkle_root",    "hex": "0x0088271a4132cf0cc66e2894037af53a8a56c17aca746e4be7c7b3e8cf036f5d", "dec": null,  "description": "Merkle root the spent note belongs to; contract checks it is in the root-history ring buffer." },
+    { "index": 1, "name": "nullifier",      "hex": "0x1778d67b2b2fec60a1554a27b13b35c7963d2a441871d02cacb61ebc24893527", "dec": null,  "description": "hash2(commitment, spending_key); contract marks it spent to prevent double-spend." },
+    { "index": 2, "name": "recipient_hash", "hex": "0x05918929c231eb29e27d6ab5b8e06643f51ca91380fe6605f06f9997034c3f8d", "dec": null,  "description": "hash2(recipient_address_as_field, 0); binds the proof to the payout recipient." },
+    { "index": 3, "name": "amount",         "hex": "0x00000000000000000000000000000000000000000000000000000000000003e8", "dec": "1000", "description": "Withdrawal amount (public; drives the SAC transfer). Equals the note amount." },
+    { "index": 4, "name": "asset_id",       "hex": "0x0000000000000000000000000000000000000000000000000000000000000000", "dec": "0",    "description": "Asset id (public; 0 = native XLM). Equals the note asset." }
+  ]
+}

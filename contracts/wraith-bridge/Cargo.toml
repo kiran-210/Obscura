@@ -1,0 +1,22 @@
+[package]
+name = "wraith-bridge"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+soroban-sdk = { version = "26.0.1", features = ["alloc"] }
+soroban-poseidon = "26.0.0"
+# In-process MPT storage-proof verifier (BRIDGE_SPEC §6). Linked as a LIBRARY
+# (rlib) path dependency and called directly from `bridge_in` — NOT a
+# cross-contract call.
+bridge-mpt = { path = "../bridge-mpt", default-features = false }
+
+[dev-dependencies]
+soroban-sdk = { version = "26.0.1", features = ["testutils", "alloc"] }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+testutils = []

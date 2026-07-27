@@ -1,0 +1,18 @@
+[profile.default]
+src = "src"
+out = "out"
+test = "test"
+script = "script"
+libs = ["lib"]
+solc = "0.8.24"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+# forge auto-detects the forge-std remapping from lib/. Kept explicit for clarity.
+remappings = ["forge-std/=lib/forge-std/src/"]
+
+[fmt]
+line_length = 100
+tab_width = 4
+
+# See https://book.getfoundry.sh/reference/config/

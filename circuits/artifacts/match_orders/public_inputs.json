@@ -1,0 +1,17 @@
+{
+  "circuit": "match_orders",
+  "public_input_count": 8,
+  "public_inputs_bytes": 256,
+  "order": "SHARED.md sec 7 -- contract parses 32-byte big-endian Fr in this exact order",
+  "witness": "A=BUY 10 base @ 2.0, B=SELL 10 base @ 1.0 -> exec 1.5, fill 10, quote_filled 15; both fully filled; buyer (A) refunded 5 quote (price improvement); residuals 0; refund_b 0",
+  "public_inputs": [
+    { "index": 0, "name": "order_commitment_a", "hex": "0x2cc1e5805a792a7e077a3d3459f3fee8ed7fc375db2f78c7eda22edf7a2b3053", "dec": null, "description": "Order A commitment (must be in active set). A is the BUY order here." },
+    { "index": 1, "name": "order_commitment_b", "hex": "0x22431c050e53d5f05b8cb49f09257f172351de32a1f97b985a295fe51c16d434", "dec": null, "description": "Order B commitment (must be in active set). B is the SELL order here." },
+    { "index": 2, "name": "fill_note_buyer",    "hex": "0x10953c5f0e386afc5ca8495893febd6f0aa0f6ff579e2f21629461d60d6c8357", "dec": null, "description": "Settlement note: buyer receives fill_amount (10) of the BASE asset." },
+    { "index": 3, "name": "fill_note_seller",   "hex": "0x0bc423b159dcef7e25bc328ad5848926b2f176f600b867e6051a43f22800152f", "dec": null, "description": "Settlement note: seller receives quote_filled (15) of the QUOTE asset." },
+    { "index": 4, "name": "residual_order_a",   "hex": "0x0000000000000000000000000000000000000000000000000000000000000000", "dec": "0", "description": "Remaining order A (0 = fully filled)." },
+    { "index": 5, "name": "residual_order_b",   "hex": "0x0000000000000000000000000000000000000000000000000000000000000000", "dec": "0", "description": "Remaining order B (0 = fully filled)." },
+    { "index": 6, "name": "refund_note_a",      "hex": "0x2957b3c574cf30b2497620ed4a91a1fe2cacd721583ce5168bba8cc680dfbc98", "dec": null, "description": "Refund of A's unused locked funds: 5 quote price-improvement (A is buy, fully filled)." },
+    { "index": 7, "name": "refund_note_b",      "hex": "0x0000000000000000000000000000000000000000000000000000000000000000", "dec": "0", "description": "Refund for B (0; B is the seller, fully delivered)." }
+  ]
+}

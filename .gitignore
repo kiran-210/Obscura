@@ -1,0 +1,45 @@
+# Noir
+circuits/noir/*/target/
+circuits/noir/*/proofs/
+circuits/noir/*/Verifier.toml
+
+# Rust / Soroban
+contracts/*/target/
+contracts/target/
+contracts/*/test_snapshots/
+*.wasm
+*.d
+
+# Node
+node_modules/
+dist/
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build artifacts
+*.proof
+*.vk
+
+# Reference repos (cloned locally for agents, not part of our codebase)
+vendor/
+
+# Deploy artifacts / secrets
+.soroban/
+deployments.json
+*.env
+
+# Bridge committee dump (reproducible public data, ~99KB) — regenerate with
+# node bridge/deploy/fetch-committee.mjs
+bridge/deploy/committee.json
+.vercel
+.env*.local

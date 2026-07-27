@@ -1,0 +1,24 @@
+{
+  "_comment": "Authoritative note/order vectors generated from the Noir golden-gen (poseidon v0.2.0). Regenerate with: cd test/golden-gen && nargo test --show-output print_note_and_order_vectors.",
+  "note": {
+    "assetId": "5",
+    "amount": "1000",
+    "spendingKey": "42",
+    "blinding": "7",
+    "ownerKey": "0x1e7981f857394b926eee0742ad9104aa612ffe6873522a4eccaab935b2ff3c96",
+    "viewingKey": "0x21ae38aab10d7c1d33c5c11a080f4395abfacfe77ad0e4ff0acef2fdac1757ee",
+    "commitment": "0x10bc5bc5439d7ede1b4b59a5ca0369a053ec4df2f8ccfab507edd558704435ec",
+    "nullifier": "0x11607413a17bfcfe6536de37a94ab8cb5a9bb1a0a8c6efcd9c2b913109c407d2"
+  },
+  "order": {
+    "side": "1",
+    "price": "25000000",
+    "amount": "1000",
+    "assetBase": "5",
+    "assetQuote": "9",
+    "spendingKey": "42",
+    "nonce": "123",
+    "ownerKey": "0x1e7981f857394b926eee0742ad9104aa612ffe6873522a4eccaab935b2ff3c96",
+    "commitment": "0x1a928484bf0d49decd87f1ef15da2c317a4a32b85066ed2622145f0e6dc7ac63"
+  }
+}

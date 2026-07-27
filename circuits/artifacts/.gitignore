@@ -1,0 +1,9 @@
+# Deployment / integration fixtures: these MUST be committed even though the
+# repo-root .gitignore excludes *.vk, *.proof and target/. Re-include everything
+# under this directory.
+!*
+!*/
+!*/vk
+!*/proof
+!*/public_inputs
+!*/public_inputs.json

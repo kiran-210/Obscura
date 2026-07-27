@@ -1,0 +1,63 @@
+# Wraith matcher — production stack for a Docker host / VPS.
+#
+#   caddy   : TLS termination (auto Let's Encrypt) + CORS, public on :80/:443.
+#   matcher : the Node matching service, live Soroban submission. Not exposed
+#             directly — the browser reaches it only through caddy over HTTPS.
+#
+# Why the proxy: the Vercel frontend is HTTPS and cross-origin, so a raw http://
+# matcher would be blocked by mixed-content AND CORS preflight. Caddy fixes both
+# without touching the matcher source.
+#
+# Run (from the repo root, with your funded secret + domain in deploy/matcher.env):
+#   docker compose --env-file deploy/matcher.env up -d --build
+#   curl https://<MATCHER_DOMAIN>/health
+services:
+  matcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: wraith-matcher:latest
+    restart: unless-stopped
+    environment:
+      # Live proving + on-chain settlement on Soroban (default in code is dry-run).
+      WRAITH_SUBMIT: "live"
+      WRAITH_RPC_URL: "${WRAITH_RPC_URL:-https://soroban-testnet.stellar.org}"
+      # A FUNDED Stellar secret ("S…") — the matcher's hot key that pays fees.
+      WRAITH_MATCHER_SECRET: "${WRAITH_MATCHER_SECRET:?set a funded S… secret in deploy/matcher.env}"
+      MATCH_INTERVAL_MS: "${MATCH_INTERVAL_MS:-2000}"
+      # Optional: pin the pool contract. Default = deployments.json (wraithPoolMatchMemo).
+      # WRAITH_POOL_CONTRACT: "C..."
+    expose:
+      - "8787"
+    volumes:
+      # Cache the bb.js SRS so a restart doesn't re-download it before the first proof.
+      - bb-crs:/root/.bb-crs
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8787/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - matcher
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # DNS A/AAAA record for this domain must point at this host (for Let's Encrypt).
+      MATCHER_DOMAIN: "${MATCHER_DOMAIN:?set your matcher domain in deploy/matcher.env}"
+      # Restrict to your Vercel origin in prod, e.g. https://wraith.vercel.app. Default: any.
+      CORS_ORIGIN: "${CORS_ORIGIN:-*}"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  bb-crs:
+  caddy-data:
+  caddy-config:

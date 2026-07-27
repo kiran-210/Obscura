@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Noir golden-vector generator artifacts
+test/golden-gen/target/
+test/golden-gen/Nargo.lock
+test/golden-gen/Prover.toml
+test/golden-gen/Verifier.toml

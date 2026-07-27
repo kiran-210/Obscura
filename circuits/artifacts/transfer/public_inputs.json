@@ -1,0 +1,14 @@
+{
+  "circuit": "transfer",
+  "public_input_count": 6,
+  "public_inputs_bytes": 192,
+  "order": "SHARED.md sec 7 -- contract parses 32-byte big-endian Fr in this exact order",
+  "public_inputs": [
+    { "index": 0, "name": "merkle_root",      "hex": "0x24ee0907d8b3a7d8a20a4f08fd115cfe53820c419aff353270adc9050a30db16", "dec": null, "description": "Root the (real) input notes belong to; contract checks it is in the root history." },
+    { "index": 1, "name": "nullifier_0",      "hex": "0x0cf169ff8b087b7b3e239c754dced6fa831b8c3002518c56a753dd338d6c9f20", "dec": null, "description": "Nullifier of input note 0." },
+    { "index": 2, "name": "nullifier_1",      "hex": "0x05a5c03117fcd6ad0eb713763913b0810ec477026e65a6c590b9d26989116e4c", "dec": null, "description": "Nullifier of input note 1 (here a dummy/phantom note, amount 0)." },
+    { "index": 3, "name": "out_commitment_0", "hex": "0x0b7bde0f76325e1dfe5c5163281445e6a261a183d6caa0a3b1b3199a9e24e7e5", "dec": null, "description": "Output note for the recipient (amount 700)." },
+    { "index": 4, "name": "out_commitment_1", "hex": "0x1db7a577b3b27c816bfdb7edd996ec2216274c449d3f1e427a1eadb269e46229", "dec": null, "description": "Change output note back to the sender (amount 300)." },
+    { "index": 5, "name": "ext_data_hash",   "hex": "0x000000000000000000000000000000000000000000000000000000003ade68b1", "dec": "987654321", "description": "Binds external params (recipient/fee/replay protection)." }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "_comment": "Golden Poseidon2 vectors generated from the pinned Noir `poseidon` v0.2.0 lib (BN254, t=4, RATE=3, IV = in_len * 2^64, output = state[0]). Regenerate with: cd test/golden-gen && source ../../../env.sh && nargo test --show-output. These are byte-for-byte identical to soroban-poseidon poseidon2_hash::<4, BnScalar>. Values are 32-byte big-endian field elements (0x-prefixed, 64 hex chars).",
+  "_source": "nargo 1.0.0-beta.9 + noir-lang/poseidon tag v0.2.0",
+  "vectors": [
+    {
+      "name": "hash2(1,2)",
+      "arity": 2,
+      "inputs": ["1", "2"],
+      "expected": "0x038682aa1cb5ae4e0a3f13da432a95c77c5c111f6f030faf9cad641ce1ed7383"
+    },
+    {
+      "name": "hash2(0,0)",
+      "arity": 2,
+      "inputs": ["0", "0"],
+      "expected": "0x0b63a53787021a4a962a452c2921b3663aff1ffd8d5510540f8e659e782956f1"
+    },
+    {
+      "name": "hash4(1,2,3,4)",
+      "arity": 4,
+      "inputs": ["1", "2", "3", "4"],
+      "expected": "0x130bf204a32cac1f0ace56c78b731aa3809f06df2731ebcf6b3464a15788b1b9"
+    },
+    {
+      "name": "hash7(1,2,3,4,5,6,7)",
+      "arity": 7,
+      "inputs": ["1", "2", "3", "4", "5", "6", "7"],
+      "expected": "0x16f929bc0d216df4b05bdc44222463edf2b9791bd949ab926eebda06a502d238"
+    }
+  ]
+}

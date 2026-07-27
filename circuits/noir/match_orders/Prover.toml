@@ -1,0 +1,41 @@
+# match_orders -- valid FULL-fill witness with buyer price-improvement refund.
+# A: BUY 10 base @ 2.0 ; B: SELL 10 base @ 1.0 -> exec 1.5, fill 10, quote_filled 15,
+# buyer refund 5 quote (locked 20 - paid 15). Both fully filled -> residuals 0, refund_b 0.
+#
+# Public inputs (SHARED sec 7 order):
+#   order_commitment_a, order_commitment_b, fill_note_buyer, fill_note_seller,
+#   residual_order_a, residual_order_b, refund_note_a, refund_note_b
+order_commitment_a = "0x2cc1e5805a792a7e077a3d3459f3fee8ed7fc375db2f78c7eda22edf7a2b3053"
+order_commitment_b = "0x22431c050e53d5f05b8cb49f09257f172351de32a1f97b985a295fe51c16d434"
+fill_note_buyer = "0x10953c5f0e386afc5ca8495893febd6f0aa0f6ff579e2f21629461d60d6c8357"
+fill_note_seller = "0x0bc423b159dcef7e25bc328ad5848926b2f176f600b867e6051a43f22800152f"
+residual_order_a = "0"
+residual_order_b = "0"
+refund_note_a = "0x2957b3c574cf30b2497620ed4a91a1fe2cacd721583ce5168bba8cc680dfbc98"
+refund_note_b = "0"
+
+# Private inputs: order A (BUY)
+a_side = "0"
+a_price = "20000000"
+a_amount = "10"
+a_asset_base = "0"
+a_asset_quote = "1"
+a_owner_key = "0x0b0f697117aa52458ddd243aeeac42e2a58175474f8889f3d763521eea2ce64b"
+a_nonce = "42"
+
+# Private inputs: order B (SELL)
+b_side = "1"
+b_price = "10000000"
+b_amount = "10"
+b_asset_base = "0"
+b_asset_quote = "1"
+b_owner_key = "0x2c17542f99762c7898e94e9b124749ed3c113a801d913f970e215cb5790794d2"
+b_nonce = "43"
+
+# Blindings / nonces for the new notes
+buyer_fill_blinding = "701"
+seller_fill_blinding = "702"
+residual_a_nonce = "801"
+residual_b_nonce = "802"
+refund_a_blinding = "703"
+refund_b_blinding = "804"

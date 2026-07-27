@@ -1,0 +1,15 @@
+# withdraw -- valid witness (see circuits/README.md)
+# Public inputs (SHARED sec 7 order): merkle_root, nullifier, recipient_hash, amount, asset_id
+merkle_root = "0x0088271a4132cf0cc66e2894037af53a8a56c17aca746e4be7c7b3e8cf036f5d"
+nullifier = "0x1778d67b2b2fec60a1554a27b13b35c7963d2a441871d02cacb61ebc24893527"
+recipient_hash = "0x05918929c231eb29e27d6ab5b8e06643f51ca91380fe6605f06f9997034c3f8d"
+amount = "1000"
+asset_id = "0"
+
+# Private inputs
+note_amount = "1000"
+note_asset_id = "0"
+note_blinding = "12345"
+spending_key = "7"
+merkle_path = ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"]
+merkle_indices = ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"]

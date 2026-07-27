@@ -1,0 +1,22 @@
+# TLS termination + CORS in front of the Wraith matcher.
+#
+# {$MATCHER_DOMAIN} must have a DNS A/AAAA record pointing to this host and ports
+# 80+443 reachable, so Caddy can issue and renew a Let's Encrypt certificate.
+# Set CORS_ORIGIN to your Vercel origin to lock down cross-origin access (default: *).
+{$MATCHER_DOMAIN} {
+	# CORS preflight: answer OPTIONS here, never proxy it to the matcher (which 404s it).
+	@preflight method OPTIONS
+	handle @preflight {
+		header Access-Control-Allow-Origin "{$CORS_ORIGIN:*}"
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+		header Access-Control-Allow-Headers "Content-Type"
+		header Access-Control-Max-Age "86400"
+		respond 204
+	}
+
+	# Everything else → the matcher, with the CORS origin header attached to the response.
+	handle {
+		header Access-Control-Allow-Origin "{$CORS_ORIGIN:*}"
+		reverse_proxy matcher:8787
+	}
+}

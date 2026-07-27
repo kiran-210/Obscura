@@ -1,0 +1,14 @@
+{
+  "circuit": "place_order",
+  "public_input_count": 5,
+  "public_inputs_bytes": 160,
+  "order": "SHARED.md sec 7 -- contract parses 32-byte big-endian Fr in this exact order",
+  "witness": "BUY 10 base @ price 2.0 (20000000); note holds 100 quote; locks 20 quote; change 80 quote",
+  "public_inputs": [
+    { "index": 0, "name": "merkle_root",       "hex": "0x1acaea475e44bcd14726b5b8f305bb05e7844b882e5a13888c9b411d44bd029c", "dec": null, "description": "Root the balance note belongs to." },
+    { "index": 1, "name": "nullifier",         "hex": "0x23d1346aeeb3ec0abc35fd5c52fb58aef55eb436ef45084ad3db94950205509a", "dec": null, "description": "Nullifier of the consumed balance note (locks funds)." },
+    { "index": 2, "name": "order_commitment",  "hex": "0x2cc1e5805a792a7e077a3d3459f3fee8ed7fc375db2f78c7eda22edf7a2b3053", "dec": null, "description": "hash7 of the hidden order; contract stores it in the active set." },
+    { "index": 3, "name": "change_commitment", "hex": "0x1847d45772f6ba441466b30c298c4aa19b2b0d9e2680c4d4e30bf1a06e20ccf2", "dec": null, "description": "Balance note for remaining funds (0 if none)." },
+    { "index": 4, "name": "locked_asset_id",   "hex": "0x0000000000000000000000000000000000000000000000000000000000000001", "dec": "1", "description": "Asset locked for this order (buy -> quote asset; here id 1)." }
+  ]
+}

@@ -1,0 +1,24 @@
+# place_order -- valid BUY witness
+# Public inputs (SHARED sec 7 order):
+#   merkle_root, nullifier, order_commitment, change_commitment, locked_asset_id
+merkle_root = "0x1acaea475e44bcd14726b5b8f305bb05e7844b882e5a13888c9b411d44bd029c"
+nullifier = "0x23d1346aeeb3ec0abc35fd5c52fb58aef55eb436ef45084ad3db94950205509a"
+order_commitment = "0x2cc1e5805a792a7e077a3d3459f3fee8ed7fc375db2f78c7eda22edf7a2b3053"
+change_commitment = "0x1847d45772f6ba441466b30c298c4aa19b2b0d9e2680c4d4e30bf1a06e20ccf2"
+locked_asset_id = "1"
+
+# Private inputs -- BUY 10 base @ 2.0 quote/base; note holds 100 quote; change 80
+note_amount = "100"
+note_asset_id = "1"
+note_blinding = "555"
+spending_key = "7"
+merkle_path = ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"]
+merkle_indices = ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"]
+order_side = "0"
+order_price = "20000000"
+order_amount = "10"
+order_asset_base = "0"
+order_asset_quote = "1"
+order_nonce = "42"
+change_amount = "80"
+change_blinding = "666"

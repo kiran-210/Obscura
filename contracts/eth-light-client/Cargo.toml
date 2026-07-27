@@ -1,0 +1,34 @@
+# Standalone package (own [workspace] table) so it is NOT pulled into the
+# wraith-pool workspace at ../Cargo.toml and we never touch that crate.
+[package]
+name = "eth-light-client"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Ethereum Altair/Capella(+Electra) sync-committee light client as a Soroban contract (BLS12-381 native)"
+
+[workspace]
+
+[dependencies]
+soroban-sdk = { version = "26.0.1", features = ["alloc"] }
+
+[dev-dependencies]
+soroban-sdk = { version = "26.0.1", features = ["testutils", "alloc"] }
+# Off-chain helpers used ONLY to prepare test vectors (decompress Ethereum's
+# 48-byte G1 pubkeys / 96-byte G2 signature into the uncompressed form the
+# Soroban host expects). Never compiled into the wasm contract.
+bls12_381 = "0.8.0"
+hex = "0.4"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true

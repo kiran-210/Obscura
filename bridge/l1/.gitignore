@@ -1,0 +1,11 @@
+# Foundry build artifacts
+out/
+cache/
+broadcast/
+
+# Local env / secrets (PRIVATE_KEY, SEPOLIA_RPC_URL)
+.env
+.env.local
+
+# Compiler downloads
+.svm/

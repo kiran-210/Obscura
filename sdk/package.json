@@ -1,0 +1,43 @@
+{
+  "name": "@wraith/sdk",
+  "version": "0.1.0",
+  "description": "Wraith TypeScript SDK — notes, orders, Poseidon2, Merkle tree, UltraHonk proofs, and Soroban tx building for the Wraith privacy platform on Stellar.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "golden": "cd test/golden-gen && nargo test --show-output"
+  },
+  "dependencies": {
+    "@noir-lang/noir_js": "1.0.0-beta.9",
+    "@aztec/bb.js": "0.87.0",
+    "@noble/ciphers": "^2.2.0",
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "^2.2.0",
+    "@stellar/stellar-sdk": "^14.6.1",
+    "@zkpassport/poseidon2": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

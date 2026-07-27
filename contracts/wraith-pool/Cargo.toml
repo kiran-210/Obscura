@@ -1,0 +1,18 @@
+[package]
+name = "wraith-pool"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+soroban-sdk = { version = "26.0.1", features = ["alloc"] }
+soroban-poseidon = "26.0.0"
+
+[dev-dependencies]
+soroban-sdk = { version = "26.0.1", features = ["testutils", "alloc"] }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+testutils = []

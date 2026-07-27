@@ -1,0 +1,12 @@
+{
+  "circuit": "cancel_order",
+  "public_input_count": 3,
+  "public_inputs_bytes": 96,
+  "order": "SHARED.md sec 7 -- contract parses 32-byte big-endian Fr in this exact order",
+  "witness": "Cancel BUY 10 base @ 2.0 -> refund 20 quote (asset 1)",
+  "public_inputs": [
+    { "index": 0, "name": "order_commitment",  "hex": "0x2cc1e5805a792a7e077a3d3459f3fee8ed7fc375db2f78c7eda22edf7a2b3053", "dec": null, "description": "Order to cancel (must be in active set)." },
+    { "index": 1, "name": "refund_commitment", "hex": "0x25b0eb826e3942a07831af677eced5b018a7e26820ccbd2e746bfe81850aa6ca", "dec": null, "description": "Balance note returning the locked funds (20 quote)." },
+    { "index": 2, "name": "refund_asset_id",   "hex": "0x0000000000000000000000000000000000000000000000000000000000000001", "dec": "1", "description": "Asset refunded (buy -> quote asset; here id 1)." }
+  ]
+}

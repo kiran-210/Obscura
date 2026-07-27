@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Act-nav jump links glide; honour reduced-motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    @apply min-h-screen bg-ink-950 font-sans text-zinc-300;
+    /* Warm gold haze (the sun through fog) + a fine fractal-noise grain in the
+       negative space. Cards sit cleanly on top of the texture. */
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"),
+      radial-gradient(60rem 40rem at 50% -14rem, rgba(232, 230, 224, 0.07), transparent 60%),
+      radial-gradient(42rem 32rem at 86% 2rem, rgba(232, 230, 224, 0.04), transparent 58%);
+    background-repeat: repeat, no-repeat, no-repeat;
+    background-size: 140px 140px, auto, auto;
+    background-blend-mode: overlay, normal, normal;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: 'Space Grotesk', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    @apply tracking-tight text-zinc-100;
+  }
+
+  ::selection {
+    @apply bg-spectral/30 text-mist-950;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #3b382d transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-ink-600;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-ink-700 bg-ink-850/80 shadow-panel;
+  }
+
+  .panel-title {
+    @apply text-sm font-semibold tracking-tight text-zinc-100;
+  }
+
+  .label {
+    @apply mb-1.5 block text-xs font-medium text-zinc-400;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-ink-700 bg-ink-900/70 px-3.5 py-2.5 text-sm text-zinc-100
+           outline-none transition placeholder:text-zinc-600
+           focus:border-spectral/60 focus:ring-2 focus:ring-spectral/20;
+  }
+  .input-mono {
+    @apply font-mono tracking-tight;
+  }
+
+  .btn {
+    @apply inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-xl px-4 py-2.5
+           text-sm font-semibold transition active:scale-[0.99]
+           disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+  }
+  .btn-sm {
+    @apply rounded-lg px-3 py-1.5 text-xs;
+  }
+  .btn-primary {
+    @apply bg-spectral text-mist-950 hover:bg-spectral-soft;
+  }
+  .btn-outline {
+    @apply border border-ink-600 bg-ink-800/50 text-zinc-200 hover:border-spectral/50 hover:text-zinc-100;
+  }
+  .btn-ghost {
+    @apply text-zinc-400 hover:bg-ink-800 hover:text-zinc-100;
+  }
+  .btn-danger {
+    @apply border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium;
+  }
+
+  /* --- Continuum shell (monopo-continuous /app) ------------------------------ */
+
+  /* The coordinate-label vernacular carried over from the landing hero. */
+  .coord-label {
+    @apply font-mono text-[10px] uppercase tracking-[0.16em] text-spectral/55;
+  }
+
+  /* Uppercase grotesque display type — the masthead + act titles. */
+  .display-hd {
+    @apply font-display font-semibold uppercase tracking-[-0.03em] text-[#f6f1e6];
+    line-height: 0.98;
+  }
+
+  /* The cream spread that closes the film — same world as the landing footer. */
+  .cream-panel {
+    @apply relative overflow-hidden text-[#1b1610];
+    background: #f4efe4;
+  }
+}
+
+/* Film grain, shared by the brand canvas and the cream footer. */
+.wr-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0.45 0.45 0 -0.4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 90px 90px;
+}
+
+/* ScrambleText — encrypted glyphs decoding into letters (monopo-style intro). */
+.wr-scramble-glyph {
+  display: inline-block;
+  font-variant-ligatures: none;
+}
+/* Scrambling glyphs are filled with fine film grain (not a glitch) — a grainy
+   dissolve that resolves to solid type once the letter settles. */
+.wr-scramble-char {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-color: #f6f1e6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.45 0.45 0.45 0 -0.4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 90px 90px;
+  -webkit-background-clip: text;
+  background-clip: text;
+}

@@ -1,0 +1,30 @@
+# transfer -- valid witness (1 real input note + 1 dummy, 2 outputs)
+# Public inputs (SHARED sec 7 order):
+#   merkle_root, nullifier_0, nullifier_1, out_commitment_0, out_commitment_1, ext_data_hash
+merkle_root = "0x24ee0907d8b3a7d8a20a4f08fd115cfe53820c419aff353270adc9050a30db16"
+nullifier_0 = "0x0cf169ff8b087b7b3e239c754dced6fa831b8c3002518c56a753dd338d6c9f20"
+nullifier_1 = "0x05a5c03117fcd6ad0eb713763913b0810ec477026e65a6c590b9d26989116e4c"
+out_commitment_0 = "0x0b7bde0f76325e1dfe5c5163281445e6a261a183d6caa0a3b1b3199a9e24e7e5"
+out_commitment_1 = "0x1db7a577b3b27c816bfdb7edd996ec2216274c449d3f1e427a1eadb269e46229"
+ext_data_hash = "987654321"
+
+# Private inputs
+in_amount = ["1000", "0"]
+in_asset_id = ["0", "0"]
+in_spending_key = ["7", "8"]
+in_blinding = ["111", "222"]
+in_merkle_path = [
+  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+]
+in_merkle_indices = [
+  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+  ["0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0","0"],
+]
+out_amount = ["700", "300"]
+out_owner_key = [
+  "0x06cb4824a064e10e1c65bba82631507dfc6883287fa218a918ab9454eba930cb",
+  "0x0b0f697117aa52458ddd243aeeac42e2a58175474f8889f3d763521eea2ce64b",
+]
+out_blinding = ["333", "444"]
+out_asset_id = ["0", "0"]

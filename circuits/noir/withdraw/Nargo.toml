@@ -1,0 +1,7 @@
+[package]
+name = "withdraw"
+type = "bin"
+authors = ["Wraith"]
+
+[dependencies]
+wraith_lib = { path = "../wraith_lib" }

@@ -1,0 +1,120 @@
+{
+  "network": "testnet",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "deployer": "GAGEXK4SPRFYJMR3HXYXMCDBEWBFO4BHJP4XWO3L43HJU366UWPY4MKX",
+  "deployedAt": "2026-06-29",
+  "toolchain": {
+    "nargo": "1.0.0-beta.9",
+    "bb": "0.87.0",
+    "soroban-sdk": "26.0.1",
+    "stellar-cli": "27.0.0"
+  },
+  "contracts": {
+    "wraithPool": "CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR",
+    "wraithPoolMemo": {
+      "note": "Memo-enabled pool (2026-07-01): transfer emits an encrypted note payload in TransferEvent for recipient note-discovery. Reuses the verifiers below. Superseded by wraithPoolMatchMemo (2026-07-02).",
+      "contract": "CBVM7B622FSW47FDNUVU7GEU7TNRVRWEVOTNAUWVUOHFMIPSTDL2YVNG",
+      "wasmHash": "9f8fc87159dff0c04b18011e1b83c3996ddaa174ae96bdcd7edf5a0dc7973bdc",
+      "deployer": "GCMLVYL34B7ZQ5C7D7QUGIBLQ45ACTBJT6QJO4Z36AMJ4OQ6TXSSWVGK"
+    },
+    "faucetTokens": {
+      "note": "Permissionless-mint mock tokens (contracts/faucet-token) so the curated deposit list works on testnet; the app faucet (/faucet) mints them. Deposited/withdrawn like any SAC. All 7 decimals.",
+      "USDC": "CB4F54CW6HRI57QUNOLBA3PWA6BTH65CXGJ6O7FNEDTU6OT6O6AMORMG",
+      "ETH": "CCBJOP22H3SY3YYHT2PLTP6RDMM2P4B3JL7KVBVGQ57IQTPXMSS6MO2L",
+      "BTC": "CAVFI65WX6J4MUL7763UKWJMLJN7I2GCT2EXK4VV4HRYMDEL5B5WDFP4",
+      "XRP": "CCZV2PCLVCSFXIDOGE5N2TBC67CW3Y6JSTUIX5HKB4IU6C3O7KESB3IA"
+    },
+    "verifiers": {
+      "withdraw": "CBKB3P72CTZAGODIKMQRLUJ2INHQULK5J66N6QQR7GCHGDUFCTUPJ6M3",
+      "transfer": "CBXOZGAWSLJEXVMHY6WMBDLAJWDESUPOJV2TEAK6F77IYD7EVRDINS6I",
+      "place_order": "CDOEXIJR3OE7527IBTBGYX62TNWBIOHMR7IBMWBMBBR6QA4TIXZSBXEE",
+      "match_orders": "CB5HNMW6IIMLQPSAKAC3ADTDHEOTKX6EHYCXNK5EITTFMO33BMD2EKM4",
+      "cancel_order": "CAI6B5ZTWOGJIBLNMOG67H3MAPSORU64ZEXBB7YYQ6TQ5RQJMSQQSA3B"
+    },
+    "assets": {
+      "native": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+    },
+    "wraithPoolMatchMemo": {
+      "note": "Match-memo pool (2026-07-02): match_orders now takes leaf_memos + residual_memos and OrderMatchedEvent carries the full leaf set + indices + memos (like transfer), so settlement fills are self-custodially discoverable and the indexer can rebuild the tree through a match. Fresh tree; reuses the verifiers below. This is the pool the frontend now targets.",
+      "contract": "CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD",
+      "wasmHash": "077e1cafc4a81b85371fa42440b2bcd907098c5d3c8ae730ba3726e2fa775f60",
+      "deployLedger": 3402675,
+      "deployer": "GCMLVYL34B7ZQ5C7D7QUGIBLQ45ACTBJT6QJO4Z36AMJ4OQ6TXSSWVGK"
+    }
+  },
+  "e2e": {
+    "verifyProofValid": "0e7c0dcaaef6be5f35e09d37960864b500c5046d97ad145b5611221fcdcaf8a0",
+    "deposit": "56cd056ce6790b05bc4ff11b34bcc77e195a2880f6c97a71034ddccb0615da97",
+    "withdraw": "6be9162fa0fc0d1b1fbce175eab97ed90ab3faca486a4f0adad7c7c1b10dda0d",
+    "transfer": "8b8eed61eabd219c9d766f496ec19fc333549868fca2308cf7e63e00b8add90f",
+    "matchOrders": "5bc05ebfa3f95849e6c6e3bff8375e6cfe09544e8c3318feb4096f81c7c4bdb3",
+    "cancelOrder": "51023894faf88329a2bd937c55ba05731860a5189aafe998e4964cf9881a4063",
+    "rootAfterDeposit": "2a58187c17fc52453ebc0a093233af740aa8d47044b83e379aa8c101328d3026",
+    "allFlowsVerifiedLive": true
+  },
+  "bridge": {
+    "deployedAt": "2026-06-30",
+    "lightClient": "CCI47AHPL6RETKEDIUGD3XWSBPOHY3IJAZVKBODCBAKZ6UAP27AQ6WH5",
+    "wraithBridge": "CB6MKCFRU5DYEZ3OMF6OEWNPTHLHBSKSMVOOKOABSBLHCYVTUDGS6AQI",
+    "wraithPoolBridgeEnabled": "CBCFCJQ5SEJJ5PKM64XLL4MENIM4V6QPVOK27GSE55NXKCDGYQ4GUFYV",
+    "wraithBridgeInitialUnwired": "CAY44CMEIJKB2TBVVPFZMEAIDQIROJPB5RIQX5TFQIYCG46WTSWDUXV6",
+    "lightClientWasmHash": "5bb07f5d9df9c19941bf9765894169917625b3b4236c3aa97da9d69072786cb3",
+    "l1ChainId": 11155111,
+    "l1Bridge": "0xcF40c553Cb47A0E3448FF468C8A7ee41769205be",
+    "withdrawVf": "CBKB3P72CTZAGODIKMQRLUJ2INHQULK5J66N6QQR7GCHGDUFCTUPJ6M3",
+    "nativeAsset": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+    "seed": {
+      "period": 1292,
+      "fork": "fulu",
+      "genesisValidatorsRoot": "d8ea171f3c94aea21ebc42a1ed61052acf3f9209c00e4efbaaddac09ed9b8078",
+      "forkVersion": "90000075",
+      "committeeSize": 512,
+      "bootstrapAnchorRoot": "0x1912e0c2d057011eb9d988c95d4d7820565eac84c8495f726378567542c630b8",
+      "bootstrapAnchorSlot": 10591744
+    },
+    "txs": {
+      "lightClientUpload": "bfb57cfbe01b8c63e0c2cc93d6922c0b0f94781bf016ae223e31e56ee9ec4e22",
+      "lightClientDeploy": "2c13b71bd5cc088eaa25767e1bac83be48c86d95b02946932251540bd1b3d581",
+      "updateHeader": "2f1549ee8bbcdf5d803d11a99886b2d160fd53c094fb6029a65929a2ee56749c",
+      "poolDeploy": "2ef74375746975ff2a3acc43889d2b4cf714dd09d47cd23ae67b7847fade9bdf",
+      "bridgeDeploy": "5ee66771c7dbb817b112fd4be64e8486f9d67e1c2f4706da2dc9ffa3544ef8f7",
+      "setBridge": "df44eec68dad72363ba65d8b8c94d4276f1d58ced117b5712345e5a3b3a06b9a"
+    },
+    "showpiece": {
+      "description": "Real Sepolia sync-committee BLS finality update verified on-chain by EthLightClient.update_header; real ETH execution state_root recorded on Stellar.",
+      "signatureSlot": 10591824,
+      "finalizedExecutionBlock": 11173658,
+      "executionStateRoot": "5e294caed189617cdb5473fc1b9f733f56f0db775b36a585d173b3833cd2ba76",
+      "headAfter": [
+        11173658,
+        "5e294caed189617cdb5473fc1b9f733f56f0db775b36a585d173b3833cd2ba76"
+      ],
+      "sepoliaBlockStateRootCrossCheck": "0x5e294caed189617cdb5473fc1b9f733f56f0db775b36a585d173b3833cd2ba76",
+      "updateHeaderLedger": 3364177,
+      "verifiedLive": true
+    },
+    "fullE2E": {
+      "description": "Complete trustless L1->L2 loop verified live: lock 0.001 ETH on Sepolia -> light client verifies the sync-committee BLS header on Stellar -> WraithBridge.bridge_in proves the lock via in-contract MPT against the trusted state_root -> shielded note minted into the pool. No trusted relayer.",
+      "mintedCommitment": "0x1b7ed1ccdbeee9b20e719fb6d2857d7ad04bdbb2c6d1fb113bb5ba1723141963",
+      "amountWei": "1000000000000000",
+      "l1Lock": {
+        "tx": "0xcf24c4d7a905ee39d2f1cbf907b3c179da8e3b11e6b329e455a65ea48f6ce802",
+        "block": 11173795
+      },
+      "headAdvance": {
+        "tx": "df258a684a4ce4c205954b342d509f46a6f6acc37b8922135d4251c571d26d9d",
+        "finalizedBlock": 11173818,
+        "stateRoot": "be389ba008f23d51e83c16161fd570ff9d775b63e6e8b3aa12d9202e9d78a4cc"
+      },
+      "bridgeIn": {
+        "tx": "4b3760d1f31b50da6a54bec54fe5f5645fe1719429f5acc05544c3a431289ffc",
+        "status": "SUCCESS",
+        "provenAtBlock": 11173818,
+        "accountNodes": 9,
+        "storageNodes": 1
+      },
+      "poolRootAfterMint": "2acd0da63ec50c4a016218905599891ec228aeaa68981fa815e1f536fa4b3eb8",
+      "verifiedLive": true
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "_comment": "Authoritative incremental Merkle roots (depth 20) generated from the Noir golden-gen (frontier algorithm, SHARED sec 5). Leaves inserted left-to-right. Regenerate with: cd test/golden-gen && nargo test --show-output.",
+  "_source": "nargo 1.0.0-beta.9 + noir-lang/poseidon tag v0.2.0",
+  "depth": 20,
+  "rootEmpty": "0x1c8c3ca0b3a3d75850fcd4dc7bf1e3445cd0cfff3ca510630fd90b47e8a24755",
+  "roots": [
+    { "leaves": ["1"], "root": "0x13140e9c67db06a3e6105edbcf754fb5776f27d9a870edb470ca76af397837a5" },
+    { "leaves": ["1", "2"], "root": "0x03348d3f7b7917fe3f16fd826c71864f8693171477fb7904b80d60770bc60234" },
+    { "leaves": ["1", "2", "3"], "root": "0x23e36bfef36c2f8fc894191bdba62ed62177b847cb3c36335fee85233030b0d1" },
+    { "leaves": ["1", "2", "3", "4"], "root": "0x0350f79f4b472b3406ee21e8d2a0fd3a43fd991bf37cf390c9f9a0d1d5cee0f9" }
+  ]
+}

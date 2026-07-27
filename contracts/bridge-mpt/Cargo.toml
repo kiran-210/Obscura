@@ -1,0 +1,23 @@
+[package]
+name = "bridge-mpt"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+soroban-sdk = { version = "26.0.1", features = ["alloc"] }
+
+[dev-dependencies]
+soroban-sdk = { version = "26.0.1", features = ["testutils", "alloc"] }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# `contract` (default-on) gates the thin `BridgeMpt` Soroban contract wrapper so
+# the verifier can build to its own WASM. Library consumers (e.g. `wraith-bridge`)
+# set `default-features = false` to link `verify_storage` in-process WITHOUT
+# pulling the contract wrapper into their exported interface.
+default = ["contract"]
+contract = []
+testutils = []

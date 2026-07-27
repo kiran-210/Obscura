@@ -1,0 +1,18 @@
+# Keep the build context small and reproducible. The Dockerfile rebuilds all
+# artifacts, so ignore installed deps, VCS, editor state, and prior build output.
+**/node_modules
+.git
+.gitignore
+.claude
+**/dist
+**/target/debug
+**/target/release
+**/*.tsbuildinfo
+**/*.log
+# Secrets / local env — never bake these into an image layer.
+**/.env
+**/.env.*
+deploy/*.env
+# Deploy scaffolding isn't needed inside the image.
+docker-compose.yml
+deploy/
