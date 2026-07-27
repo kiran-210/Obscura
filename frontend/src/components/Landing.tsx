@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import FluidVolume from './FluidVolume'
 import ScrambleCycle from './ScrambleCycle'
 import { StoryShielded } from './StoryShielded'
-import markUrl from '../assets/wraith-mark.png'
+import markUrl from '../assets/obscura-mark.png'
 
 const ROTATING = ['shielded', 'unlinkable', 'verified', 'private', 'yours']
 
@@ -11,7 +11,7 @@ const LINE_STROKE = 'rgba(255,255,255,0.62)'
 const CIRCLE_STROKE = 'rgba(239,233,220,0.24)'
 
 /** Two large overlapping circles + three skewed lines + position labels — the
- *  coords background of the monopo.nyc intro, in Wraith's own words. Line and
+ *  coords background of the monopo.nyc intro, in Obscura's own words. Line and
  *  circle colours are driven by the `--coord-*` vars so they can darken on
  *  scroll against the incoming footer. */
 function CoordsBackground() {
@@ -138,9 +138,9 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
       <header className="fixed inset-x-0 top-0 z-50 mix-blend-difference">
         <div className="flex items-center justify-between px-8 py-5">
           <a href="#/" className="flex items-center gap-2.5">
-            <img src={markUrl} alt="Wraith" className="h-7 w-auto" />
+            <img src={markUrl} alt="Obscura" className="h-7 w-auto" />
             <span className="font-display text-sm font-semibold tracking-tight">
-              wraith <span className="align-super font-mono text-[10px] tracking-[0.2em] text-[#efe9dc]/60">ZK</span>
+              obscura <span className="align-super font-mono text-[10px] tracking-[0.2em] text-[#efe9dc]/60">ZK</span>
             </span>
           </a>
           <nav className="flex items-center gap-8 font-mono text-[11px] uppercase tracking-[0.18em]">
@@ -205,16 +205,16 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <p className="max-w-xs text-[15px] font-medium leading-snug">
             Feel free to reach out if you want private money on Stellar — or simply have a chat.
           </p>
-          <img src={markUrl} alt="Wraith" className="h-11 w-auto opacity-80" style={{ filter: 'brightness(0)' }} />
+          <img src={markUrl} alt="Obscura" className="h-11 w-auto opacity-80" style={{ filter: 'brightness(0)' }} />
         </div>
 
         <div className="relative">
           <a
-            href="mailto:hello@wraith.money"
+            href="mailto:hello@obscura.money"
             className="block font-display font-light uppercase leading-none tracking-[-0.02em] text-[#b3a081] transition-colors hover:text-[#4f3e22]"
             style={{ fontSize: 'clamp(2rem, 8.2vw, 6.5rem)' }}
           >
-            hello@wraith.money
+            hello@obscura.money
           </a>
           <div className="mt-6 h-px w-full bg-[#1b1610]/20" />
         </div>
@@ -236,7 +236,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                   Open source
                 </div>
                 <p className="text-[13px] leading-relaxed text-[#1b1610]/70">
-                  Wraith is open source and community-run. We're always looking for cryptographers, Soroban engineers and designers. Reach out with what you'd build.
+                  Obscura is open source and community-run. We're always looking for cryptographers, Soroban engineers and designers. Reach out with what you'd build.
                 </p>
               </div>
               <div className="max-w-[15rem]">
@@ -248,14 +248,14 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                   Security
                 </div>
                 <p className="text-[13px] leading-relaxed text-[#1b1610]/70">
-                  Found a vulnerability in the circuits or contracts? Disclose it responsibly at security@wraith.money — privacy protects everyone.
+                  Found a vulnerability in the circuits or contracts? Disclose it responsibly at security@obscura.money — privacy protects everyone.
                 </p>
               </div>
             </div>
           </div>
 
           <div className="mt-14 flex items-center justify-between border-t border-[#1b1610]/12 pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-[#1b1610]/50">
-            <span>© Wraith 2026</span>
+            <span>© Obscura 2026</span>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="transition hover:text-[#1b1610]"

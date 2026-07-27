@@ -13,7 +13,7 @@
  * client indexer, which rebuilds the full leaf set from events. See lib/indexer.
  */
 import { Contract, rpc, scValToNative, xdr } from '@stellar/stellar-sdk'
-import { bytesToField, hash2, MerkleTree, TREE_DEPTH, ZEROS, type Field } from '@wraith/sdk'
+import { bytesToField, hash2, MerkleTree, TREE_DEPTH, ZEROS, type Field } from '@obscura/sdk'
 
 export interface PoolTreeState {
   /** `filledSubtrees[i]` for i in [0, TREE_DEPTH). */

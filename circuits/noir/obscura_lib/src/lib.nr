@@ -1,4 +1,4 @@
-//! Wraith shared circuit library.
+//! Obscura shared circuit library.
 //!
 //! Centralises every cryptographic invariant that MUST be byte-for-byte identical
 //! across the Noir circuits, the Soroban contract, and the TypeScript SDK.

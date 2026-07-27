@@ -1,12 +1,12 @@
-# WraithBridgeL1 — Ethereum L1 lock contract
+# ObscuraBridgeL1 — Ethereum L1 lock contract
 
-Minimal lock/unlock escrow for the **Wraith** trust-minimized cross-chain bridge
+Minimal lock/unlock escrow for the **Obscura** trust-minimized cross-chain bridge
 (Ethereum Sepolia → Stellar/Soroban). Implements `BRIDGE_SPEC.md` §4. Foundry
 project; Solidity `^0.8.24`; deploys to Sepolia.
 
-`lock` escrows native ETH or an ERC20 against a Wraith note `commitment`. On the
+`lock` escrows native ETH or an ERC20 against a Obscura note `commitment`. On the
 Stellar side, `EthLightClient` establishes a trusted execution `state_root` (BLS
-sync-committee verification) and `WraithBridge` proves the resulting **storage
+sync-committee verification) and `ObscuraBridge` proves the resulting **storage
 word** with an EIP-1186 Merkle-Patricia inclusion proof, then mints a shielded
 note. `unlock` releases the escrow after a verified L2 `bridge_out`
 (governor-gated for the hackathon).
@@ -89,7 +89,7 @@ amount = uint96(uint256(W) >> 160)         // high 96 bits
 ### 3. Worked example (real, reproducible with `cast`)
 
 ```
-commitment = 0x0e86ed873f020b3df2996bcff4fb0b630e4cbbafb03858dde35121f86a754ecf   # keccak256("wraith-note-1")
+commitment = 0x0e86ed873f020b3df2996bcff4fb0b630e4cbbafb03858dde35121f86a754ecf   # keccak256("obscura-note-1")
 token      = 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238                           # example Sepolia ERC20
 amount     = 1000000                                                              # = 0xf4240
 
@@ -107,7 +107,7 @@ W          = 0x0000000000000000000f42401c7d4b196cb0c7b01d743fbc6116a902379c7238
 Reproduce:
 
 ```bash
-cast keccak "wraith-note-1"                                     # commitment
+cast keccak "obscura-note-1"                                     # commitment
 cast keccak $(cast abi-encode "f(bytes32,uint256)" <commitment> 0)   # slot
 ```
 
@@ -194,7 +194,7 @@ forge script script/Deploy.s.sol:Deploy \
 
 Drop `--verify` if you have no Etherscan key configured (`ETHERSCAN_API_KEY`).
 Record the deployed address and the constructor `relayerOrGovernor` for the
-relayer and the Soroban `WraithBridge` constructor (`l1_bridge_addr`).
+relayer and the Soroban `ObscuraBridge` constructor (`l1_bridge_addr`).
 
 > Not deployed from this repo (no key present here). The command above is the
 > intended deployment path.
@@ -206,8 +206,8 @@ relayer and the Soroban `WraithBridge` constructor (`l1_bridge_addr`).
 ```
 bridge/l1/
 ├── foundry.toml
-├── src/WraithBridgeL1.sol          # contract + minimal IERC20
-├── test/WraithBridgeL1.t.sol       # storage-slot + lock/unlock + fuzz
+├── src/ObscuraBridgeL1.sol          # contract + minimal IERC20
+├── test/ObscuraBridgeL1.t.sol       # storage-slot + lock/unlock + fuzz
 ├── script/Deploy.s.sol             # Sepolia deploy (env-driven)
 └── lib/forge-std/                   # submodule
 ```

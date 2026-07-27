@@ -1,6 +1,6 @@
 use poseidon::poseidon2::Poseidon2;
 
-// Emits Wraith golden vectors used by the SDK tests:
+// Emits Obscura golden vectors used by the SDK tests:
 //   * Poseidon2 hash vectors (arities 2, 4, 7)  -> test/poseidon.golden.json
 //   * zeros[0..20] empty-subtree constants       -> src/constants.ts
 //   * incremental Merkle roots                   -> test/merkle.golden.json

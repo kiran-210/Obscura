@@ -13,7 +13,7 @@
  *   - **Spends** are detected by matching event `nullifiers` against our owned notes.
  *
  * Because the full leaf set is rebuilt (not just a frontier snapshot), *every* owned note is
- * spendable via {@link WraithIndexer.witnessFor} — this supersedes the deposit-time frontier
+ * spendable via {@link ObscuraIndexer.witnessFor} — this supersedes the deposit-time frontier
  * witness capture and the standalone note-scanner.
  *
  * Scope: within the RPC's ~7-day event-retention window. Older leaves are pruned, so the
@@ -33,7 +33,7 @@ import {
   PRICE_SCALE,
   TREE_DEPTH,
   type Field,
-} from '@wraith/sdk'
+} from '@obscura/sdk'
 import { NATIVE_SAC, POOL_CONTRACT_ID } from './config'
 import { decryptNote, decryptOrder, deriveEncKeypair, type EncKeypair } from './note-crypto'
 import { depositBlinding, noteSecret } from './note-secrets'
@@ -50,7 +50,7 @@ import {
 } from './note-store'
 import { assetIdFor, assetMeta, tokenBySac } from './tokens'
 import type { MerkleWitness } from './merkle-witness'
-import type { AssetCode } from './wraith-sdk'
+import type { AssetCode } from './obscura-sdk'
 
 /** The subset of a wallet's derived keys the indexer needs to recover its notes. */
 export interface IndexerIdentity {
@@ -118,7 +118,7 @@ function topicSymbol(ev: rpc.Api.EventResponse): string {
   }
 }
 
-export class WraithIndexer {
+export class ObscuraIndexer {
   readonly tree = new MerkleTree(TREE_DEPTH)
   private leaves: string[] = [] // hex commitments (canonical), insertion order
   private leafSet = new Set<string>() // lowercased leaf hexes, for O(1) idempotent appends

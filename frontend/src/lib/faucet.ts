@@ -4,7 +4,7 @@
  * backend. Testnet only (the faucet tokens have an open `mint`).
  */
 import { Address, Contract, nativeToScVal, rpc, TransactionBuilder } from '@stellar/stellar-sdk'
-import { buildTransaction } from '@wraith/sdk'
+import { buildTransaction } from '@obscura/sdk'
 import { NETWORK_PASSPHRASE, SOROBAN_RPC_URL } from './config'
 import { getKitAddress, signWithKit } from './wallet-kit'
 

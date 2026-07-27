@@ -22,7 +22,7 @@ import {
   type Field,
   type NotePayload,
   type OrderPayload,
-} from "@wraith/sdk";
+} from "@obscura/sdk";
 import type { AssembledMatch } from "./prover.js";
 import type { Match, SubmittedOrder } from "./types.js";
 

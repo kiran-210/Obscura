@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
-const STORAGE_KEY = 'wraith.revealBalance.v1'
+const STORAGE_KEY = 'obscura.revealBalance.v1'
 
 /**
  * Whether shielded balances are shown. Persisted so the choice survives a hard refresh, and

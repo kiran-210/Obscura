@@ -1,16 +1,16 @@
 /**
- * Wraith orchestrator: the deterministic (non-proof) paths — deposit, local-tree sync,
+ * Obscura orchestrator: the deterministic (non-proof) paths — deposit, local-tree sync,
  * balance/ order views, and the precise "no prover configured" errors for proof flows.
  */
 import { describe, expect, it } from "vitest";
-import { Wraith, nativeAsset } from "../src/index.js";
+import { Obscura, nativeAsset } from "../src/index.js";
 import { fieldToHex } from "../src/poseidon.js";
 
 const CONTRACT_ID = "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4";
 const ACCOUNT = "GBGLR42JSE24SYA2H5XHHMQR6MTGOA5AUIPHQHL5JX5UH7N7CKUXKSPP";
 const XLM = nativeAsset();
 
-const newSdk = () => new Wraith({ contractId: CONTRACT_ID, spendingKey: 42n });
+const newSdk = () => new Obscura({ contractId: CONTRACT_ID, spendingKey: 42n });
 
 describe("deposit + local tree sync", () => {
   it("creates a note, builds an op, and tracks the shielded balance", () => {

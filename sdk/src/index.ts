@@ -1,8 +1,8 @@
 /**
- * @wraith/sdk — TypeScript client for the Wraith privacy platform on Stellar.
+ * @obscura/sdk — TypeScript client for the Obscura privacy platform on Stellar.
  *
- * Re-exports every module plus a {@link Wraith} orchestrator implementing the
- * {@link WraithSdk} surface the frontend expects. All cryptographic invariants
+ * Re-exports every module plus a {@link Obscura} orchestrator implementing the
+ * {@link ObscuraSdk} surface the frontend expects. All cryptographic invariants
  * (Poseidon2, commitments, Merkle tree, public-input encoding) follow SHARED.md.
  */
 import type { xdr } from "@stellar/stellar-sdk";
@@ -21,7 +21,7 @@ import {
   type CircuitInputMap,
   type TransferInputNote,
 } from "./prover.js";
-import { WraithContract, encodePublicInputs, recipientHash, type CircuitName } from "./stellar.js";
+import { ObscuraContract, encodePublicInputs, recipientHash, type CircuitName } from "./stellar.js";
 import type { Asset, BalanceNote, KeyPair, Order, OrderParams, ProofData } from "./types.js";
 import { Wallet } from "./wallet.js";
 
@@ -60,10 +60,10 @@ export interface ProvenResult {
 /**
  * The high-level SDK surface mirrored by the frontend (SPEC sec 10.2). Proof-gated
  * methods require the corresponding compiled circuit to be configured (see
- * {@link WraithConfig.provers}); the deterministic crypto/encoding around them runs
+ * {@link ObscuraConfig.provers}); the deterministic crypto/encoding around them runs
  * regardless.
  */
-export interface WraithSdk {
+export interface ObscuraSdk {
   deposit(params: { asset: Asset; amount: bigint; from: string }): DepositResult;
   withdraw(params: { note: BalanceNote; recipient: string }): Promise<ProvenResult>;
   transfer(params: {
@@ -78,15 +78,15 @@ export interface WraithSdk {
   getOpenOrders(): Order[];
 }
 
-/** Construction options for {@link Wraith}. */
-export interface WraithConfig {
+/** Construction options for {@link Obscura}. */
+export interface ObscuraConfig {
   contractId: string;
   networkPassphrase?: string;
   /** Wallet spending key; a random one is generated if omitted. */
   spendingKey?: Field;
   /** Compiled-circuit provers, one per circuit (pending feat/circuits). */
   provers?: Partial<Record<CircuitName, NoirProver>>;
-  /** Local mirror of the on-chain Merkle tree (kept in sync via {@link Wraith.observeCommitment}). */
+  /** Local mirror of the on-chain Merkle tree (kept in sync via {@link Obscura.observeCommitment}). */
   tree?: MerkleTree;
   /** Pre-seeded wallet. */
   wallet?: Wallet;
@@ -98,18 +98,18 @@ export interface WraithConfig {
  * settlement commitments via {@link observeCommitment}, in global insertion order, for
  * Merkle proofs to be valid.
  */
-export class Wraith implements WraithSdk {
+export class Obscura implements ObscuraSdk {
   readonly keys: KeyPair;
   readonly wallet: Wallet;
   readonly tree: MerkleTree;
-  readonly contract: WraithContract;
+  readonly contract: ObscuraContract;
   private readonly provers: Partial<Record<CircuitName, NoirProver>>;
 
-  constructor(config: WraithConfig) {
+  constructor(config: ObscuraConfig) {
     this.keys = deriveKeys(config.spendingKey ?? randomField());
     this.wallet = config.wallet ?? new Wallet();
     this.tree = config.tree ?? new MerkleTree(TREE_DEPTH);
-    this.contract = new WraithContract({
+    this.contract = new ObscuraContract({
       contractId: config.contractId,
       networkPassphrase: config.networkPassphrase,
     });
@@ -360,7 +360,7 @@ export class Wraith implements WraithSdk {
     const prover = this.provers[circuit];
     if (!prover) {
       throw new Error(
-        `no prover configured for circuit "${circuit}". Provide a compiled circuit via WraithConfig.provers (pending feat/circuits integration).`,
+        `no prover configured for circuit "${circuit}". Provide a compiled circuit via ObscuraConfig.provers (pending feat/circuits integration).`,
       );
     }
     return prover.prove(inputs);
@@ -375,4 +375,4 @@ export class Wraith implements WraithSdk {
   }
 }
 
-export default Wraith;
+export default Obscura;

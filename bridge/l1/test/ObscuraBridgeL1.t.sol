@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {Test} from "forge-std/Test.sol";
-import {WraithBridgeL1} from "../src/WraithBridgeL1.sol";
+import {ObscuraBridgeL1} from "../src/ObscuraBridgeL1.sol";
 
 /// @dev Minimal standards-compliant ERC20 for the ERC20 lock/unlock paths.
 contract MockERC20 {
@@ -60,22 +60,22 @@ contract NoReturnERC20 {
     }
 }
 
-contract WraithBridgeL1Test is Test {
-    WraithBridgeL1 internal bridge;
+contract ObscuraBridgeL1Test is Test {
+    ObscuraBridgeL1 internal bridge;
     MockERC20 internal token;
 
     address internal governor;
     address internal alice = address(0xA11CE);
     address internal recipient = address(0xBEEF);
 
-    bytes32 internal constant COMMITMENT = keccak256("wraith-note-1");
+    bytes32 internal constant COMMITMENT = keccak256("obscura-note-1");
 
     event Locked(bytes32 indexed commitment, address token, uint256 amount);
     event Unlocked(bytes32 indexed commitment, address indexed to, address token, uint256 amount);
 
     function setUp() public {
         governor = makeAddr("governor");
-        bridge = new WraithBridgeL1(governor);
+        bridge = new ObscuraBridgeL1(governor);
         token = new MockERC20();
     }
 
@@ -196,7 +196,7 @@ contract WraithBridgeL1Test is Test {
         vm.startPrank(alice);
         bridge.lock{value: amount}(COMMITMENT, address(0), amount);
 
-        vm.expectRevert(WraithBridgeL1.CommitmentUsed.selector);
+        vm.expectRevert(ObscuraBridgeL1.CommitmentUsed.selector);
         bridge.lock{value: amount}(COMMITMENT, address(0), amount);
         vm.stopPrank();
     }
@@ -204,7 +204,7 @@ contract WraithBridgeL1Test is Test {
     function test_Lock_RevertWhen_NativeValueMismatch() public {
         vm.deal(alice, 3 ether);
         vm.prank(alice);
-        vm.expectRevert(WraithBridgeL1.BadEthValue.selector);
+        vm.expectRevert(ObscuraBridgeL1.BadEthValue.selector);
         bridge.lock{value: 1 ether}(COMMITMENT, address(0), 2 ether);
     }
 
@@ -214,14 +214,14 @@ contract WraithBridgeL1Test is Test {
         vm.deal(alice, 1 ether);
         vm.startPrank(alice);
         token.approve(address(bridge), amount);
-        vm.expectRevert(WraithBridgeL1.BadEthValue.selector);
+        vm.expectRevert(ObscuraBridgeL1.BadEthValue.selector);
         bridge.lock{value: 1}(COMMITMENT, address(token), amount);
         vm.stopPrank();
     }
 
     function test_Lock_RevertWhen_ZeroAmount() public {
         vm.prank(alice);
-        vm.expectRevert(WraithBridgeL1.ZeroAmount.selector);
+        vm.expectRevert(ObscuraBridgeL1.ZeroAmount.selector);
         bridge.lock(COMMITMENT, address(0), 0);
     }
 
@@ -229,7 +229,7 @@ contract WraithBridgeL1Test is Test {
         uint256 tooBig = uint256(type(uint96).max) + 1;
         vm.deal(alice, tooBig);
         vm.prank(alice);
-        vm.expectRevert(WraithBridgeL1.AmountTooLarge.selector);
+        vm.expectRevert(ObscuraBridgeL1.AmountTooLarge.selector);
         bridge.lock{value: tooBig}(COMMITMENT, address(0), tooBig);
     }
 
@@ -276,7 +276,7 @@ contract WraithBridgeL1Test is Test {
         bridge.lock{value: amount}(COMMITMENT, address(0), amount);
 
         vm.prank(alice); // not the governor
-        vm.expectRevert(WraithBridgeL1.NotGovernor.selector);
+        vm.expectRevert(ObscuraBridgeL1.NotGovernor.selector);
         bridge.unlock(COMMITMENT, recipient);
     }
 
@@ -288,14 +288,14 @@ contract WraithBridgeL1Test is Test {
 
         vm.startPrank(governor);
         bridge.unlock(COMMITMENT, recipient);
-        vm.expectRevert(WraithBridgeL1.AlreadyUnlocked.selector);
+        vm.expectRevert(ObscuraBridgeL1.AlreadyUnlocked.selector);
         bridge.unlock(COMMITMENT, recipient);
         vm.stopPrank();
     }
 
     function test_Unlock_RevertWhen_UnknownCommitment() public {
         vm.prank(governor);
-        vm.expectRevert(WraithBridgeL1.UnknownCommitment.selector);
+        vm.expectRevert(ObscuraBridgeL1.UnknownCommitment.selector);
         bridge.unlock(keccak256("never-locked"), recipient);
     }
 

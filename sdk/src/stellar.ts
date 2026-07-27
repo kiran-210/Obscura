@@ -1,5 +1,5 @@
 /**
- * Soroban transaction scaffolding for the WraithPool contract via @stellar/stellar-sdk.
+ * Soroban transaction scaffolding for the ObscuraPool contract via @stellar/stellar-sdk.
  *
  * Builds invoke operations for deposit / withdraw / transfer / place_order /
  * match_orders / cancel_order (SPEC sec 9.1), and encodes `public_inputs` as the
@@ -9,7 +9,7 @@
  * The address->field convention used by {@link addressToField} (StrKey raw 32 bytes
  * interpreted big-endian, reduced mod r) is the canonical `address_as_field` rule of
  * SHARED §4. The deployed contract derives `asset_id` / `recipient_hash` identically
- * (`contracts/wraith-pool/src/lib.rs::address_to_field`), pinned by the cross-impl golden
+ * (`contracts/obscura-pool/src/lib.rs::address_to_field`), pinned by the cross-impl golden
  * test `address_to_field_matches_sdk_golden`. Native XLM keeps `asset_id = 0` (see
  * {@link assetIdFromAddress}); the contract maps the configured native SAC Address to 0.
  */
@@ -129,11 +129,11 @@ const scvI128 = (n: bigint): xdr.ScVal => nativeToScVal(n, { type: "i128" });
 const scvField = (f: Field): xdr.ScVal => scvBytes(fieldToBytes(f));
 
 /**
- * Builds Soroban invoke operations against a deployed WraithPool contract. The returned
+ * Builds Soroban invoke operations against a deployed ObscuraPool contract. The returned
  * values are `xdr.Operation`s; wrap them with {@link buildTransaction} (or your own
  * TransactionBuilder) to produce a submittable, signable transaction.
  */
-export class WraithContract {
+export class ObscuraContract {
   readonly contract: Contract;
   readonly networkPassphrase: string;
 

@@ -1,5 +1,5 @@
 /**
- * Local wallet persistence for the live Wraith client.
+ * Local wallet persistence for the live Obscura client.
  *
  * A shielded balance note's secret material (spending key, blinding) is the ONLY thing
  * that lets the owner later spend/withdraw it — it lives nowhere on-chain. We persist it
@@ -9,18 +9,18 @@
  *
  * BN254 field elements (bigint) are serialized as 0x-hex; amounts as decimal strings.
  */
-import { fieldToHex, hexToField, type BalanceNote, type Field } from '@wraith/sdk'
+import { fieldToHex, hexToField, type BalanceNote, type Field } from '@obscura/sdk'
 import { POOL_CONTRACT_ID } from './config'
-import type { AssetCode } from './wraith-sdk'
+import type { AssetCode } from './obscura-sdk'
 
-const NOTES_PREFIX = 'wraith.notes.v1'
-const SPENDING_PREFIX = 'wraith.spendingKey.v1'
+const NOTES_PREFIX = 'obscura.notes.v1'
+const SPENDING_PREFIX = 'obscura.spendingKey.v1'
 // The client indexer's persisted state (per identity): the full leaf set (to rebuild the
 // Merkle tree) and the last fully-indexed ledger (cold-start resumes from here).
-const LEAVES_PREFIX = 'wraith.leaves.v1'
-const CURSOR_PREFIX = 'wraith.indexcursor.v1'
+const LEAVES_PREFIX = 'obscura.leaves.v1'
+const CURSOR_PREFIX = 'obscura.indexcursor.v1'
 // Placed dark-pool orders (per identity).
-const ORDERS_PREFIX = 'wraith.orders.v1'
+const ORDERS_PREFIX = 'obscura.orders.v1'
 
 // The shielded identity is derived per Stellar address (see lib/shielded-identity).
 // `activeAddress` namespaces both the notes list and the cached spending key, so
@@ -196,7 +196,7 @@ export function clearAllNotes(): void {
         k.startsWith(`${LEAVES_PREFIX}:`) ||
         k.startsWith(`${CURSOR_PREFIX}:`) ||
         k.startsWith(`${ORDERS_PREFIX}:`) ||
-        k.startsWith('wraith.scan.'))
+        k.startsWith('obscura.scan.'))
     ) {
       doomed.push(k)
     }

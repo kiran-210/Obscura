@@ -27,7 +27,7 @@ import {
   type CircuitInputMap,
   type Field,
   type ProofData,
-} from "@wraith/sdk";
+} from "@obscura/sdk";
 import type { Match, SubmittedOrder } from "./types.js";
 
 /** Anything that can turn a Noir input map into a proof (the SDK's `NoirProver` fits). */

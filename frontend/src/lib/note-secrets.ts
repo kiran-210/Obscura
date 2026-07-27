@@ -11,7 +11,7 @@
  * Received and change notes stay random-blinded but are delivered as encrypted memos, so
  * this only covers the outputs whose amount is public on-chain.
  */
-import { hash2, hash4, toField, type Field } from '@wraith/sdk'
+import { hash2, hash4, toField, type Field } from '@obscura/sdk'
 
 // Domain-separated from the owner key (hash2(sk,0)) and viewing key.
 const DOMAIN_NOTE_SECRET: Field = toField('0x6e6f74655f736563726574') // "note_secret"

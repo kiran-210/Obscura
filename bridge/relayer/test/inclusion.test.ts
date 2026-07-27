@@ -18,8 +18,8 @@ describe("storage slot derivation", () => {
     expect(deriveStorageSlot(COMMITMENT)).toBe(SLOT);
   });
 
-  it("cross-checks the example commitment is keccak256(\"wraith-note-1\")", () => {
-    expect(keccak256(stringToBytes("wraith-note-1"))).toBe(COMMITMENT);
+  it("cross-checks the example commitment is keccak256(\"obscura-note-1\")", () => {
+    expect(keccak256(stringToBytes("obscura-note-1"))).toBe(COMMITMENT);
   });
 
   it("is sensitive to the declaration slot argument", () => {

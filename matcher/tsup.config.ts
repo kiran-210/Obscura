@@ -11,5 +11,5 @@ export default defineConfig({
   target: "es2022",
   // Keep the workspace SDK and heavy runtime deps external — they are resolved at
   // runtime from node_modules, not bundled into the matcher.
-  external: ["@wraith/sdk", "@stellar/stellar-sdk", "@aztec/bb.js", "@noir-lang/noir_js"],
+  external: ["@obscura/sdk", "@stellar/stellar-sdk", "@aztec/bb.js", "@noir-lang/noir_js"],
 });

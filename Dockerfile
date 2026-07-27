@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
 #
-# Wraith off-chain matcher — production image.
+# Obscura off-chain matcher — production image.
 #
-# Builds @wraith/sdk + @wraith/matcher from the pnpm monorepo and runs the HTTP
+# Builds @obscura/sdk + @obscura/matcher from the pnpm monorepo and runs the HTTP
 # matching service (POST/GET /orders, GET /health) plus its background match loop.
 # Live proving uses @aztec/bb.js (WASM) — no native `bb` binary required, but the
 # first proof downloads the SRS over HTTPS (cache it with a volume; see compose).
@@ -23,10 +23,10 @@ COPY sdk/package.json ./sdk/
 COPY matcher/package.json ./matcher/
 COPY frontend/package.json ./frontend/
 COPY bridge/relayer/package.json ./bridge/relayer/
-RUN pnpm install --frozen-lockfile --filter "@wraith/matcher..."
+RUN pnpm install --frozen-lockfile --filter "@obscura/matcher..."
 
 # Sources for the two packages we actually build, then compile.
-# NB: don't `pnpm prune --prod` here — it drops the @wraith/sdk workspace symlink the
+# NB: don't `pnpm prune --prod` here — it drops the @obscura/sdk workspace symlink the
 # matcher resolves at runtime. The filtered install already keeps the image lean.
 COPY sdk ./sdk
 COPY matcher ./matcher
@@ -38,7 +38,7 @@ FROM node:20-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=8787 \
-    WRAITH_DEPLOYMENTS=/app/deployments.json \
+    OBSCURA_DEPLOYMENTS=/app/deployments.json \
     MATCH_CIRCUIT=/app/circuits/match_orders.json
 
 # Built workspace + resolved node_modules (workspace symlinks preserved).

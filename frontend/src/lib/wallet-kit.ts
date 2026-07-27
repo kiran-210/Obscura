@@ -23,7 +23,7 @@ import {
 } from '@creit.tech/stellar-wallets-kit'
 import { NETWORK_PASSPHRASE } from './config'
 
-const STORAGE_KEY = 'wraith:selected-wallet-id'
+const STORAGE_KEY = 'obscura:selected-wallet-id'
 
 /** Read the persisted wallet id (null in private mode / first visit). */
 export function readStoredWalletId(): string | null {

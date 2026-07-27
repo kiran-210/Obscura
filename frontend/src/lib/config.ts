@@ -1,5 +1,5 @@
 /**
- * Live deployment configuration for the Wraith frontend.
+ * Live deployment configuration for the Obscura frontend.
  *
  * Source of truth: `deployments.json` at the repo root (testnet). The values are inlined
  * here (a typed config) so the app does not need filesystem access outside its own root,
@@ -11,8 +11,8 @@
  *   native SAC  CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
  *   passphrase  "Test SDF Network ; September 2015"
  */
-import { assetFromSac, hash2, NATIVE_ASSET_ID, toField, type Field } from '@wraith/sdk'
-import type { AssetCode } from './wraith-sdk'
+import { assetFromSac, hash2, NATIVE_ASSET_ID, toField, type Field } from '@obscura/sdk'
+import type { AssetCode } from './obscura-sdk'
 
 // Tolerate a missing `import.meta.env` (Node/SSR/test contexts, where Vite hasn't injected it)
 // by falling back to the compiled defaults rather than throwing.
@@ -29,7 +29,7 @@ function flag(key: string): boolean {
 }
 
 /**
- * WraithPool contract id on the configured network.
+ * ObscuraPool contract id on the configured network.
  *
  * Points at the match-memo pool (redeployed 2026-07-02): `transfer` AND `match_orders` carry
  * encrypted note payloads (+ full leaf set/indices) in their events, which the recipient's
@@ -38,7 +38,7 @@ function flag(key: string): boolean {
  * pre-memo pool CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR.
  */
 export const POOL_CONTRACT_ID = env(
-  'VITE_WRAITH_POOL',
+  'VITE_OBSCURA_POOL',
   'CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD',
 )
 
@@ -62,7 +62,7 @@ export const POOL_DEPLOY_LEDGER = Number(env('VITE_POOL_DEPLOY_LEDGER', '3402675
 /** Stellar network passphrase. */
 export const NETWORK_PASSPHRASE = env('VITE_NETWORK_PASSPHRASE', 'Test SDF Network ; September 2015')
 
-/** When true, the app uses the offline `MockWraithSdk` instead of the live client. */
+/** When true, the app uses the offline `MockObscuraSdk` instead of the live client. */
 export const USE_MOCK = flag('VITE_USE_MOCK')
 
 /** Optional USDC SAC address — not part of the single-asset testnet demo. */
@@ -87,7 +87,7 @@ export const L1_CHAIN_ID = Number(env('VITE_L1_CHAIN_ID', '11155111'))
 /** Sepolia execution RPC used by viem reads (eth_getProof is done by the relayer). */
 export const SEPOLIA_RPC_URL = env('VITE_SEPOLIA_RPC_URL', 'https://ethereum-sepolia-rpc.publicnode.com')
 
-/** `WraithBridgeL1` escrow address on Sepolia (locks/unlocks the backing). */
+/** `ObscuraBridgeL1` escrow address on Sepolia (locks/unlocks the backing). */
 export const L1_BRIDGE_ADDRESS = env(
   'VITE_L1_BRIDGE_ADDRESS',
   '0x0000000000000000000000000000000000000000',
@@ -96,8 +96,8 @@ export const L1_BRIDGE_ADDRESS = env(
 /** Soroban `EthLightClient` contract id (trusted Ethereum head on Stellar). */
 export const ETH_LIGHT_CLIENT_ID = env('VITE_ETH_LIGHT_CLIENT', '')
 
-/** Soroban `WraithBridge` contract id (bridge_in / bridge_out). */
-export const WRAITH_BRIDGE_ID = env('VITE_WRAITH_BRIDGE', '')
+/** Soroban `ObscuraBridge` contract id (bridge_in / bridge_out). */
+export const OBSCURA_BRIDGE_ID = env('VITE_OBSCURA_BRIDGE', '')
 
 /**
  * Optional relayer base URL. If set, `requestBridgeIn` POSTs the commitment to nudge
@@ -114,7 +114,7 @@ export const RELAYER_URL = env('VITE_RELAYER_URL', '')
  */
 export const BRIDGE_DOMAIN: Field = toField(env('VITE_BRIDGE_DOMAIN', '0x627269646765')) // "bridge"
 
-/** Map a 20-byte L1 token address (hex) to its bridged Wraith `asset_id` field. */
+/** Map a 20-byte L1 token address (hex) to its bridged Obscura `asset_id` field. */
 export function deriveBridgedAssetId(tokenAddressHex: string): Field {
   const addrField = toField(BigInt(tokenAddressHex))
   return hash2(hash2(L1_CHAIN_ID, addrField), BRIDGE_DOMAIN)

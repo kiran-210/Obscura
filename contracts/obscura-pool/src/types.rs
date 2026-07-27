@@ -15,7 +15,7 @@ pub enum DataKey {
     /// otherwise set on the first `set_bridge` call. Only this admin may
     /// (re)configure the bridge address.
     Admin,
-    /// The `WraithBridge` contract address authorised to call `bridge_mint`
+    /// The `ObscuraBridge` contract address authorised to call `bridge_mint`
     /// (BRIDGE_SPEC §3/§7). Set once via `set_bridge` after the bridge deploys.
     Bridge,
     NextIndex,
@@ -28,7 +28,7 @@ pub enum DataKey {
 #[contracterror]
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum WraithError {
+pub enum ObscuraError {
     VerifierNotSet = 1,
     VerificationFailed = 2,
     InvalidPublicInputs = 3,

@@ -1,15 +1,15 @@
 {
-  "name": "@wraith/relayer",
+  "name": "@obscura/relayer",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Wraith bridge relayer — UNTRUSTED transport that feeds Ethereum data to the Soroban contracts: beacon LightClientFinalityUpdate -> EthLightClient.update_header (with off-chain BLS12-381 decompression), and eth_getProof -> WraithBridge.bridge_in. Holds no authority; every value is re-verified on-chain.",
+  "description": "Obscura bridge relayer — UNTRUSTED transport that feeds Ethereum data to the Soroban contracts: beacon LightClientFinalityUpdate -> EthLightClient.update_header (with off-chain BLS12-381 decompression), and eth_getProof -> ObscuraBridge.bridge_in. Holds no authority; every value is re-verified on-chain.",
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "wraith-relayer": "./dist/index.js"
+    "obscura-relayer": "./dist/index.js"
   },
   "exports": {
     ".": {

@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { deriveOwnerKey, deriveViewingKey } from '@wraith/sdk'
-import { createWraithSdk } from '../lib/wraith-sdk'
-import type { OpenOrder, ShieldedBalance, WraithSdk } from '../lib/wraith-sdk'
+import { deriveOwnerKey, deriveViewingKey } from '@obscura/sdk'
+import { createObscuraSdk } from '../lib/obscura-sdk'
+import type { OpenOrder, ShieldedBalance, ObscuraSdk } from '../lib/obscura-sdk'
 import { USE_MOCK } from '../lib/config'
 import {
   clearActiveIdentity,
@@ -17,8 +17,8 @@ import { deriveEncKeypair, encodeReceiveCode } from '../lib/note-crypto'
 import { clearIndexer, startIndexer, syncIndexer } from '../lib/indexer-service'
 import { useWallet } from './useWallet'
 
-interface WraithContextValue {
-  sdk: WraithSdk
+interface ObscuraContextValue {
+  sdk: ObscuraSdk
   balances: ShieldedBalance[]
   orders: OpenOrder[]
   loadingBalances: boolean
@@ -31,16 +31,16 @@ interface WraithContextValue {
   refreshOrders: () => Promise<void>
 }
 
-const WraithContext = createContext<WraithContextValue | null>(null)
+const ObscuraContext = createContext<ObscuraContextValue | null>(null)
 
 /**
- * Provides the app-wide Wraith SDK client plus cached shielded balances and open orders.
+ * Provides the app-wide Obscura SDK client plus cached shielded balances and open orders.
  * The shielded identity (spending + viewing keys) is derived from the connected Stellar
  * wallet, and this is the only place that constructs the SDK, drives that derivation, and
  * runs the client indexer that rebuilds the Merkle tree and discovers incoming notes.
  */
-export function WraithProvider({ children }: { children: ReactNode }) {
-  const sdkRef = useRef<WraithSdk>(createWraithSdk())
+export function ObscuraProvider({ children }: { children: ReactNode }) {
+  const sdkRef = useRef<ObscuraSdk>(createObscuraSdk())
   const sdk = sdkRef.current
   const { address, status } = useWallet()
 
@@ -152,7 +152,7 @@ export function WraithProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id)
   }, [identityReady, address, refreshBalances, refreshOrders])
 
-  const value = useMemo<WraithContextValue>(
+  const value = useMemo<ObscuraContextValue>(
     () => ({
       sdk,
       balances,
@@ -167,11 +167,11 @@ export function WraithProvider({ children }: { children: ReactNode }) {
     [sdk, balances, orders, loadingBalances, loadingOrders, receiveCode, identityReady, refreshBalances, refreshOrders],
   )
 
-  return <WraithContext.Provider value={value}>{children}</WraithContext.Provider>
+  return <ObscuraContext.Provider value={value}>{children}</ObscuraContext.Provider>
 }
 
-export function useWraith(): WraithContextValue {
-  const ctx = useContext(WraithContext)
-  if (!ctx) throw new Error('useWraith must be used within a WraithProvider')
+export function useObscura(): ObscuraContextValue {
+  const ctx = useContext(ObscuraContext)
+  if (!ctx) throw new Error('useObscura must be used within a ObscuraProvider')
   return ctx
 }

@@ -1,7 +1,7 @@
 [package]
 name = "match_orders"
 type = "bin"
-authors = ["Wraith"]
+authors = ["Obscura"]
 
 [dependencies]
-wraith_lib = { path = "../wraith_lib" }
+obscura_lib = { path = "../obscura_lib" }

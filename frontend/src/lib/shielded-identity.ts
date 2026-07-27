@@ -18,12 +18,12 @@
  * If the wallet cannot sign messages (or the user declines), we fall back to a random
  * browser-local key so the app still works — just not portable.
  */
-import { toField, type Field } from '@wraith/sdk'
+import { toField, type Field } from '@obscura/sdk'
 import { signMessageWithKit } from './wallet-kit'
 import { peekCachedSpendingKey, randomSpendingKey, setActiveAddress, setSpendingKey } from './note-store'
 
 const DERIVATION_MESSAGE = [
-  'Wraith Shielded Wallet',
+  'Obscura Shielded Wallet',
   '',
   'Sign to unlock your private spending key on this device.',
   'This signature stays in your browser and reveals nothing on-chain.',

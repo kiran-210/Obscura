@@ -1,14 +1,14 @@
 import { useState } from 'react'
-import { useWraith } from '../hooks/useWraith'
+import { useObscura } from '../hooks/useObscura'
 import { useProofFlow } from '../hooks/useProofFlow'
 import { TOKEN_OPTIONS } from '../lib/tokens'
 import { isPositiveAmount } from '../lib/format'
-import type { AssetCode } from '../lib/wraith-sdk'
+import type { AssetCode } from '../lib/obscura-sdk'
 import { Button, Card, Field, PageIntro, SectionHeading, Select, ShieldIcon, TextInput } from './ui'
 import { ProofProgress } from './ProofProgress'
 
 export function Pay({ embedded }: { embedded?: boolean } = {}) {
-  const { sdk, refreshBalances } = useWraith()
+  const { sdk, refreshBalances } = useObscura()
   const proof = useProofFlow()
 
   const [recipientKey, setRecipientKey] = useState('')
@@ -44,7 +44,7 @@ export function Pay({ embedded }: { embedded?: boolean } = {}) {
         <div className="mt-5 space-y-4">
           <Field
             label="Recipient code"
-            hint="The recipient's Wraith receive code (wr1…) from their Receive screen — the payment is encrypted to it."
+            hint="The recipient's Obscura receive code (wr1…) from their Receive screen — the payment is encrypted to it."
           >
             <TextInput
               mono

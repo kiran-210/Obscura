@@ -1,4 +1,4 @@
-# Wraith matcher — production stack for a Docker host / VPS.
+# Obscura matcher — production stack for a Docker host / VPS.
 #
 #   caddy   : TLS termination (auto Let's Encrypt) + CORS, public on :80/:443.
 #   matcher : the Node matching service, live Soroban submission. Not exposed
@@ -16,17 +16,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: wraith-matcher:latest
+    image: obscura-matcher:latest
     restart: unless-stopped
     environment:
       # Live proving + on-chain settlement on Soroban (default in code is dry-run).
-      WRAITH_SUBMIT: "live"
-      WRAITH_RPC_URL: "${WRAITH_RPC_URL:-https://soroban-testnet.stellar.org}"
+      OBSCURA_SUBMIT: "live"
+      OBSCURA_RPC_URL: "${OBSCURA_RPC_URL:-https://soroban-testnet.stellar.org}"
       # A FUNDED Stellar secret ("S…") — the matcher's hot key that pays fees.
-      WRAITH_MATCHER_SECRET: "${WRAITH_MATCHER_SECRET:?set a funded S… secret in deploy/matcher.env}"
+      OBSCURA_MATCHER_SECRET: "${OBSCURA_MATCHER_SECRET:?set a funded S… secret in deploy/matcher.env}"
       MATCH_INTERVAL_MS: "${MATCH_INTERVAL_MS:-2000}"
-      # Optional: pin the pool contract. Default = deployments.json (wraithPoolMatchMemo).
-      # WRAITH_POOL_CONTRACT: "C..."
+      # Optional: pin the pool contract. Default = deployments.json (obscuraPoolMatchMemo).
+      # OBSCURA_POOL_CONTRACT: "C..."
     expose:
       - "8787"
     volumes:
@@ -50,7 +50,7 @@ services:
     environment:
       # DNS A/AAAA record for this domain must point at this host (for Let's Encrypt).
       MATCHER_DOMAIN: "${MATCHER_DOMAIN:?set your matcher domain in deploy/matcher.env}"
-      # Restrict to your Vercel origin in prod, e.g. https://wraith.vercel.app. Default: any.
+      # Restrict to your Vercel origin in prod, e.g. https://obscura.vercel.app. Default: any.
       CORS_ORIGIN: "${CORS_ORIGIN:-*}"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro

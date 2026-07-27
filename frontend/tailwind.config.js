@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 
-// "Mist" palette — Dark Wraith theme.
+// "Mist" palette — Dark Obscura theme.
 // Warm, desaturated neutrals (the fog) + a single gold accent (the backlit sun
-// through fog), pulled from the wraith-in-mist mood image. `mist`/`halo` are the
+// through fog), pulled from the obscura-in-mist mood image. `mist`/`halo` are the
 // canonical names; `ink`/`spectral` alias them so existing classes re-theme with
 // no edits, and the default cool `zinc` text ramp is warmed to match.
 const mist = {

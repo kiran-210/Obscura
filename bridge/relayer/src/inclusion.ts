@@ -1,7 +1,7 @@
 /**
- * Inclusion feed -> `WraithBridge` Soroban contract.
+ * Inclusion feed -> `ObscuraBridge` Soroban contract.
  *
- * Given a Wraith note `commitment` (or a watched L1 `Locked` event), the relayer:
+ * Given a Obscura note `commitment` (or a watched L1 `Locked` event), the relayer:
  *   1. derives the L1 storage slot of `locks[commitment]`
  *        slot = keccak256(abi.encode(commitment, uint256(0)))   (mapping decl slot 0)
  *   2. calls `eth_getProof(bridgeL1, [slot], block)` on a Sepolia execution RPC,
@@ -122,7 +122,7 @@ export async function fetchInclusionProof(
 /** Arguments for `bridge_in`. */
 export interface BridgeInArgs {
   blockNumber: bigint | number;
-  /** 32-byte Wraith note commitment. */
+  /** 32-byte Obscura note commitment. */
   commitment: Hex;
   /** 20-byte L1 token address (0x00..00 = native ETH). */
   token: Hex;
@@ -133,7 +133,7 @@ export interface BridgeInArgs {
   storageProof: Hex[];
 }
 
-/** Builds / submits `bridge_in` operations against a deployed `WraithBridge` contract. */
+/** Builds / submits `bridge_in` operations against a deployed `ObscuraBridge` contract. */
 export class BridgeInSubmitter {
   readonly contract: Contract;
   readonly contractId: string;

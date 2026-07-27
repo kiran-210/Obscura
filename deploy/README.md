@@ -1,7 +1,7 @@
-# Deploying the Wraith matcher (live, on a VPS)
+# Deploying the Obscura matcher (live, on a VPS)
 
 The `matcher/` service is a **long-running Node process** — an in-memory order book plus a
-`setInterval` matching loop that proves and submits `wraith-pool.match_orders` on Soroban.
+`setInterval` matching loop that proves and submits `obscura-pool.match_orders` on Soroban.
 That rules out Vercel (serverless, stateless). This stack runs it on any Docker host.
 
 ```
@@ -18,7 +18,7 @@ Two browser blockers are handled by Caddy, so the matcher source is untouched:
 - A VPS with **Docker + Docker Compose v2**, ports **80, 443** open, ≥ **2 GB RAM** (UltraHonk proving via `bb.js` is memory-hungry).
 - A **domain** with a DNS `A`/`AAAA` record pointing at the VPS IP (needed for the certificate).
 - A **funded Stellar testnet secret** for the matcher's hot key.
-- `deployments.json` present in the repo working tree (it's gitignored — it's already on your machine; make sure it's on the VPS too). The image bakes it in and targets `contracts.wraithPoolMatchMemo` = `CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD` on testnet.
+- `deployments.json` present in the repo working tree (it's gitignored — it's already on your machine; make sure it's on the VPS too). The image bakes it in and targets `contracts.obscuraPoolMatchMemo` = `CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD` on testnet.
 
 ## 1. Fund the matcher key
 
@@ -33,7 +33,7 @@ No Stellar CLI? Any funded testnet keypair works — generate one and fund it at
 
 ```bash
 cp deploy/matcher.env.example deploy/matcher.env
-# edit deploy/matcher.env: MATCHER_DOMAIN, CORS_ORIGIN (your Vercel origin), WRAITH_MATCHER_SECRET
+# edit deploy/matcher.env: MATCHER_DOMAIN, CORS_ORIGIN (your Vercel origin), OBSCURA_MATCHER_SECRET
 ```
 
 ## 3. Launch (from the repo root)

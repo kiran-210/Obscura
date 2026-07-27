@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useWraith } from '../hooks/useWraith'
+import { useObscura } from '../hooks/useObscura'
 import { useReveal } from '../hooks/useReveal'
 import { formatUsd } from '../lib/format'
 import { cx } from '../lib/cx'
@@ -18,7 +18,7 @@ const MODULES = [
 ] as const
 
 export function Hub() {
-  const { balances, loadingBalances } = useWraith()
+  const { balances, loadingBalances } = useObscura()
   const { revealed, toggle } = useReveal()
   const total = balances.reduce((sum, b) => sum + b.usdEstimate, 0)
 

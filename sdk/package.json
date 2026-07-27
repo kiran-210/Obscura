@@ -1,7 +1,7 @@
 {
-  "name": "@wraith/sdk",
+  "name": "@obscura/sdk",
   "version": "0.1.0",
-  "description": "Wraith TypeScript SDK — notes, orders, Poseidon2, Merkle tree, UltraHonk proofs, and Soroban tx building for the Wraith privacy platform on Stellar.",
+  "description": "Obscura TypeScript SDK — notes, orders, Poseidon2, Merkle tree, UltraHonk proofs, and Soroban tx building for the Obscura privacy platform on Stellar.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",

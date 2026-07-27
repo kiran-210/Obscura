@@ -1,5 +1,5 @@
 #![no_std]
-//! Wraith bridge — in-contract Ethereum MPT storage-proof verifier (BRIDGE_SPEC §6).
+//! Obscura bridge — in-contract Ethereum MPT storage-proof verifier (BRIDGE_SPEC §6).
 //!
 //! Pure Rust, `no_std`, Soroban-compatible. Verifies an EIP-1186 `eth_getProof`
 //! (account proof + storage proof) against a trusted Ethereum execution
@@ -94,7 +94,7 @@ pub fn verify_storage(
 /// Thin Soroban contract wrapper so `stellar contract build` produces a WASM and
 /// the verifier is callable cross-contract.
 ///
-/// Gated behind the (default-on) `contract` feature: `WraithBridge` depends on
+/// Gated behind the (default-on) `contract` feature: `ObscuraBridge` depends on
 /// this crate as an in-process **library** (`default-features = false`) and calls
 /// [`verify_storage`] directly, so it must NOT pull this contract wrapper into the
 /// bridge WASM's exported interface.

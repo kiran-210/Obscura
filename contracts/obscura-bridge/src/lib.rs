@@ -1,7 +1,7 @@
 #![no_std]
-//! # WraithBridge — trustless ZK-private cross-chain bridge hub (BRIDGE_SPEC §7).
+//! # ObscuraBridge — trustless ZK-private cross-chain bridge hub (BRIDGE_SPEC §7).
 //!
-//! The integration contract that composes the three Wraith bridge components into
+//! The integration contract that composes the three Obscura bridge components into
 //! one trust-minimised flow:
 //!
 //! * [`EthLightClient`](../eth_light_client) — a **separate deployed** contract.
@@ -11,7 +11,7 @@
 //!   `verify_storage` walks the EIP-1186 account+storage proof against that
 //!   `state_root` using `keccak256`, returning the proven 32-byte `locks` word.
 //!   No cross-contract call.
-//! * [`WraithPool`](../wraith_pool) — a **separate deployed** contract. Cross-called
+//! * [`ObscuraPool`](../obscura_pool) — a **separate deployed** contract. Cross-called
 //!   for `bridge_mint(commitment)` (inbound) and `is_known_root` (outbound).
 //!
 //! ## `bridge_in` (inbound, fully implemented & trustless)
@@ -45,13 +45,13 @@ use crate::types::{BridgeError, BridgeInEvent, BridgeOutEvent, DataKey};
 const WITHDRAW_PUBLIC_INPUTS: u32 = 5;
 
 #[contract]
-pub struct WraithBridge;
+pub struct ObscuraBridge;
 
 #[contractimpl]
-impl WraithBridge {
+impl ObscuraBridge {
     /// Wire the bridge to its three collaborators. `light_client` and `pool` are
     /// the addresses of the already-deployed contracts; `l1_bridge_addr` is the
-    /// `WraithBridgeL1` escrow on Ethereum whose `locks` mapping `bridge_in`
+    /// `ObscuraBridgeL1` escrow on Ethereum whose `locks` mapping `bridge_in`
     /// proves; `withdraw_vf` is the existing UltraHonk withdraw verifier reused by
     /// `bridge_out`.
     pub fn __constructor(

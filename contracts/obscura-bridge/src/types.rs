@@ -1,18 +1,18 @@
 use soroban_sdk::{contracterror, contractevent, contracttype, BytesN};
 
-/// Instance / persistent storage keys for `WraithBridge`.
+/// Instance / persistent storage keys for `ObscuraBridge`.
 #[contracttype]
 #[derive(Clone)]
 pub enum DataKey {
     /// `Address`: the deployed `EthLightClient` (cross-called for `state_root_at`).
     LightClient,
-    /// `Address`: the deployed `WraithPool` (cross-called for `bridge_mint` /
+    /// `Address`: the deployed `ObscuraPool` (cross-called for `bridge_mint` /
     /// `is_known_root`).
     Pool,
     /// `u32`: the Ethereum L1 chain id the bridge is bound to (Sepolia). Recorded
     /// for the relayer / asset-id derivation; the commitment already encodes it.
     L1ChainId,
-    /// `BytesN<20>`: the `WraithBridgeL1` escrow address on Ethereum whose `locks`
+    /// `BytesN<20>`: the `ObscuraBridgeL1` escrow address on Ethereum whose `locks`
     /// mapping is proven by `bridge_in`.
     L1BridgeAddr,
     /// `Address`: the existing UltraHonk **withdraw** verifier reused by
@@ -65,7 +65,7 @@ pub struct BridgeInEvent {
 }
 
 /// Emitted on a successful outbound burn. The relayer settles this on Ethereum
-/// via `WraithBridgeL1.unlock` (BRIDGE_SPEC §7/§8).
+/// via `ObscuraBridgeL1.unlock` (BRIDGE_SPEC §7/§8).
 #[contractevent(topics = ["bridge_out"], data_format = "map")]
 pub struct BridgeOutEvent {
     #[topic]

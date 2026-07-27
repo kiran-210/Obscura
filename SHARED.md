@@ -54,7 +54,7 @@ All three implementations must produce identical output for identical inputs.
   from the on-chain/Noir impl (e.g. assert `H(1,2)`, `H(0,0)`, a 4-input hash all match). A silent
   mismatch makes every note unspendable. See §9.
 
-### Hash arities used by Wraith
+### Hash arities used by Obscura
 
 | Name | Inputs | Call |
 |------|--------|------|
@@ -65,7 +65,7 @@ All three implementations must produce identical output for identical inputs.
 > The reference only exercises `hash2`. `hash4`/`hash7` use the **same lib** with a longer input
 > array (sponge absorbs RATE=3 at a time; the lib handles padding). Both Noir and `soroban-poseidon`
 > implement the same variable-length sponge, so they remain consistent for any arity — but the SDK's
-> JS lib must be golden-vector-checked for **each arity** Wraith uses (2, 4, 7).
+> JS lib must be golden-vector-checked for **each arity** Obscura uses (2, 4, 7).
 
 ---
 
@@ -120,7 +120,7 @@ address_as_field(addr) =
 Implementations:
 - **SDK** (`sdk/src/stellar.ts`, `addressToField`): `StrKey.decode{Contract,Ed25519PublicKey}` →
   `bytesToField` (big-endian) → `mod r`.
-- **Contract** (`contracts/wraith-pool/src/lib.rs`, `address_to_field`): `Address::to_xdr` →
+- **Contract** (`contracts/obscura-pool/src/lib.rs`, `address_to_field`): `Address::to_xdr` →
   trailing 32 bytes of the `ScVal::Address` XDR (both the `…Account/PublicKey/Ed25519` and
   `…Contract/Hash` encodings end with the 32-byte key) → `U256::from_be_bytes(..).rem_euclid(r)`.
   Pinned by the cross-impl golden test `address_to_field_matches_sdk_golden` in
@@ -165,7 +165,7 @@ TREE_DEPTH  = 20
 ## 6. Verifier integration (UltraHonk)
 
 Verifier contract: `vendor/rs-soroban-ultrahonk/contracts/rs-soroban-ultrahonk` (or depend on the
-crate `ultrahonk-soroban-verifier`). One **verifier instance per circuit VK** — Wraith deploys 5
+crate `ultrahonk-soroban-verifier`). One **verifier instance per circuit VK** — Obscura deploys 5
 (withdraw, transfer, place_order, match_orders, cancel_order) and the pool stores their addresses.
 
 **API (exact):**
@@ -268,7 +268,7 @@ Before the SDK computes any commitment, it MUST pass a test that reproduces on-c
 
 - **R1** bb pinned to exactly `0.87.0` (verifier ported from 0.82.2 but CI-green at 0.87.0). Never bump silently.
 - **R3** JS Poseidon2 mismatch → §9 golden gate is mandatory.
-- **R4** No ready-made deploy path for an app contract on-chain — Wraith ships its own deploy script
+- **R4** No ready-made deploy path for an app contract on-chain — Obscura ships its own deploy script
   (deploy 5 verifiers with their VKs, then the pool with the 5 addresses).
 - **R5** Verifier has no access control; pool must be constructed with the correct verifier addresses
   and should expose `vk_bytes()` checks in the deploy script.

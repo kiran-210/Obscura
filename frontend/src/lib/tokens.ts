@@ -9,7 +9,7 @@
  * This module holds a curated list of well-known tokens (metadata + SAC where available on
  * the active network) and resolves arbitrary custom tokens from a pasted SAC address.
  */
-import { assetFromSac, buildTransaction, NATIVE_ASSET_ID, type Field } from '@wraith/sdk'
+import { assetFromSac, buildTransaction, NATIVE_ASSET_ID, type Field } from '@obscura/sdk'
 import { Account, Contract, rpc, scValToNative } from '@stellar/stellar-sdk'
 import { NATIVE_SAC, NETWORK_PASSPHRASE, SOROBAN_RPC_URL } from './config'
 

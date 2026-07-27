@@ -7,7 +7,7 @@ import { cx } from '../lib/cx'
  * Rendered as single-color glyphs (they inherit `currentColor`) so they sit cleanly
  * in the black-and-white UI — no external image fetches, so nothing can 404. The
  * Stellar and Ethereum paths are the canonical simple-icons marks; USDC and the
- * Wraith mark are drawn to match the same weight.
+ * Obscura mark are drawn to match the same weight.
  */
 
 export function StellarGlyph(props: SVGProps<SVGSVGElement>) {
@@ -56,7 +56,7 @@ export function XrpGlyph(props: SVGProps<SVGSVGElement>) {
   )
 }
 
-export function WraithMark(props: SVGProps<SVGSVGElement>) {
+export function ObscuraMark(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
       <path
@@ -76,7 +76,7 @@ type GlyphComponent = FC<SVGProps<SVGSVGElement>>
 const GLYPHS: Record<string, GlyphComponent> = {
   stellar: StellarGlyph,
   ethereum: EthereumGlyph,
-  wraith: WraithMark,
+  obscura: ObscuraMark,
   XLM: StellarGlyph,
   ETH: EthereumGlyph,
   bETH: EthereumGlyph,
@@ -94,7 +94,7 @@ const SIZES = {
 
 /**
  * A chain or token logo inside a round monochrome chip. `name` is a chain id
- * (`stellar`/`ethereum`/`wraith`) or a token code (`XLM`, `ETH`, `bETH`, …).
+ * (`stellar`/`ethereum`/`obscura`) or a token code (`XLM`, `ETH`, `bETH`, …).
  * Unknown names fall back to a short mono label so nothing renders empty.
  */
 export function CoinBadge({

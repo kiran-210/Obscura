@@ -2,9 +2,9 @@
 pragma solidity ^0.8.24;
 
 import {Script, console2} from "forge-std/Script.sol";
-import {WraithBridgeL1} from "../src/WraithBridgeL1.sol";
+import {ObscuraBridgeL1} from "../src/ObscuraBridgeL1.sol";
 
-/// @notice Deploys WraithBridgeL1 to Sepolia.
+/// @notice Deploys ObscuraBridgeL1 to Sepolia.
 /// @dev    Secrets are read from the environment — never hardcode keys.
 ///
 ///         Required env:
@@ -17,7 +17,7 @@ import {WraithBridgeL1} from "../src/WraithBridgeL1.sol";
 ///           forge script script/Deploy.s.sol:Deploy \
 ///             --rpc-url "$SEPOLIA_RPC_URL" --broadcast --verify -vvvv
 contract Deploy is Script {
-    function run() external returns (WraithBridgeL1 bridge) {
+    function run() external returns (ObscuraBridgeL1 bridge) {
         uint256 pk = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(pk);
 
@@ -25,10 +25,10 @@ contract Deploy is Script {
         address governor = vm.envOr("RELAYER_OR_GOVERNOR", deployer);
 
         vm.startBroadcast(pk);
-        bridge = new WraithBridgeL1(governor);
+        bridge = new ObscuraBridgeL1(governor);
         vm.stopBroadcast();
 
-        console2.log("WraithBridgeL1 deployed at:", address(bridge));
+        console2.log("ObscuraBridgeL1 deployed at:", address(bridge));
         console2.log("relayerOrGovernor:", governor);
         console2.log("locks mapping declaration slot: 0");
     }

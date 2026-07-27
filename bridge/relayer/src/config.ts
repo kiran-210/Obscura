@@ -7,8 +7,8 @@
  *   STELLAR_RPC                Soroban RPC (submit + simulate)
  *   STELLAR_NETWORK_PASSPHRASE Soroban network passphrase (default: Testnet)
  *   LIGHT_CLIENT_CONTRACT      EthLightClient contract id ("C...")
- *   WRAITH_BRIDGE_CONTRACT     WraithBridge contract id ("C...")
- *   BRIDGE_L1_ADDRESS          WraithBridgeL1 address ("0x...")
+ *   OBSCURA_BRIDGE_CONTRACT     ObscuraBridge contract id ("C...")
+ *   BRIDGE_L1_ADDRESS          ObscuraBridgeL1 address ("0x...")
  *
  * Signers (only needed for the live submit paths):
  *   STELLAR_SIGNER_SECRET      Soroban tx signer seed ("S...") — header/bridge_in
@@ -23,7 +23,7 @@ export interface RelayerConfig {
   stellarRpc?: string;
   stellarNetworkPassphrase?: string;
   lightClientContract?: string;
-  wraithBridgeContract?: string;
+  obscuraBridgeContract?: string;
   /** EthSignalClient contract id ("C...") — the Boundless-Signal light client. */
   signalClientContract?: string;
   bridgeL1Address?: Hex;
@@ -51,8 +51,8 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   if (pass) cfg.stellarNetworkPassphrase = pass;
   const lc = clean(env.LIGHT_CLIENT_CONTRACT);
   if (lc) cfg.lightClientContract = lc;
-  const bridge = clean(env.WRAITH_BRIDGE_CONTRACT);
-  if (bridge) cfg.wraithBridgeContract = bridge;
+  const bridge = clean(env.OBSCURA_BRIDGE_CONTRACT);
+  if (bridge) cfg.obscuraBridgeContract = bridge;
   const signalClient = clean(env.SIGNAL_CLIENT_CONTRACT);
   if (signalClient) cfg.signalClientContract = signalClient;
   const l1 = clean(env.BRIDGE_L1_ADDRESS);

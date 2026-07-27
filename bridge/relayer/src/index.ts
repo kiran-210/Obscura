@@ -1,20 +1,20 @@
 /**
- * `@wraith/relayer` — UNTRUSTED transport for the Wraith cross-chain bridge.
+ * `@obscura/relayer` — UNTRUSTED transport for the Obscura cross-chain bridge.
  *
  * The relayer holds **no authority**. It only moves bytes:
  *   - header feed: beacon `LightClientFinalityUpdate` -> `EthLightClient.update_header`
  *     (decompressing the BLS signature off-chain; the on-chain pairing check is
  *     the trust root);
- *   - inclusion feed: `eth_getProof(bridgeL1, slot)` -> `WraithBridge.bridge_in`
+ *   - inclusion feed: `eth_getProof(bridgeL1, slot)` -> `ObscuraBridge.bridge_in`
  *     (the on-chain MPT verifier re-checks every node against the trusted root);
- *   - out feed: Soroban `bridge_out` authorization -> `WraithBridgeL1.unlock`
+ *   - out feed: Soroban `bridge_out` authorization -> `ObscuraBridgeL1.unlock`
  *     (governor-gated, hackathon scope).
  *
  * CLI:
- *   wraith-relayer relay-header [--post-root] [--submit]
- *   wraith-relayer relay-in <commitment> [--block N] [--token 0x..] [--amount N] [--submit]
- *   wraith-relayer watch [--interval-ms N]
- *   wraith-relayer help
+ *   obscura-relayer relay-header [--post-root] [--submit]
+ *   obscura-relayer relay-in <commitment> [--block N] [--token 0x..] [--amount N] [--submit]
+ *   obscura-relayer watch [--interval-ms N]
+ *   obscura-relayer help
  *
  * Without `--submit` (and without the relevant signer secrets) every command is a
  * safe dry run: it fetches/derives and prints the operation it WOULD submit. Live
@@ -307,12 +307,12 @@ async function relayIn(
     log("WARNING: proven (token, amount) does not match the requested values; the contract will reject.");
   }
 
-  if (!cfg.wraithBridgeContract) {
-    log("\nno WRAITH_BRIDGE_CONTRACT set — dry run only (proof packaged, not submitted).");
+  if (!cfg.obscuraBridgeContract) {
+    log("\nno OBSCURA_BRIDGE_CONTRACT set — dry run only (proof packaged, not submitted).");
     return;
   }
   const bridge = new BridgeInSubmitter({
-    contractId: cfg.wraithBridgeContract,
+    contractId: cfg.obscuraBridgeContract,
     ...(cfg.stellarNetworkPassphrase ? { networkPassphrase: cfg.stellarNetworkPassphrase } : {}),
   });
   const op = bridge.bridgeInOp({
@@ -376,11 +376,11 @@ async function watch(cfg: RelayerConfig, flags: Record<string, string | true>): 
   }
 
   // Inclusion: watch L1 Locked -> relay-in.
-  if (cfg.sepoliaExecRpc && cfg.bridgeL1Address && cfg.wraithBridgeContract && cfg.stellarRpc && cfg.stellarSignerSecret) {
+  if (cfg.sepoliaExecRpc && cfg.bridgeL1Address && cfg.obscuraBridgeContract && cfg.stellarRpc && cfg.stellarSignerSecret) {
     const client = makePublicClient(cfg.sepoliaExecRpc);
     const bridgeL1 = cfg.bridgeL1Address;
     const bridge = new BridgeInSubmitter({
-      contractId: cfg.wraithBridgeContract,
+      contractId: cfg.obscuraBridgeContract,
       ...(cfg.stellarNetworkPassphrase ? { networkPassphrase: cfg.stellarNetworkPassphrase } : {}),
     });
     const lc =
@@ -426,16 +426,16 @@ async function watch(cfg: RelayerConfig, flags: Record<string, string | true>): 
     stops.push(() => w.stop());
     log("[watch] L1 Locked -> bridge_in active");
   } else {
-    log("[watch] inclusion loop inactive (need SEPOLIA_EXEC_RPC + BRIDGE_L1_ADDRESS + WRAITH_BRIDGE_CONTRACT + STELLAR_RPC + STELLAR_SIGNER_SECRET)");
+    log("[watch] inclusion loop inactive (need SEPOLIA_EXEC_RPC + BRIDGE_L1_ADDRESS + OBSCURA_BRIDGE_CONTRACT + STELLAR_RPC + STELLAR_SIGNER_SECRET)");
   }
 
   // Out: watch Stellar bridge_out -> L1 unlock.
-  if (cfg.stellarRpc && cfg.wraithBridgeContract && cfg.bridgeL1Address && cfg.sepoliaExecRpc && cfg.governorPrivateKey) {
+  if (cfg.stellarRpc && cfg.obscuraBridgeContract && cfg.bridgeL1Address && cfg.sepoliaExecRpc && cfg.governorPrivateKey) {
     const account = privateKeyToAccount(cfg.governorPrivateKey);
     const wallet = createWalletClient({ account, chain: sepolia, transport: http(cfg.sepoliaExecRpc) });
     const bridgeL1 = cfg.bridgeL1Address;
     const w = watchBridgeOut(
-      { rpcUrl: cfg.stellarRpc, contractId: cfg.wraithBridgeContract },
+      { rpcUrl: cfg.stellarRpc, contractId: cfg.obscuraBridgeContract },
       async (ev) => {
         log(`[bridge_out] commitment ${ev.commitment} -> unlock to ${ev.l1Recipient}`);
         try {
@@ -449,7 +449,7 @@ async function watch(cfg: RelayerConfig, flags: Record<string, string | true>): 
     stops.push(() => w.stop());
     log("[watch] Stellar bridge_out -> L1 unlock active (governor)");
   } else {
-    log("[watch] out loop inactive (need STELLAR_RPC + WRAITH_BRIDGE_CONTRACT + BRIDGE_L1_ADDRESS + SEPOLIA_EXEC_RPC + GOVERNOR_PRIVATE_KEY)");
+    log("[watch] out loop inactive (need STELLAR_RPC + OBSCURA_BRIDGE_CONTRACT + BRIDGE_L1_ADDRESS + SEPOLIA_EXEC_RPC + GOVERNOR_PRIVATE_KEY)");
   }
 
   log("[watch] running; Ctrl-C to stop.");
@@ -498,7 +498,7 @@ async function seedCommittee(cfg: RelayerConfig, flags: Record<string, string | 
 function usage(): void {
   log(
     [
-      "wraith-relayer — UNTRUSTED transport for the Wraith bridge",
+      "obscura-relayer — UNTRUSTED transport for the Obscura bridge",
       "",
       "Commands:",
       "  relay-header [--post-root] [--submit]            fetch finality update -> update_header (or post_root fallback)",

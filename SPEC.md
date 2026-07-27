@@ -1,4 +1,4 @@
-# Wraith -- Full Privacy Platform on Stellar
+# Obscura -- Full Privacy Platform on Stellar
 
 ## Technical Specification v2.0
 
@@ -6,13 +6,13 @@
 
 ## 1. Overview
 
-Wraith is a full-stack privacy platform on Stellar. It provides four integrated modules -- Bridge, Portfolio, Pay, and Swap -- all built on a shared shielded balance layer. Users bridge classic Stellar assets into a private environment, manage hidden balances, send private payments, and trade via a ZK-powered dark pool. Every operation is verified by zero-knowledge proofs on Soroban.
+Obscura is a full-stack privacy platform on Stellar. It provides four integrated modules -- Bridge, Portfolio, Pay, and Swap -- all built on a shared shielded balance layer. Users bridge classic Stellar assets into a private environment, manage hidden balances, send private payments, and trade via a ZK-powered dark pool. Every operation is verified by zero-knowledge proofs on Soroban.
 
 ### 1.1 Modules
 
 | Module | What it does |
 |---|---|
-| **Bridge** | Move assets between classic Stellar and Wraith's private layer (via SAC) |
+| **Bridge** | Move assets between classic Stellar and Obscura's private layer (via SAC) |
 | **Portfolio** | View and manage shielded multi-asset balances |
 | **Pay** | Send private payments -- amounts and participants hidden |
 | **Swap** | Dark pool DEX -- hidden orders, ZK-proven fair matching |
@@ -30,14 +30,14 @@ Wraith is a full-stack privacy platform on Stellar. It provides four integrated 
 ## 2. Architecture
 
 ```
-STELLAR CLASSIC                         WRAITH (Soroban)
+STELLAR CLASSIC                         OBSCURA (Soroban)
                               +--------------------------------------+
   XLM  ----+                  |                                      |
   USDC ----+--- BRIDGE ------>|  SHIELDED BALANCE LAYER              |
   EURC ----+    (SAC)         |  (ZK notes, Merkle tree, nullifiers) |
                               |       |              |               |
                               |       v              v               |
-                              |   WRAITH PAY    WRAITH SWAP          |
+                              |   OBSCURA PAY    OBSCURA SWAP          |
                               |   (transfer     (place_order,        |
                               |    circuit)      match_orders)       |
                               |                                      |
@@ -60,7 +60,7 @@ STELLAR CLASSIC                         WRAITH (Soroban)
 | `circuits/match_orders` | Noir | Fair match proof between two orders |
 | `circuits/withdraw` | Noir | Withdrawal proof (shielded -> public) |
 | `circuits/cancel_order` | Noir | Order cancellation proof |
-| `contracts/wraith-pool` | Rust/Soroban | Core contract: balances, orders, settlement |
+| `contracts/obscura-pool` | Rust/Soroban | Core contract: balances, orders, settlement |
 | `sdk/` | TypeScript | Client library: notes, proofs, transactions |
 | `matcher/` | TypeScript | Off-chain matching engine |
 | `frontend/` | React + TS | 4-tab UI: Bridge, Portfolio, Pay, Swap |
@@ -100,7 +100,7 @@ This is the foundation shared by all modules.
 
 ### 4.1 Balance Note
 
-A note represents a hidden balance within Wraith:
+A note represents a hidden balance within Obscura:
 
 ```
 BalanceNote {
@@ -206,7 +206,7 @@ fn check_merkle_proof(leaf: Field, path: [Field; 20], indices: [Field; 20]) -> F
 
 ## 5. Module: Bridge
 
-### 5.1 Deposit (Classic -> Wraith)
+### 5.1 Deposit (Classic -> Obscura)
 
 No ZK proof required. Deposit amounts are public.
 
@@ -220,7 +220,7 @@ Flow:
 6. User stores locally: { asset_id, amount, spending_key, blinding, leaf_index }
 ```
 
-### 5.2 Withdraw (Wraith -> Classic)
+### 5.2 Withdraw (Obscura -> Classic)
 
 Requires a ZK proof of note ownership.
 
@@ -248,7 +248,7 @@ Where `asset_address` is the SAC contract address for that asset. Native XLM use
 
 ### 6.1 Private Transfer
 
-Send tokens to another Wraith user without revealing amount or participants.
+Send tokens to another Obscura user without revealing amount or participants.
 
 ```
 Flow:
@@ -761,10 +761,10 @@ assert(refund_asset == refund_asset_id);
 
 ```rust
 #[contract]
-pub struct WraithPool;
+pub struct ObscuraPool;
 
 #[contractimpl]
-impl WraithPool {
+impl ObscuraPool {
     // --- Lifecycle ---
 
     pub fn __constructor(
@@ -778,7 +778,7 @@ impl WraithPool {
 
     // --- Bridge ---
 
-    /// Deposit classic Stellar asset into Wraith
+    /// Deposit classic Stellar asset into Obscura
     pub fn deposit(
         env: Env,
         from: Address,
@@ -787,7 +787,7 @@ impl WraithPool {
         commitment: BytesN<32>,
     ) -> u32;  // leaf index
 
-    /// Withdraw from Wraith to a classic Stellar account
+    /// Withdraw from Obscura to a classic Stellar account
     pub fn withdraw(
         env: Env,
         proof: Bytes,
@@ -795,16 +795,16 @@ impl WraithPool {
         recipient: Address,
         amount: i128,
         asset: Address,
-    ) -> Result<(), WraithError>;
+    ) -> Result<(), ObscuraError>;
 
     // --- Pay ---
 
-    /// Private transfer between Wraith users
+    /// Private transfer between Obscura users
     pub fn transfer(
         env: Env,
         proof: Bytes,
         public_inputs: Bytes,
-    ) -> Result<(), WraithError>;
+    ) -> Result<(), ObscuraError>;
 
     // --- Swap ---
 
@@ -813,21 +813,21 @@ impl WraithPool {
         env: Env,
         proof: Bytes,
         public_inputs: Bytes,
-    ) -> Result<(), WraithError>;
+    ) -> Result<(), ObscuraError>;
 
     /// Match two compatible orders
     pub fn match_orders(
         env: Env,
         proof: Bytes,
         public_inputs: Bytes,
-    ) -> Result<(), WraithError>;
+    ) -> Result<(), ObscuraError>;
 
     /// Cancel an open order
     pub fn cancel_order(
         env: Env,
         proof: Bytes,
         public_inputs: Bytes,
-    ) -> Result<(), WraithError>;
+    ) -> Result<(), ObscuraError>;
 
     // --- View ---
 
@@ -1054,7 +1054,7 @@ All within the 100M CPU instruction limit per Soroban transaction.
 ## 15. Project Structure
 
 ```
-wraith/
+obscura/
 ├── circuits/
 │   └── noir/
 │       ├── withdraw/
@@ -1073,7 +1073,7 @@ wraith/
 │           ├── Nargo.toml
 │           └── src/main.nr
 ├── contracts/
-│   └── wraith-pool/
+│   └── obscura-pool/
 │       ├── Cargo.toml
 │       └── src/
 │           ├── lib.rs          # Entry point, function dispatch
@@ -1116,10 +1116,10 @@ wraith/
 │       │   ├── Swap.tsx
 │       │   └── Layout.tsx
 │       ├── hooks/
-│       │   ├── useWraith.ts
+│       │   ├── useObscura.ts
 │       │   └── useWallet.ts
 │       └── lib/
-│           └── wraith-sdk.ts
+│           └── obscura-sdk.ts
 ├── scripts/
 │   ├── deploy.ts               # Deploy all contracts
 │   └── demo.ts                 # E2E demo script

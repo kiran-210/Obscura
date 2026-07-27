@@ -1,10 +1,10 @@
 /**
- * RealWraithSdk — the live client that talks to the deployed WraithPool on Stellar
- * Testnet, backed by `@wraith/sdk` (crypto + Soroban op building), `@stellar/stellar-sdk`
+ * RealObscuraSdk — the live client that talks to the deployed ObscuraPool on Stellar
+ * Testnet, backed by `@obscura/sdk` (crypto + Soroban op building), `@stellar/stellar-sdk`
  * (RPC submit) and the Stellar Wallets Kit (multi-wallet address + signing).
  *
- * It implements the same `WraithSdk` surface the UI is written against (see
- * `wraith-sdk.ts`), so it drops in behind `createWraithSdk()` with no UI changes.
+ * It implements the same `ObscuraSdk` surface the UI is written against (see
+ * `obscura-sdk.ts`), so it drops in behind `createObscuraSdk()` with no UI changes.
  *
  * Flow status:
  *   deposit              LIVE  — generates a note, builds + signs + submits the on-chain
@@ -34,10 +34,10 @@ import {
   OrderSide,
   recipientHash,
   toField,
-  WraithContract,
+  ObscuraContract,
   type CircuitInputMap,
   type Field,
-} from '@wraith/sdk'
+} from '@obscura/sdk'
 import { Account, Contract, rpc, scValToNative, TransactionBuilder, xdr } from '@stellar/stellar-sdk'
 import { Buffer } from 'buffer'
 import { ASSET_CONFIG, NATIVE_SAC, NETWORK_PASSPHRASE, POOL_CONTRACT_ID, SOROBAN_RPC_URL } from './config'
@@ -70,8 +70,8 @@ import type {
   TransferParams,
   TxResult,
   WithdrawParams,
-  WraithSdk,
-} from './wraith-sdk'
+  ObscuraSdk,
+} from './obscura-sdk'
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -101,8 +101,8 @@ function walletError(err: unknown): string {
   return typeof err === 'string' ? err : 'The wallet rejected the request.'
 }
 
-export class RealWraithSdk implements WraithSdk {
-  private readonly contract = new WraithContract({
+export class RealObscuraSdk implements ObscuraSdk {
+  private readonly contract = new ObscuraContract({
     contractId: POOL_CONTRACT_ID,
     networkPassphrase: NETWORK_PASSPHRASE,
   })

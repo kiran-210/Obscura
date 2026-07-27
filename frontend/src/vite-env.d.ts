@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** Use the offline MockWraithSdk instead of the live testnet client. */
+  /** Use the offline MockObscuraSdk instead of the live testnet client. */
   readonly VITE_USE_MOCK?: string
   /** Enable the experimental in-browser withdraw prover (heavy). */
   readonly VITE_ENABLE_WITHDRAW?: string
   /** Overrides for the live deployment (default to deployments.json / testnet). */
-  readonly VITE_WRAITH_POOL?: string
+  readonly VITE_OBSCURA_POOL?: string
   readonly VITE_NATIVE_SAC?: string
   readonly VITE_USDC_SAC?: string
   readonly VITE_SOROBAN_RPC_URL?: string
@@ -18,12 +18,12 @@ interface ImportMetaEnv {
   readonly VITE_L1_CHAIN_ID?: string
   /** Sepolia execution RPC for viem reads. */
   readonly VITE_SEPOLIA_RPC_URL?: string
-  /** WraithBridgeL1 escrow address on Sepolia (0x…). */
+  /** ObscuraBridgeL1 escrow address on Sepolia (0x…). */
   readonly VITE_L1_BRIDGE_ADDRESS?: string
   /** Soroban EthLightClient contract id (C…). */
   readonly VITE_ETH_LIGHT_CLIENT?: string
-  /** Soroban WraithBridge contract id (C…). */
-  readonly VITE_WRAITH_BRIDGE?: string
+  /** Soroban ObscuraBridge contract id (C…). */
+  readonly VITE_OBSCURA_BRIDGE?: string
   /** Optional relayer base URL for the bridge-in nudge. */
   readonly VITE_RELAYER_URL?: string
   /** Bridge-asset domain separator (BRIDGE_SPEC §3). */

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Deploy Wraith to Stellar testnet: 5 UltraHonk verifiers (one per circuit VK) + the pool.
-# Prereqs: `source ./env.sh`; a funded testnet identity (default: wraith-deployer).
+# Deploy Obscura to Stellar testnet: 5 UltraHonk verifiers (one per circuit VK) + the pool.
+# Prereqs: `source ./env.sh`; a funded testnet identity (default: obscura-deployer).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-IDENT="${IDENT:-wraith-deployer}"
+IDENT="${IDENT:-obscura-deployer}"
 NET="${NET:-testnet}"
 VERIFIER_WASM="vendor/rs-soroban-ultrahonk/target/wasm32v1-none/release/rs_soroban_ultrahonk.wasm"
-POOL_WASM="contracts/target/wasm32v1-none/release/wraith_pool.wasm"
+POOL_WASM="contracts/target/wasm32v1-none/release/obscura_pool.wasm"
 
 stellar keys address "$IDENT" >/dev/null 2>&1 || stellar keys generate "$IDENT" --network "$NET" --fund
 stellar keys fund "$IDENT" --network "$NET" || true
@@ -28,7 +28,7 @@ done
 # (SHARED §4) when binding `withdraw`'s `asset` arg to the proof's public `asset_id`.
 NATIVE=$(stellar contract id asset --asset native --network "$NET")
 
-echo "==> Deploying wraith-pool"
+echo "==> Deploying obscura-pool"
 POOL=$(stellar contract deploy --wasm "$POOL_WASM" --source "$IDENT" --network "$NET" -- \
   --transfer_vf  "${VF[transfer]}" \
   --order_vf     "${VF[place_order]}" \
@@ -43,7 +43,7 @@ cat > deployments.json <<JSON
   "network": "$NET",
   "deployer": "$(stellar keys address "$IDENT")",
   "contracts": {
-    "wraithPool": "$POOL",
+    "obscuraPool": "$POOL",
     "verifiers": {
       "withdraw": "${VF[withdraw]}", "transfer": "${VF[transfer]}",
       "place_order": "${VF[place_order]}", "match_orders": "${VF[match_orders]}",

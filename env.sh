@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Wraith toolchain environment.
+# Obscura toolchain environment.
 # Source this before running nargo / bb / stellar:  `source ./env.sh`
 export PATH="$HOME/.nargo/bin:$HOME/.bb:$HOME/.cargo/bin:/opt/homebrew/bin:$PATH"
 

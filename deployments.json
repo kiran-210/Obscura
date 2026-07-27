@@ -10,9 +10,9 @@
     "stellar-cli": "27.0.0"
   },
   "contracts": {
-    "wraithPool": "CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR",
-    "wraithPoolMemo": {
-      "note": "Memo-enabled pool (2026-07-01): transfer emits an encrypted note payload in TransferEvent for recipient note-discovery. Reuses the verifiers below. Superseded by wraithPoolMatchMemo (2026-07-02).",
+    "obscuraPool": "CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR",
+    "obscuraPoolMemo": {
+      "note": "Memo-enabled pool (2026-07-01): transfer emits an encrypted note payload in TransferEvent for recipient note-discovery. Reuses the verifiers below. Superseded by obscuraPoolMatchMemo (2026-07-02).",
       "contract": "CBVM7B622FSW47FDNUVU7GEU7TNRVRWEVOTNAUWVUOHFMIPSTDL2YVNG",
       "wasmHash": "9f8fc87159dff0c04b18011e1b83c3996ddaa174ae96bdcd7edf5a0dc7973bdc",
       "deployer": "GCMLVYL34B7ZQ5C7D7QUGIBLQ45ACTBJT6QJO4Z36AMJ4OQ6TXSSWVGK"
@@ -34,7 +34,7 @@
     "assets": {
       "native": "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
     },
-    "wraithPoolMatchMemo": {
+    "obscuraPoolMatchMemo": {
       "note": "Match-memo pool (2026-07-02): match_orders now takes leaf_memos + residual_memos and OrderMatchedEvent carries the full leaf set + indices + memos (like transfer), so settlement fills are self-custodially discoverable and the indexer can rebuild the tree through a match. Fresh tree; reuses the verifiers below. This is the pool the frontend now targets.",
       "contract": "CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD",
       "wasmHash": "077e1cafc4a81b85371fa42440b2bcd907098c5d3c8ae730ba3726e2fa775f60",
@@ -55,9 +55,9 @@
   "bridge": {
     "deployedAt": "2026-06-30",
     "lightClient": "CCI47AHPL6RETKEDIUGD3XWSBPOHY3IJAZVKBODCBAKZ6UAP27AQ6WH5",
-    "wraithBridge": "CB6MKCFRU5DYEZ3OMF6OEWNPTHLHBSKSMVOOKOABSBLHCYVTUDGS6AQI",
-    "wraithPoolBridgeEnabled": "CBCFCJQ5SEJJ5PKM64XLL4MENIM4V6QPVOK27GSE55NXKCDGYQ4GUFYV",
-    "wraithBridgeInitialUnwired": "CAY44CMEIJKB2TBVVPFZMEAIDQIROJPB5RIQX5TFQIYCG46WTSWDUXV6",
+    "obscuraBridge": "CB6MKCFRU5DYEZ3OMF6OEWNPTHLHBSKSMVOOKOABSBLHCYVTUDGS6AQI",
+    "obscuraPoolBridgeEnabled": "CBCFCJQ5SEJJ5PKM64XLL4MENIM4V6QPVOK27GSE55NXKCDGYQ4GUFYV",
+    "obscuraBridgeInitialUnwired": "CAY44CMEIJKB2TBVVPFZMEAIDQIROJPB5RIQX5TFQIYCG46WTSWDUXV6",
     "lightClientWasmHash": "5bb07f5d9df9c19941bf9765894169917625b3b4236c3aa97da9d69072786cb3",
     "l1ChainId": 11155111,
     "l1Bridge": "0xcF40c553Cb47A0E3448FF468C8A7ee41769205be",
@@ -94,7 +94,7 @@
       "verifiedLive": true
     },
     "fullE2E": {
-      "description": "Complete trustless L1->L2 loop verified live: lock 0.001 ETH on Sepolia -> light client verifies the sync-committee BLS header on Stellar -> WraithBridge.bridge_in proves the lock via in-contract MPT against the trusted state_root -> shielded note minted into the pool. No trusted relayer.",
+      "description": "Complete trustless L1->L2 loop verified live: lock 0.001 ETH on Sepolia -> light client verifies the sync-committee BLS header on Stellar -> ObscuraBridge.bridge_in proves the lock via in-contract MPT against the trusted state_root -> shielded note minted into the pool. No trusted relayer.",
       "mintedCommitment": "0x1b7ed1ccdbeee9b20e719fb6d2857d7ad04bdbb2c6d1fb113bb5ba1723141963",
       "amountWei": "1000000000000000",
       "l1Lock": {

@@ -3,7 +3,7 @@
  * on-chain/Noir hash for arities 2, 4, and 7. Vectors in poseidon.golden.json were
  * generated from the pinned Noir `poseidon` v0.2.0 lib (test/golden-gen).
  *
- * Do not weaken these assertions: a silent mismatch makes every Wraith note unspendable.
+ * Do not weaken these assertions: a silent mismatch makes every Obscura note unspendable.
  */
 import { describe, expect, it } from "vitest";
 import golden from "./poseidon.golden.json" assert { type: "json" };

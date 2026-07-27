@@ -1,4 +1,4 @@
-# Wraith — Live on Stellar Testnet
+# Obscura — Live on Stellar Testnet
 
 The full system is deployed and the end-to-end private flow is **verified on-chain**. Every claim
 below is backed by a testnet transaction you can open on stellar.expert.
@@ -7,7 +7,7 @@ below is backed by a testnet transaction you can open on stellar.expert.
 
 | Contract | ID |
 |----------|----|
-| **Wraith Pool** | [`CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR`](https://stellar.expert/explorer/testnet/contract/CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR) |
+| **Obscura Pool** | [`CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR`](https://stellar.expert/explorer/testnet/contract/CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR) |
 | Verifier · withdraw | `CBKB3P72CTZAGODIKMQRLUJ2INHQULK5J66N6QQR7GCHGDUFCTUPJ6M3` |
 | Verifier · transfer | `CBXOZGAWSLJEXVMHY6WMBDLAJWDESUPOJV2TEAK6F77IYD7EVRDINS6I` |
 | Verifier · place_order | `CDOEXIJR3OE7527IBTBGYX62TNWBIOHMR7IBMWBMBBR6QA4TIXZSBXEE` |

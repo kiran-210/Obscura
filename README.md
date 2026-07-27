@@ -1,4 +1,4 @@
-# Wraith
+# Obscura
 
 **A full-privacy platform on Stellar.** Bridge assets into a shielded layer, hold private multi-asset balances, send confidential payments, and trade on a zero-knowledge dark pool — all verified on-chain by Soroban smart contracts.
 
@@ -27,7 +27,7 @@ The **Bridge** is a genuine **trust-minimized cross-chain bridge**, not a relaye
 Ethereum Sepolia arrive as **shielded notes** on Stellar, with provenance proven on-chain. The full
 loop is verified live (no trusted relayer):
 
-1. **Lock** 0.001 ETH on Sepolia (`WraithBridgeL1` `0xcF40c553…`).
+1. **Lock** 0.001 ETH on Sepolia (`ObscuraBridgeL1` `0xcF40c553…`).
 2. An **Ethereum sync-committee BLS signature** is verified **natively on Soroban** (`EthLightClient`),
    recording a real Ethereum execution `state_root` on Stellar — the same trust model as Helios, but
    with **no SNARK-wrap** because Stellar has native BLS12-381 (the check is ~30M of the 100M budget,
@@ -43,7 +43,7 @@ compatibility to verify another chain's consensus*. Full evidence + reproduction
 
 | Module | Description |
 |--------|-------------|
-| **Bridge** | Move classic Stellar assets (XLM, USDC, …) in/out of Wraith via the Stellar Asset Contract. |
+| **Bridge** | Move classic Stellar assets (XLM, USDC, …) in/out of Obscura via the Stellar Asset Contract. |
 | **Portfolio** | View and manage shielded, multi-asset balances. |
 | **Pay** | Send private payments — amounts and participants hidden. |
 | **Swap** | Dark-pool DEX — hidden orders, ZK-proven fair matching, atomic settlement. |
@@ -56,7 +56,7 @@ Every state transition out of the shielded layer (withdraw, transfer, place/canc
 
 ```
 circuits/noir/   Noir circuits (withdraw, transfer, place_order, match_orders, cancel_order)
-contracts/       Soroban smart contracts (wraith-pool + UltraHonk verifier integration)
+contracts/       Soroban smart contracts (obscura-pool + UltraHonk verifier integration)
 sdk/             TypeScript client library (notes, proofs, Merkle tree, tx building)
 matcher/         Off-chain order-matching service
 frontend/        React app (Bridge / Portfolio / Pay / Swap)

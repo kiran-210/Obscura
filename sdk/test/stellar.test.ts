@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
-  WraithContract,
+  ObscuraContract,
   addressToField,
   assetIdFromAddress,
   decodePublicInputs,
@@ -63,8 +63,8 @@ describe("address mapping", () => {
   });
 });
 
-describe("WraithContract operation building", () => {
-  const c = new WraithContract({ contractId: CONTRACT_ID });
+describe("ObscuraContract operation building", () => {
+  const c = new ObscuraContract({ contractId: CONTRACT_ID });
 
   it("builds a deposit operation", () => {
     const op = c.depositOp({ from: CONTRACT_ID, asset: CONTRACT_ID, amount: 1000n, commitment: 123n });

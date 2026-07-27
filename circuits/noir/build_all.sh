@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Build, test, prove, and export VKs for all five Wraith circuits.
+# Build, test, prove, and export VKs for all five Obscura circuits.
 #
 # Usage (from anywhere):
 #   source <repo>/env.sh        # put pinned nargo 1.0.0-beta.9 + bb 0.87.0 on PATH

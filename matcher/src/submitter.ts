@@ -1,5 +1,5 @@
 /**
- * Build and submit `wraith-pool.match_orders(proof, public_inputs)` invoke operations via
+ * Build and submit `obscura-pool.match_orders(proof, public_inputs)` invoke operations via
  * the SDK's Soroban module.
  *
  * `match_orders` takes exactly two args (SPEC sec 9.1): the UltraHonk proof bytes and the
@@ -7,10 +7,10 @@
  * deterministic and unit-tested here; the live `submit` path (RPC prepare -> sign -> send)
  * is integration-only and never exercised by the unit tests.
  *
- * The pool contract address is injectable: explicit option > `WRAITH_POOL_CONTRACT` env >
- * a passed-in `deployments.json` object (`contracts.wraithPool`).
+ * The pool contract address is injectable: explicit option > `OBSCURA_POOL_CONTRACT` env >
+ * a passed-in `deployments.json` object (`contracts.obscuraPool`).
  */
-import { WraithContract, encodePublicInputs, isValidProofLength, type ProofData } from "@wraith/sdk";
+import { ObscuraContract, encodePublicInputs, isValidProofLength, type ProofData } from "@obscura/sdk";
 import type { xdr } from "@stellar/stellar-sdk";
 import type { MatchMemos } from "./memo.js";
 
@@ -19,9 +19,9 @@ export interface DeploymentsLike {
   network?: string;
   networkPassphrase?: string;
   contracts?: {
-    wraithPool?: string;
-    wraithPoolMemo?: { contract?: string };
-    wraithPoolMatchMemo?: { contract?: string };
+    obscuraPool?: string;
+    obscuraPoolMemo?: { contract?: string };
+    obscuraPoolMatchMemo?: { contract?: string };
   };
 }
 
@@ -29,28 +29,28 @@ export interface DeploymentsLike {
 export interface ContractIdSources {
   /** Explicit contract id ("C..."). Highest priority. */
   contractId?: string;
-  /** Environment (defaults to `process.env`); reads `WRAITH_POOL_CONTRACT`. */
+  /** Environment (defaults to `process.env`); reads `OBSCURA_POOL_CONTRACT`. */
   env?: Record<string, string | undefined>;
-  /** Parsed `deployments.json`; reads `contracts.wraithPool`. */
+  /** Parsed `deployments.json`; reads `contracts.obscuraPool`. */
   deployments?: DeploymentsLike;
 }
 
 /**
- * Resolve the WraithPool contract id: explicit option, then `WRAITH_POOL_CONTRACT`, then
- * `deployments.contracts.wraithPool`. Throws if none is set.
+ * Resolve the ObscuraPool contract id: explicit option, then `OBSCURA_POOL_CONTRACT`, then
+ * `deployments.contracts.obscuraPool`. Throws if none is set.
  */
 export function resolveContractId(sources: ContractIdSources = {}): string {
   const env = sources.env ?? process.env;
   const c = sources.deployments?.contracts;
   const id =
     sources.contractId ??
-    env.WRAITH_POOL_CONTRACT ??
-    c?.wraithPoolMatchMemo?.contract ?? // the pool the frontend targets (match memos)
-    c?.wraithPoolMemo?.contract ??
-    c?.wraithPool;
+    env.OBSCURA_POOL_CONTRACT ??
+    c?.obscuraPoolMatchMemo?.contract ?? // the pool the frontend targets (match memos)
+    c?.obscuraPoolMemo?.contract ??
+    c?.obscuraPool;
   if (!id) {
     throw new Error(
-      "no WraithPool contract id; set it explicitly, via WRAITH_POOL_CONTRACT, or in deployments.json (contracts.wraithPool)",
+      "no ObscuraPool contract id; set it explicitly, via OBSCURA_POOL_CONTRACT, or in deployments.json (contracts.obscuraPool)",
     );
   }
   return id;
@@ -78,17 +78,17 @@ export interface LiveSubmitOptions {
 
 /**
  * Builds (and, optionally, live-submits) `match_orders` invoke operations against a
- * deployed WraithPool contract using the SDK's {@link WraithContract}.
+ * deployed ObscuraPool contract using the SDK's {@link ObscuraContract}.
  */
 export class MatchSubmitter {
   readonly contractId: string;
   readonly networkPassphrase: string | undefined;
-  private readonly contract: WraithContract;
+  private readonly contract: ObscuraContract;
 
   constructor(config: { contractId: string; networkPassphrase?: string }) {
     this.contractId = config.contractId;
     this.networkPassphrase = config.networkPassphrase;
-    this.contract = new WraithContract({
+    this.contract = new ObscuraContract({
       contractId: config.contractId,
       ...(config.networkPassphrase !== undefined ? { networkPassphrase: config.networkPassphrase } : {}),
     });

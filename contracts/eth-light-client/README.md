@@ -1,6 +1,6 @@
 # `eth-light-client` — Ethereum sync-committee light client on Soroban
 
-The **trustless provenance core** of the Wraith bridge (BRIDGE_SPEC §5). It verifies
+The **trustless provenance core** of the Obscura bridge (BRIDGE_SPEC §5). It verifies
 the Ethereum Altair/Capella light-client protocol *natively* on Stellar using the
 CAP-0059 BLS12-381 host functions (`g1_add`, `hash_to_g2`, `pairing_check`, subgroup
 checks) and SHA-256 — no SNARK wrapping. A finalized Ethereum execution `state_root`
@@ -8,7 +8,7 @@ is accepted **only** if > 2/3 of the seeded 512-member sync committee signed the
 attesting beacon header (a BLS aggregate-signature pairing check), and the finalized
 execution header is proven against it by SSZ Merkle branches.
 
-Standalone crate (own `[workspace]` table) so it never touches the `wraith-pool`
+Standalone crate (own `[workspace]` table) so it never touches the `obscura-pool`
 workspace.
 
 ## Build & test

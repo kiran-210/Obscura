@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 # `contract` (default-on) gates the thin `BridgeMpt` Soroban contract wrapper so
-# the verifier can build to its own WASM. Library consumers (e.g. `wraith-bridge`)
+# the verifier can build to its own WASM. Library consumers (e.g. `obscura-bridge`)
 # set `default-features = false` to link `verify_storage` in-process WITHOUT
 # pulling the contract wrapper into their exported interface.
 default = ["contract"]

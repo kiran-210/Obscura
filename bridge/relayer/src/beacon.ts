@@ -1,5 +1,5 @@
 /**
- * Beacon-chain header feed for the Wraith bridge relayer.
+ * Beacon-chain header feed for the Obscura bridge relayer.
  *
  * Responsibilities:
  *   1. BLS12-381 point **decompression** (the relayer's core off-chain job): the

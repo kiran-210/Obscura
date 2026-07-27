@@ -1,5 +1,5 @@
 /**
- * Wraith data model — notes, orders, Merkle proofs, keys, assets.
+ * Obscura data model — notes, orders, Merkle proofs, keys, assets.
  * Field ordering and semantics follow SHARED.md sec 4-7 exactly.
  */
 import type { Field } from "./poseidon.js";
@@ -11,7 +11,7 @@ export const OrderSide = { Buy: 0, Sell: 1 } as const;
 export type OrderSide = (typeof OrderSide)[keyof typeof OrderSide];
 
 /**
- * A Wraith asset. `assetId` is the in-circuit field identifier:
+ * A Obscura asset. `assetId` is the in-circuit field identifier:
  * `hash2(sacAddressAsField, 0)` for a SAC asset, or `0` for native XLM.
  * SHARED sec 4 / SPEC sec 5.3.
  */

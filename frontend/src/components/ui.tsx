@@ -6,13 +6,13 @@ import type {
   SVGProps,
 } from 'react'
 import { cx } from '../lib/cx'
-import type { AssetCode } from '../lib/wraith-sdk'
+import type { AssetCode } from '../lib/obscura-sdk'
 import { truncateKey } from '../lib/format'
-import { CoinBadge, WraithMark } from './BrandIcons'
+import { CoinBadge, ObscuraMark } from './BrandIcons'
 
-// The wraith mark lives with the other brand glyphs; re-exported so `import
-// { WraithMark } from './ui'` call sites resolve here.
-export { WraithMark } from './BrandIcons'
+// The obscura mark lives with the other brand glyphs; re-exported so `import
+// { ObscuraMark } from './ui'` call sites resolve here.
+export { ObscuraMark } from './BrandIcons'
 
 // --- Icons (inherit currentColor) -------------------------------------------
 
@@ -101,7 +101,7 @@ export function ChartIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 export function Spinner({ className }: { className?: string }) {
-  return <WraithMark className={cx('animate-spin', className)} />
+  return <ObscuraMark className={cx('animate-spin', className)} />
 }
 
 // --- Primitives -------------------------------------------------------------

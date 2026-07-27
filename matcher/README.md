@@ -1,11 +1,11 @@
-# @wraith/matcher
+# @obscura/matcher
 
-Off-chain order-matching service for the **Wraith** ZK dark pool on Stellar.
+Off-chain order-matching service for the **Obscura** ZK dark pool on Stellar.
 
 Traders submit their order details (the order's commitment plus its full preimage) to this
 service. The engine keeps an in-memory book, finds crossable matches with **price-time
 priority**, and for each match assembles the `match_orders` circuit inputs + the 8
-public-input fields (SHARED §7) and submits `wraith-pool.match_orders(proof, public_inputs)`
+public-input fields (SHARED §7) and submits `obscura-pool.match_orders(proof, public_inputs)`
 to the Soroban contract.
 
 The matching math is a byte-for-byte mirror of the `match_orders` Noir circuit
@@ -97,11 +97,11 @@ as 32-byte big-endian Fr → 256 bytes total):
 
 ```bash
 # from matcher/
-pnpm install            # installs the matcher + its @wraith/sdk workspace dep
+pnpm install            # installs the matcher + its @obscura/sdk workspace dep
 pnpm build              # tsup -> dist/
 pnpm test               # vitest (engine + prover + submitter)
 
-# live server (needs the SDK built: pnpm --filter @wraith/sdk build)
+# live server (needs the SDK built: pnpm --filter @obscura/sdk build)
 pnpm start              # http://localhost:8787
 ```
 
@@ -110,31 +110,31 @@ Environment:
 | Var | Default | Meaning |
 |---|---|---|
 | `PORT` | `8787` | HTTP port |
-| `WRAITH_POOL_CONTRACT` | — | pool contract id (else read from `deployments.json` — the match-memo pool wins) |
-| `WRAITH_DEPLOYMENTS` | `../deployments.json` | path to `deployments.json` |
+| `OBSCURA_POOL_CONTRACT` | — | pool contract id (else read from `deployments.json` — the match-memo pool wins) |
+| `OBSCURA_DEPLOYMENTS` | `../deployments.json` | path to `deployments.json` |
 | `MATCH_CIRCUIT` | — | path to compiled `match_orders.json`; set it to prove for real (needs the bb.js CRS at runtime). Unset ⇒ `MockMatchProver`. |
-| `WRAITH_SUBMIT` | `dry-run` | set to `live` to actually submit |
-| `WRAITH_MATCHER_SECRET` | — | funded `S…` key the matcher signs + pays gas with (required when `live`). **Server secret — never ship it to the frontend.** |
-| `WRAITH_RPC_URL` | `https://soroban-testnet.stellar.org` | Soroban RPC used for live submission |
+| `OBSCURA_SUBMIT` | `dry-run` | set to `live` to actually submit |
+| `OBSCURA_MATCHER_SECRET` | — | funded `S…` key the matcher signs + pays gas with (required when `live`). **Server secret — never ship it to the frontend.** |
+| `OBSCURA_RPC_URL` | `https://soroban-testnet.stellar.org` | Soroban RPC used for live submission |
 | `MATCH_INTERVAL_MS` | `2000` | background match-loop interval (0 disables) |
 
 ### Going live (runbook)
 
 ```bash
-pnpm --filter @wraith/sdk build                 # matcher consumes the SDK dist
-pnpm --filter @wraith/matcher build
+pnpm --filter @obscura/sdk build                 # matcher consumes the SDK dist
+pnpm --filter @obscura/matcher build
 
 # 1. compile the match circuit (pinned nargo 1.0.0-beta.9)
 ( cd circuits/noir/match_orders && nargo compile )   # -> target/match_orders.json
 
 # 2. fund a matcher key (testnet) and export its secret
 #    stellar keys generate matcher --network testnet --fund
-#    export WRAITH_MATCHER_SECRET=$(stellar keys show matcher)   # keep this off the frontend
+#    export OBSCURA_MATCHER_SECRET=$(stellar keys show matcher)   # keep this off the frontend
 
 # 3. run live
 MATCH_CIRCUIT=circuits/noir/match_orders/target/match_orders.json \
-WRAITH_SUBMIT=live WRAITH_MATCHER_SECRET=S... \
-pnpm --filter @wraith/matcher start
+OBSCURA_SUBMIT=live OBSCURA_MATCHER_SECRET=S... \
+pnpm --filter @obscura/matcher start
 ```
 
 Traders opt into matching by POSTing their order preimage **plus their `wr1…` receive code** to
@@ -146,14 +146,14 @@ on-chain memos the wallet's indexer discovers (self-custodial — the matcher ca
 | Piece | Status |
 |---|---|
 | Order book + price-time matching (`engine.ts`) | **Real**, fully unit-tested, mirrors the circuit math (cross-checked against the circuit's own `#[test]` golden vectors). |
-| Public-input assembly + commitments (`prover.ts`) | **Real** Poseidon2 commitments via `@wraith/sdk`; validated against the circuit's golden settlement vectors. |
+| Public-input assembly + commitments (`prover.ts`) | **Real** Poseidon2 commitments via `@obscura/sdk`; validated against the circuit's golden settlement vectors. |
 | ZK proof generation | **Integration-only.** `proveMatch` takes an injectable `MatchProver`; wire the SDK's `NoirProver` (compiled `match_orders.json` + bb.js, keccak transcript) for real proofs. The default `MockMatchProver` returns the correct public inputs with a zero-filled proof (the verifier will reject it) so the pipeline runs without a circuit. |
-| Settlement memo sealing (`memo.ts`) | **Real & unit-tested** — seals each fill/refund note + residual order to its owner (shared `@wraith/sdk` sealed box), in the contract's exact insertion order; round-trip verified against owner recovery. |
+| Settlement memo sealing (`memo.ts`) | **Real & unit-tested** — seals each fill/refund note + residual order to its owner (shared `@obscura/sdk` sealed box), in the contract's exact insertion order; round-trip verified against owner recovery. |
 | Soroban encoding (`submitter.ts`) | **Real & unit-tested** — builds the exact `match_orders(proof, public_inputs, leaf_memos, residual_memos)` invoke op. |
 | On-chain submission (`MatchSubmitter.submit`) | **Integration-only** — RPC prepare → sign → send; never exercised by unit tests. Needs a funded source account and a real, verifier-accepted proof. |
 | Note discovery / persistence | Delivery is **on-chain memos** (`OrderMatchedEvent`), discovered by the wallet's indexer — self-custodial, works offline. The book is still in-memory (persistence is a hardening item). |
 
 Addresses (testnet) come from the repo-root `deployments.json` — the matcher targets the
-match-memo pool `contracts.wraithPoolMatchMemo.contract`
+match-memo pool `contracts.obscuraPoolMatchMemo.contract`
 (`CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD`); the match verifier is
 `contracts.verifiers.match_orders` (`CB5HNMW6IIMLQPSAKAC3ADTDHEOTKX6EHYCXNK5EITTFMO33BMD2EKM4`).

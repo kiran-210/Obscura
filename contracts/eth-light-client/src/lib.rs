@@ -3,7 +3,7 @@
 //!
 //! Verifies the Ethereum Altair/Capella(+Electra/Fulu) light-client protocol
 //! natively on Stellar using the CAP-0059 BLS12-381 host functions and SHA-256.
-//! This is the trustless provenance core of the Wraith bridge (BRIDGE_SPEC §5).
+//! This is the trustless provenance core of the Obscura bridge (BRIDGE_SPEC §5).
 //!
 //! ## Trust model (see README for full detail)
 //! - **Trustless path** = [`EthLightClient::update_header`]. A header is accepted

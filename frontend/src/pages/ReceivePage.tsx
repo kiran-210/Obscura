@@ -1,9 +1,9 @@
 import { Act } from '../components/Act'
 import { Receive } from '../components/Receive'
-import { useWraith } from '../hooks/useWraith'
+import { useObscura } from '../hooks/useObscura'
 
 export function ReceivePage() {
-  const { receiveCode } = useWraith()
+  const { receiveCode } = useObscura()
   return (
     <Act
       no="Act 04"

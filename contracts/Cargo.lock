@@ -1876,7 +1876,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "wraith-bridge"
+name = "obscura-bridge"
 version = "0.1.0"
 dependencies = [
  "bridge-mpt",
@@ -1885,7 +1885,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "wraith-pool"
+name = "obscura-pool"
 version = "0.1.0"
 dependencies = [
  "soroban-poseidon",

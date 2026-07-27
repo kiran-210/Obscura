@@ -1,12 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { useWraith } from '../hooks/useWraith'
+import { useObscura } from '../hooks/useObscura'
 import { useReveal } from '../hooks/useReveal'
 import { clearAllNotes } from '../lib/note-store'
 import { formatUsd } from '../lib/format'
 import { cx } from '../lib/cx'
 import { BrandCanvas } from './BrandCanvas'
 import { ConnectWallet } from './ConnectWallet'
-import { EyeGlyph, WraithMark } from './ui'
+import { EyeGlyph, ObscuraMark } from './ui'
 import { ScrambleNumber } from './ScrambleNumber'
 
 const NAV = [
@@ -18,7 +18,7 @@ const NAV = [
 ] as const
 
 function ShieldedChip() {
-  const { balances, loadingBalances } = useWraith()
+  const { balances, loadingBalances } = useObscura()
   const { revealed, toggle } = useReveal()
   if (loadingBalances || balances.length === 0) return null
   const total = balances.reduce((sum, b) => sum + b.usdEstimate, 0)
@@ -43,9 +43,9 @@ function AppNav() {
     <header className="sticky top-0 z-40 border-b border-[#efe9dc]/8 bg-[#1c1710]/40 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3">
         <NavLink to="/app" className="flex items-center gap-2">
-          <WraithMark className="h-5 w-5 text-spectral" />
+          <ObscuraMark className="h-5 w-5 text-spectral" />
           <span className="font-display text-sm font-semibold tracking-tight text-[#f6f1e6]">
-            wraith <sup className="align-super font-mono text-[9px] tracking-[0.2em] text-spectral/60">ZK</sup>
+            obscura <sup className="align-super font-mono text-[9px] tracking-[0.2em] text-spectral/60">ZK</sup>
           </span>
         </NavLink>
         <nav className="hidden items-center gap-5 font-mono text-[10px] uppercase tracking-[0.16em] md:flex">
@@ -71,7 +71,7 @@ function AppNav() {
 }
 
 function AppFooter() {
-  const { refreshBalances } = useWraith()
+  const { refreshBalances } = useObscura()
   async function clearLocalData() {
     const ok = window.confirm(
       'Clear locally-cached shielded notes on this device?\n\nYour wallet stays connected — this only removes the notes/balance stored in this browser. Any on-chain funds tied to older notes stay on-chain.',
@@ -94,7 +94,7 @@ function AppFooter() {
       />
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-5 px-8 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <WraithMark className="h-7 w-7 shrink-0" style={{ filter: 'brightness(0)', opacity: 0.85 }} />
+          <ObscuraMark className="h-7 w-7 shrink-0" style={{ filter: 'brightness(0)', opacity: 0.85 }} />
           <p className="max-w-[18rem] text-[12.5px] font-normal leading-relaxed text-[#1b1610]/70">
             Private money on Stellar. Bridge in, hold, pay and trade — proven on-chain, never revealed.
           </p>
@@ -106,7 +106,7 @@ function AppFooter() {
           <button type="button" onClick={() => void clearLocalData()} className="uppercase transition hover:text-[#1b1610]">
             Clear data
           </button>
-          <span className="text-[#1b1610]/45">© Wraith 2026</span>
+          <span className="text-[#1b1610]/45">© Obscura 2026</span>
         </div>
       </div>
     </footer>

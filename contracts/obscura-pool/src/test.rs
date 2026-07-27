@@ -13,8 +13,8 @@ use soroban_sdk::{
 };
 
 use crate::merkle::TREE_DEPTH;
-use crate::types::{DataKey, WraithError};
-use crate::{WraithPool, WraithPoolClient};
+use crate::types::{DataKey, ObscuraError};
+use crate::{ObscuraPool, ObscuraPoolClient};
 
 const PROOF_BYTES: usize = 456 * 32;
 
@@ -89,7 +89,7 @@ fn pub_inputs(env: &Env, fields: &[BytesN<32>]) -> Bytes {
 
 struct Ctx {
     env: Env,
-    client: WraithPoolClient<'static>,
+    client: ObscuraPoolClient<'static>,
     pool: Address,
     asset: Address,
     native: Address,
@@ -110,7 +110,7 @@ fn setup(ok: bool) -> Ctx {
     // (native -> 0 vs. hash2(addr_field, 0)) are both exercised.
     let native = Address::generate(&env);
     let pool = env.register(
-        WraithPool,
+        ObscuraPool,
         (
             verifier.clone(),
             verifier.clone(),
@@ -120,7 +120,7 @@ fn setup(ok: bool) -> Ctx {
             native.clone(),
         ),
     );
-    let client = WraithPoolClient::new(&env, &pool);
+    let client = ObscuraPoolClient::new(&env, &pool);
 
     let admin = Address::generate(&env);
     let sac = env.register_stellar_asset_contract_v2(admin);
@@ -188,7 +188,7 @@ fn merkle_root_matches_reference() {
     env.cost_estimate().budget().reset_unlimited();
     let v = Address::generate(&env);
     let pool = env.register(
-        WraithPool,
+        ObscuraPool,
         (
             v.clone(),
             v.clone(),
@@ -315,7 +315,7 @@ fn withdraw_double_spend_rejected() {
     c.withdraw(&proof(env), &pi, &recipient, &100i128, &ctx.asset);
     assert_eq!(
         c.try_withdraw(&proof(env), &pi, &recipient, &100i128, &ctx.asset),
-        Err(Ok(WraithError::NullifierUsed))
+        Err(Ok(ObscuraError::NullifierUsed))
     );
 }
 
@@ -330,7 +330,7 @@ fn withdraw_unknown_root_rejected() {
     let pi = pub_inputs(env, &[bad_root, f(env, 1), f(env, 0x99), f(env, 100), f(env, 1)]);
     assert_eq!(
         c.try_withdraw(&proof(env), &pi, &recipient, &100i128, &ctx.asset),
-        Err(Ok(WraithError::UnknownRoot))
+        Err(Ok(ObscuraError::UnknownRoot))
     );
 }
 
@@ -346,7 +346,7 @@ fn withdraw_amount_mismatch_rejected() {
     let pi = pub_inputs(env, &[root, f(env, 1), f(env, 0x99), f(env, 100), f(env, 1)]);
     assert_eq!(
         c.try_withdraw(&proof(env), &pi, &recipient, &900i128, &ctx.asset),
-        Err(Ok(WraithError::AmountMismatch))
+        Err(Ok(ObscuraError::AmountMismatch))
     );
 }
 
@@ -372,7 +372,7 @@ fn withdraw_verification_failure_rejected() {
     );
     assert_eq!(
         c.try_withdraw(&proof(env), &pi, &recipient, &100i128, &ctx.asset),
-        Err(Ok(WraithError::VerificationFailed))
+        Err(Ok(ObscuraError::VerificationFailed))
     );
 }
 
@@ -394,7 +394,7 @@ fn transfer_consumes_two_nullifiers_and_inserts_two_notes() {
     // replay rejected (nullifiers spent)
     assert_eq!(
         c.try_transfer(&proof(env), &pi, &memos),
-        Err(Ok(WraithError::NullifierUsed))
+        Err(Ok(ObscuraError::NullifierUsed))
     );
 }
 
@@ -410,7 +410,7 @@ fn transfer_rejects_duplicate_nullifiers() {
     let memos = soroban_sdk::Vec::<soroban_sdk::Bytes>::new(env);
     assert_eq!(
         c.try_transfer(&proof(env), &pi, &memos),
-        Err(Ok(WraithError::DuplicateNullifier))
+        Err(Ok(ObscuraError::DuplicateNullifier))
     );
 }
 
@@ -459,7 +459,7 @@ fn match_rejects_inactive_order() {
     let residual_memos: SorobanVec<Bytes> = SorobanVec::new(env);
     assert_eq!(
         c.try_match_orders(&proof(env), &pi, &leaf_memos, &residual_memos),
-        Err(Ok(WraithError::OrderNotActive))
+        Err(Ok(ObscuraError::OrderNotActive))
     );
 }
 
@@ -500,7 +500,7 @@ fn match_rejects_memo_count_mismatch() {
     let residual_memos: SorobanVec<Bytes> = SorobanVec::new(env);
     assert_eq!(
         c.try_match_orders(&proof(env), &pi, &bad_leaf_memos, &residual_memos),
-        Err(Ok(WraithError::InvalidPublicInputs))
+        Err(Ok(ObscuraError::InvalidPublicInputs))
     );
 }
 
@@ -516,7 +516,7 @@ fn place_order_unknown_root_rejected() {
     );
     assert_eq!(
         c.try_place_order(&proof(env), &pi),
-        Err(Ok(WraithError::UnknownRoot))
+        Err(Ok(ObscuraError::UnknownRoot))
     );
 }
 
@@ -541,7 +541,7 @@ fn address_to_field_matches_sdk_golden() {
     env.cost_estimate().budget().reset_unlimited();
     let v = Address::generate(&env);
     let pool = env.register(
-        WraithPool,
+        ObscuraPool,
         (
             v.clone(),
             v.clone(),
@@ -551,7 +551,7 @@ fn address_to_field_matches_sdk_golden() {
             v.clone(),
         ),
     );
-    let c = WraithPoolClient::new(&env, &pool);
+    let c = ObscuraPoolClient::new(&env, &pool);
 
     // Contract address whose raw id = 32 × 0x22 (< r ⇒ reduction is a no-op).
     let cid = Address::from_str(&env, "CARCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEIRCEVQO");
@@ -619,7 +619,7 @@ fn withdraw_asset_mismatch_rejected() {
     );
     assert_eq!(
         c.try_withdraw(&proof(env), &pi, &recipient, &100i128, &ctx.asset),
-        Err(Ok(WraithError::AssetMismatch))
+        Err(Ok(ObscuraError::AssetMismatch))
     );
 }
 
@@ -644,7 +644,7 @@ fn withdraw_recipient_mismatch_rejected() {
     );
     assert_eq!(
         c.try_withdraw(&proof(env), &pi, &recipient, &100i128, &ctx.asset),
-        Err(Ok(WraithError::RecipientMismatch))
+        Err(Ok(ObscuraError::RecipientMismatch))
     );
 }
 
@@ -657,7 +657,7 @@ fn rejects_malformed_public_inputs_length() {
     let short = Bytes::from_slice(env, &[0u8; 31]);
     assert_eq!(
         c.try_withdraw(&proof(env), &short, &recipient, &1i128, &ctx.asset),
-        Err(Ok(WraithError::InvalidPublicInputs))
+        Err(Ok(ObscuraError::InvalidPublicInputs))
     );
 }
 
@@ -666,12 +666,12 @@ fn rejects_malformed_public_inputs_length() {
 /// A pool registered with a single stand-in verifier address, plus a fresh
 /// `admin` and `bridge`. Auth is left under the caller's control so each test can
 /// assert the admin/bridge gating precisely.
-fn bridge_setup() -> (Env, WraithPoolClient<'static>, Address, Address, Address) {
+fn bridge_setup() -> (Env, ObscuraPoolClient<'static>, Address, Address, Address) {
     let env = Env::default();
     env.cost_estimate().budget().reset_unlimited();
     let v = Address::generate(&env);
     let pool = env.register(
-        WraithPool,
+        ObscuraPool,
         (
             v.clone(),
             v.clone(),
@@ -681,7 +681,7 @@ fn bridge_setup() -> (Env, WraithPoolClient<'static>, Address, Address, Address)
             v.clone(),
         ),
     );
-    let c = WraithPoolClient::new(&env, &pool);
+    let c = ObscuraPoolClient::new(&env, &pool);
     let admin = Address::generate(&env);
     let bridge = Address::generate(&env);
     (env, c, pool, admin, bridge)
@@ -702,13 +702,13 @@ fn set_bridge_admin_gated_and_only_once() {
     // One-time: a second call is rejected even by the same admin…
     assert_eq!(
         c.try_set_bridge(&admin, &bridge),
-        Err(Ok(WraithError::BridgeAlreadySet))
+        Err(Ok(ObscuraError::BridgeAlreadySet))
     );
     // …and by anyone else.
     let other = Address::generate(&env);
     assert_eq!(
         c.try_set_bridge(&other, &bridge),
-        Err(Ok(WraithError::BridgeAlreadySet))
+        Err(Ok(ObscuraError::BridgeAlreadySet))
     );
 }
 
@@ -724,7 +724,7 @@ fn set_bridge_rejects_wrong_admin() {
     let attacker = Address::generate(&env);
     assert_eq!(
         c.try_set_bridge(&attacker, &bridge),
-        Err(Ok(WraithError::Unauthorized))
+        Err(Ok(ObscuraError::Unauthorized))
     );
     // The established admin can still configure it.
     c.set_bridge(&admin, &bridge);
@@ -738,7 +738,7 @@ fn bridge_mint_requires_bridge_set() {
     // No bridge configured yet -> BridgeNotSet (checked before auth).
     assert_eq!(
         c.try_bridge_mint(&f(&env, 1)),
-        Err(Ok(WraithError::BridgeNotSet))
+        Err(Ok(ObscuraError::BridgeNotSet))
     );
 }
 

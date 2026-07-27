@@ -1,5 +1,5 @@
 /**
- * Off-chain order book + price-time matching for the Wraith dark pool (SPEC sec 7.4 /
+ * Off-chain order book + price-time matching for the Obscura dark pool (SPEC sec 7.4 /
  * 11.2). The matching math here MUST mirror the `match_orders` Noir circuit
  * (`circuits/noir/match_orders/src/main.nr`) exactly, because the on-chain verifier will
  * reject any settlement whose notes don't reproduce the circuit's outputs.
@@ -18,7 +18,7 @@
  * The engine computes amounts only; per-note commitments (which require fresh blindings/
  * nonces) are assembled in `prover.ts`.
  */
-import { PRICE_SCALE } from "@wraith/sdk";
+import { PRICE_SCALE } from "@obscura/sdk";
 import type { Match, Side, SubmittedOrder } from "./types.js";
 
 const TWO_POW_64 = 1n << 64n;

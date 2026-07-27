@@ -16,7 +16,7 @@
     "outDir": "dist",
     "types": ["node"],
     "paths": {
-      "@wraith/sdk": ["../sdk/src/index.ts"]
+      "@obscura/sdk": ["../sdk/src/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "test/**/*.ts"],

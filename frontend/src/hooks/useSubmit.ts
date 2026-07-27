@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { TxResult } from '../lib/wraith-sdk'
+import type { TxResult } from '../lib/obscura-sdk'
 
 export type SubmitStatus = 'idle' | 'pending' | 'done' | 'error'
 

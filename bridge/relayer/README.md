@@ -1,6 +1,6 @@
-# `@wraith/relayer` — Wraith bridge relayer (UNTRUSTED transport)
+# `@obscura/relayer` — Obscura bridge relayer (UNTRUSTED transport)
 
-Off-chain Node/TS service that feeds Ethereum (Sepolia) data to the Wraith
+Off-chain Node/TS service that feeds Ethereum (Sepolia) data to the Obscura
 Soroban contracts. Implements `BRIDGE_SPEC.md` §8. It is **untrusted transport**:
 it holds no authority and every value it relays is re-verified on-chain.
 
@@ -12,7 +12,7 @@ inclusion proof. Every claim is re-checked by a Soroban contract:
 | What the relayer relays | Re-verified on-chain by |
 |---|---|
 | Beacon `LightClientFinalityUpdate` (headers + BLS sig + SSZ branches) | `EthLightClient.update_header`: > 2/3 sync-committee participation, a BLS12-381 **pairing check** (CAP-0059 host fns), and SSZ Merkle branches. The committee (seeded at construction) is the trust root. |
-| `eth_getProof` account + storage MPT proof | `WraithBridge.bridge_in`: an in-contract Merkle-Patricia verifier (Keccak host fn + RLP) walks the proof against the light client's trusted execution `state_root` and re-derives `(token, amount)`. |
+| `eth_getProof` account + storage MPT proof | `ObscuraBridge.bridge_in`: an in-contract Merkle-Patricia verifier (Keccak host fn + RLP) walks the proof against the light client's trusted execution `state_root` and re-derives `(token, amount)`. |
 
 Consequences:
 
@@ -70,8 +70,8 @@ already-RLP-encoded MPT trie node, validated then passed through), and submit
 current trusted head (so the proof is against a root the contract trusts).
 
 ### 3. Out feed — `watch` (governor)
-`l1.ts`. Watch the Soroban `WraithBridge` `bridge_out` authorization event and
-call `WraithBridgeL1.unlock(commitment, to)` with the governor key (viem wallet).
+`l1.ts`. Watch the Soroban `ObscuraBridge` `bridge_out` authorization event and
+call `ObscuraBridgeL1.unlock(commitment, to)` with the governor key (viem wallet).
 
 > The exact `bridge_out` event schema is finalized in the bridge-contract branch.
 > `parseBridgeOutEvent` is written defensively against the documented shape
@@ -92,8 +92,8 @@ happens at deploy time via `stellar contract deploy`.
 | `STELLAR_RPC` | Soroban RPC (submit + simulate) |
 | `STELLAR_NETWORK_PASSPHRASE` | Soroban network passphrase (default: Testnet) |
 | `LIGHT_CLIENT_CONTRACT` | `EthLightClient` contract id (`C…`) |
-| `WRAITH_BRIDGE_CONTRACT` | `WraithBridge` contract id (`C…`) |
-| `BRIDGE_L1_ADDRESS` | `WraithBridgeL1` address (`0x…`) |
+| `OBSCURA_BRIDGE_CONTRACT` | `ObscuraBridge` contract id (`C…`) |
+| `BRIDGE_L1_ADDRESS` | `ObscuraBridgeL1` address (`0x…`) |
 | `STELLAR_SIGNER_SECRET` | Soroban tx signer seed (`S…`) — header / bridge_in |
 | `LIGHT_CLIENT_ADMIN_SECRET` | admin seed (`S…`) for the `post_root` fallback |
 | `GOVERNOR_PRIVATE_KEY` | L1 governor key (`0x…`) — `unlock` settlement |
@@ -106,7 +106,7 @@ Without `--submit` (and without the relevant signer secrets), every command is a
 
 ```bash
 source ./env.sh                 # node 20 / pnpm 10
-pnpm --filter @wraith/relayer build
+pnpm --filter @obscura/relayer build
 
 # dry-run: fetch a finality update and print the update_header op it would submit
 SEPOLIA_BEACON_API=https://ethereum-sepolia-beacon-api.publicnode.com \
@@ -129,14 +129,14 @@ hangs silently.
 
 ## Tests — what's unit-tested vs integration-only
 
-`pnpm --filter @wraith/relayer test` (vitest, **network-free**, 46 tests):
+`pnpm --filter @obscura/relayer test` (vitest, **network-free**, 46 tests):
 
 - **BLS decompression** (`bls.test.ts`): G1 generator → the contract's exact
   `G1_GENERATOR` bytes; G2 generator → 192-byte uncompressed; `compress(decompress(x)) == x`
   round-trips; 512-pubkey committee; length-error cases.
 - **Storage-slot derivation** (`inclusion.test.ts`): `keccak256(abi.encode(commitment, 0))`
   matches the L1 README §3 worked example, and the example commitment is
-  `keccak256("wraith-note-1")`.
+  `keccak256("obscura-note-1")`.
 - **Lock-word decode**: token = low 20 bytes, amount = high 12 bytes, for both the
   ERC20 and native-ETH worked examples.
 - **RLP proof packaging**: valid trie nodes pass through; non-list RLP is rejected;

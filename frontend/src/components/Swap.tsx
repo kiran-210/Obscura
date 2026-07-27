@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useWraith } from '../hooks/useWraith'
+import { useObscura } from '../hooks/useObscura'
 import { useProofFlow } from '../hooks/useProofFlow'
 import { usePriceQuote } from '../hooks/usePriceQuote'
 import { formatAmount, formatPrice, parseAmount } from '../lib/format'
-import type { OpenOrder, OrderSide } from '../lib/wraith-sdk'
+import type { OpenOrder, OrderSide } from '../lib/obscura-sdk'
 import { TOKEN_OPTIONS } from '../lib/tokens'
 import { cx } from '../lib/cx'
 import {
@@ -157,7 +157,7 @@ function OpenOrders({
 }
 
 export function Swap({ embedded }: { embedded?: boolean } = {}) {
-  const { sdk, orders, loadingOrders, refreshOrders, refreshBalances } = useWraith()
+  const { sdk, orders, loadingOrders, refreshOrders, refreshBalances } = useObscura()
   const proof = useProofFlow()
 
   const [side, setSide] = useState<OrderSide>('buy')

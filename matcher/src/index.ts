@@ -1,5 +1,5 @@
 /**
- * `@wraith/matcher` — off-chain order-matching service for the Wraith ZK dark pool.
+ * `@obscura/matcher` — off-chain order-matching service for the Obscura ZK dark pool.
  *
  * Wires together the three building blocks:
  *   - {@link MatchingEngine} (engine.ts): in-memory book + price-time matching that mirrors
@@ -7,7 +7,7 @@
  *   - {@link assembleMatchInputs} / {@link proveMatch} (prover.ts): build the circuit inputs
  *     and the 8 public-input fields (SHARED sec 7) and produce a proof via an injectable
  *     prover (the SDK's `NoirProver` for real proofs; {@link MockMatchProver} for dev);
- *   - {@link MatchSubmitter} (submitter.ts): build / submit `wraith-pool.match_orders`.
+ *   - {@link MatchSubmitter} (submitter.ts): build / submit `obscura-pool.match_orders`.
  *
  * Exposes a tiny HTTP API (node:http):
  *   POST /orders   submit an order (JSON body)         -> 201 { commitment, sequence }
@@ -272,7 +272,7 @@ function readBody(req: IncomingMessage, limitBytes = 1_000_000): Promise<string>
 export async function main(): Promise<void> {
   const port = Number(process.env.PORT ?? 8787);
   const deploymentsPath =
-    process.env.WRAITH_DEPLOYMENTS ?? fileURLToPath(new URL("../../deployments.json", import.meta.url));
+    process.env.OBSCURA_DEPLOYMENTS ?? fileURLToPath(new URL("../../deployments.json", import.meta.url));
   const deployments = loadDeployments(deploymentsPath);
 
   let submitter: MatchSubmitter | null = null;
@@ -284,23 +284,23 @@ export async function main(): Promise<void> {
     // No contract configured: run in log-only matching mode.
   }
 
-  const mode = process.env.WRAITH_SUBMIT === "live" ? "live" : "dry-run";
+  const mode = process.env.OBSCURA_SUBMIT === "live" ? "live" : "dry-run";
 
   // Real proving: point MATCH_CIRCUIT at the compiled match_orders.json (needs the bb.js CRS
   // at runtime). Without it, proving is mocked and submission is a dry-run (safe offline).
   let prover: MatchProver | undefined;
   const circuitPath = process.env.MATCH_CIRCUIT;
   if (circuitPath) {
-    const { NoirProver } = await import("@wraith/sdk");
+    const { NoirProver } = await import("@obscura/sdk");
     prover = new NoirProver(JSON.parse(readFileSync(circuitPath, "utf8")));
   }
 
   // Live submission: needs the funded matcher key (server secret) + an RPC endpoint.
   let live: LiveSubmitOptions | undefined;
   if (mode === "live") {
-    const sourceSecret = process.env.WRAITH_MATCHER_SECRET;
-    if (!sourceSecret) throw new Error("WRAITH_SUBMIT=live requires WRAITH_MATCHER_SECRET (a funded S… key)");
-    live = { rpcUrl: process.env.WRAITH_RPC_URL ?? "https://soroban-testnet.stellar.org", sourceSecret };
+    const sourceSecret = process.env.OBSCURA_MATCHER_SECRET;
+    if (!sourceSecret) throw new Error("OBSCURA_SUBMIT=live requires OBSCURA_MATCHER_SECRET (a funded S… key)");
+    live = { rpcUrl: process.env.OBSCURA_RPC_URL ?? "https://soroban-testnet.stellar.org", sourceSecret };
   }
 
   const service = new MatcherService({

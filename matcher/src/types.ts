@@ -1,5 +1,5 @@
 /**
- * Wraith matcher data model.
+ * Obscura matcher data model.
  *
  * A {@link SubmittedOrder} is what a trader hands the off-chain matching service: the
  * on-chain order commitment plus the full order preimage (side/price/amount/assets/
@@ -41,7 +41,7 @@ export interface SubmittedOrder {
   /** Order nonce (Field) — part of the commitment preimage, supplied so the proof can reopen it. */
   nonce: string;
 
-  /** The trader's Wraith receive code (`wr1…` = ownerKey ‖ encPub). Required by the live intake
+  /** The trader's Obscura receive code (`wr1…` = ownerKey ‖ encPub). Required by the live intake
    *  so the matcher can seal the settlement notes/residual to the owner's viewing key (on-chain
    *  memo delivery). Optional in the type so tests can build orders without one. */
   receiveCode?: string;

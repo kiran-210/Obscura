@@ -122,7 +122,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
                 value falls into the pool and disappears.
               </h3>
               <p className="mt-5 text-[15px] font-medium leading-relaxed text-[#565243]">
-                wraith bridges assets into a shielded layer on Stellar, where value moves behind
+                obscura bridges assets into a shielded layer on Stellar, where value moves behind
                 zero-knowledge proofs verified on-chain by Soroban contracts. no valid proof, no funds move.
               </p>
             </div>

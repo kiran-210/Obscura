@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # End-to-end private round-trip against a live deployment: deposit 1 XLM, then
 # withdraw it with a real ZK proof. Reads contract ids from deployments.json.
-# Prereqs: `source ./env.sh`; `pnpm --filter @wraith/sdk build`; deployments.json present.
+# Prereqs: `source ./env.sh`; `pnpm --filter @obscura/sdk build`; deployments.json present.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-IDENT="${IDENT:-wraith-deployer}"
+IDENT="${IDENT:-obscura-deployer}"
 NET="${NET:-testnet}"
-POOL=$(node -e "console.log(require('./deployments.json').contracts.wraithPool)")
+POOL=$(node -e "console.log(require('./deployments.json').contracts.obscuraPool)")
 NATIVE=$(node -e "console.log(require('./deployments.json').contracts.assets.native)")
 DEPLOYER=$(stellar keys address "$IDENT")
 

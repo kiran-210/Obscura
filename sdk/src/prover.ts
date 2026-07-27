@@ -13,7 +13,7 @@
  * end-to-end pipeline is exercised in prover.test.ts (skipped unless a circuit is
  * provided / compiled inline).
  *
- * bb.js and noir_js are imported dynamically so that simply importing `@wraith/sdk`
+ * bb.js and noir_js are imported dynamically so that simply importing `@obscura/sdk`
  * does not spin up the Barretenberg WASM/threads.
  */
 import { fieldToHex, toField, type Field } from "./poseidon.js";

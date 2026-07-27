@@ -8,7 +8,7 @@ import {
   fieldToHex,
   toField,
   type Field,
-} from "@wraith/sdk";
+} from "@obscura/sdk";
 import { computeMatch } from "../src/engine.js";
 import {
   MATCH_PUBLIC_INPUT_LABELS,

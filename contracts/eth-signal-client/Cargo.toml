@@ -1,5 +1,5 @@
 # Standalone package (own [workspace] table) so it is NOT pulled into the
-# wraith-pool workspace at ../Cargo.toml — same convention as eth-light-client,
+# obscura-pool workspace at ../Cargo.toml — same convention as eth-light-client,
 # which this contract supersedes.
 [package]
 name = "eth-signal-client"

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { useWraith } from '../hooks/useWraith'
+import { useObscura } from '../hooks/useObscura'
 import { useEvmWallet } from '../hooks/useEvmWallet'
 import { useWallet } from '../hooks/useWallet'
 import { addNote, getSpendingKey, loadNotes, markSpent, type StoredNote } from '../lib/note-store'
@@ -12,7 +12,7 @@ import {
   L1_BRIDGE_ADDRESS,
   USE_MOCK,
   USE_MOCK_BRIDGE,
-  WRAITH_BRIDGE_ID,
+  OBSCURA_BRIDGE_ID,
 } from '../lib/config'
 import {
   assetMeta,
@@ -52,20 +52,20 @@ import { CoinBadge } from './BrandIcons'
 // Endpoints & routing
 //
 // The Deposit surface moves value between an external Layer-1 (Stellar or Ethereum)
-// and the Wraith shielded pool, in either direction:
-//   • deposit  = L1 → Wraith   (fund the pool)
-//   • withdraw = Wraith → L1   (redeem back out)
-// The Wraith side is always fixed; the L1 side is a chain picker.
+// and the Obscura shielded pool, in either direction:
+//   • deposit  = L1 → Obscura   (fund the pool)
+//   • withdraw = Obscura → L1   (redeem back out)
+// The Obscura side is always fixed; the L1 side is a chain picker.
 // ---------------------------------------------------------------------------
 
 type L1 = 'stellar' | 'ethereum'
-type Endpoint = L1 | 'wraith'
+type Endpoint = L1 | 'obscura'
 type Direction = 'deposit' | 'withdraw'
 
 const ENDPOINT_META: Record<Endpoint, { label: string; sub: string; icon: string }> = {
   stellar: { label: 'Stellar', sub: 'Testnet', icon: 'stellar' },
   ethereum: { label: 'Ethereum', sub: 'Sepolia', icon: 'ethereum' },
-  wraith: { label: 'Wraith', sub: 'Shielded pool', icon: 'wraith' },
+  obscura: { label: 'Obscura', sub: 'Shielded pool', icon: 'obscura' },
 }
 
 const L1_CHAINS: L1[] = ['stellar', 'ethereum']
@@ -132,7 +132,7 @@ const simulatedHeadBlock = (): bigint =>
 const BRIDGE_CONFIGURED =
   L1_BRIDGE_ADDRESS.toLowerCase() !== '0x0000000000000000000000000000000000000000' &&
   Boolean(ETH_LIGHT_CLIENT_ID) &&
-  Boolean(WRAITH_BRIDGE_ID)
+  Boolean(OBSCURA_BRIDGE_ID)
 
 type FlowStatus = 'idle' | 'running' | 'done' | 'error'
 type StepState = 'pending' | 'active' | 'done' | 'error'
@@ -237,7 +237,7 @@ function ProvenanceStrip() {
   )
 }
 
-/** Static chain identity (used for the fixed Wraith endpoint). */
+/** Static chain identity (used for the fixed Obscura endpoint). */
 function ChainIdentity({ endpoint }: { endpoint: Endpoint }) {
   const m = ENDPOINT_META[endpoint]
   return (
@@ -351,14 +351,14 @@ function TokenChip({ code }: { code: string }) {
 // ---------------------------------------------------------------------------
 
 export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgress?: (p: BridgeProgress) => void } = {}) {
-  const { sdk, refreshBalances, identityReady } = useWraith()
+  const { sdk, refreshBalances, identityReady } = useObscura()
   const evm = useEvmWallet()
   const stellar = useWallet()
 
   const [l1, setL1] = useState<L1>('stellar')
   const [direction, setDirection] = useState<Direction>('deposit')
-  const from: Endpoint = direction === 'deposit' ? l1 : 'wraith'
-  const to: Endpoint = direction === 'deposit' ? 'wraith' : l1
+  const from: Endpoint = direction === 'deposit' ? l1 : 'obscura'
+  const to: Endpoint = direction === 'deposit' ? 'obscura' : l1
 
   const ethToken = BRIDGE_TOKENS.ETH
 
@@ -475,7 +475,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
 
   // --- deposit / withdraw flows --------------------------------------------
 
-  /** Stellar → Wraith: a native single-tx deposit of the selected token (LIVE). */
+  /** Stellar → Obscura: a native single-tx deposit of the selected token (LIVE). */
   async function runStellarIn() {
     setStep(0)
     const { hash } = await sdk.deposit({
@@ -490,7 +490,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     await refreshBalances()
   }
 
-  /** Ethereum → Wraith: lock on L1, wait for the light client, mint on Stellar. */
+  /** Ethereum → Obscura: lock on L1, wait for the light client, mint on Stellar. */
   async function runEthIn() {
     const amountBase = (() => {
       try {
@@ -547,7 +547,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     await creditBridgeNote(note)
   }
 
-  /** Wraith → Stellar: an in-browser ZK withdraw of one note to a classic Stellar account. */
+  /** Obscura → Stellar: an in-browser ZK withdraw of one note to a classic Stellar account. */
   async function runStellarOut() {
     if (!selectedNote) throw new Error('No shielded note to withdraw.')
     setStep(0)
@@ -562,7 +562,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     await refreshBalances()
   }
 
-  /** Wraith → Ethereum: burn the selected note, unlock the L1 backing (preview). */
+  /** Obscura → Ethereum: burn the selected note, unlock the L1 backing (preview). */
   async function runEthOut() {
     if (!USE_MOCK_BRIDGE) {
       throw new Error(
@@ -645,14 +645,14 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
     ) : undefined
 
   const fromIdentity =
-    from === 'wraith' ? (
-      <ChainIdentity endpoint="wraith" />
+    from === 'obscura' ? (
+      <ChainIdentity endpoint="obscura" />
     ) : (
       <ChainSelect value={l1} onChange={selectChain} disabled={running} />
     )
   const toIdentity =
-    to === 'wraith' ? (
-      <ChainIdentity endpoint="wraith" />
+    to === 'obscura' ? (
+      <ChainIdentity endpoint="obscura" />
     ) : (
       <ChainSelect value={l1} onChange={selectChain} disabled={running} />
     )
@@ -671,8 +671,8 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
         <TxLink href={sepoliaTxUrl(l1Hash)} label={truncateKey(l1Hash, 8, 6)} />
       )
     }
-    if (direction === 'deposit' && l1 === 'ethereum' && i === 3 && status === 'done' && WRAITH_BRIDGE_ID && !USE_MOCK_BRIDGE) {
-      return <TxLink href={stellarContractUrl(WRAITH_BRIDGE_ID)} label="WraithBridge" />
+    if (direction === 'deposit' && l1 === 'ethereum' && i === 3 && status === 'done' && OBSCURA_BRIDGE_ID && !USE_MOCK_BRIDGE) {
+      return <TxLink href={stellarContractUrl(OBSCURA_BRIDGE_ID)} label="ObscuraBridge" />
     }
     if (l1 === 'stellar' && stellarHash && !USE_MOCK) {
       const last = steps.length - 1
@@ -688,7 +688,7 @@ export function Bridge({ embedded, onProgress }: { embedded?: boolean; onProgres
       {!embedded && (
         <PageIntro
           title="Deposit"
-          subtitle="Move assets between Layer 1 and the Wraith shielded pool — deposit in, or withdraw back out."
+          subtitle="Move assets between Layer 1 and the Obscura shielded pool — deposit in, or withdraw back out."
         />
       )}
 

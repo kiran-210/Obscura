@@ -1,10 +1,10 @@
 /**
  * Out feed: Stellar `bridge_out` authorization -> L1 settlement.
  *
- * When a user burns a bridged note on Soroban (`WraithBridge.bridge_out`), the
+ * When a user burns a bridged note on Soroban (`ObscuraBridge.bridge_out`), the
  * contract emits an unlock authorization carrying the original L1 `commitment`
  * and the chosen `l1_recipient`. The relayer (running the **governor** key, for
- * the hackathon — BRIDGE_SPEC §4/§8) calls `WraithBridgeL1.unlock(commitment,
+ * the hackathon — BRIDGE_SPEC §4/§8) calls `ObscuraBridgeL1.unlock(commitment,
  * to)` to release the escrow. Future work verifies the Stellar proof on L1 so the
  * settlement is trustless too.
  *
@@ -14,7 +14,7 @@
  * branch (feat/bridge-contract). {@link parseBridgeOutEvent} is written
  * defensively against the documented shape (a `commitment` BytesN<32> + an
  * `l1_recipient` BytesN<20>) and is easy to retarget. The L1 `Locked` event and
- * `unlock`/`locks` ABI are pinned by `bridge/l1/src/WraithBridgeL1.sol`.
+ * `unlock`/`locks` ABI are pinned by `bridge/l1/src/ObscuraBridgeL1.sol`.
  */
 import {
   getAddress,
@@ -26,8 +26,8 @@ import {
   type WalletClient,
 } from "viem";
 
-/** Minimal ABI for the L1 lock contract (matches WraithBridgeL1.sol). */
-export const WRAITH_BRIDGE_L1_ABI = [
+/** Minimal ABI for the L1 lock contract (matches ObscuraBridgeL1.sol). */
+export const OBSCURA_BRIDGE_L1_ABI = [
   {
     type: "function",
     name: "unlock",
@@ -87,14 +87,14 @@ export async function readLock(
 ): Promise<LockRecord> {
   const [token, amount] = (await client.readContract({
     address: bridgeL1,
-    abi: WRAITH_BRIDGE_L1_ABI,
+    abi: OBSCURA_BRIDGE_L1_ABI,
     functionName: "locks",
     args: [commitment],
   })) as [EvmAddress, bigint];
   return { token, amount };
 }
 
-/** Call `WraithBridgeL1.unlock(commitment, to)` with the governor wallet. Returns the tx hash. */
+/** Call `ObscuraBridgeL1.unlock(commitment, to)` with the governor wallet. Returns the tx hash. */
 export async function unlockOnL1(
   wallet: WalletClient,
   bridgeL1: EvmAddress,
@@ -107,7 +107,7 @@ export async function unlockOnL1(
     account,
     chain: wallet.chain ?? null,
     address: bridgeL1,
-    abi: WRAITH_BRIDGE_L1_ABI,
+    abi: OBSCURA_BRIDGE_L1_ABI,
     functionName: "unlock",
     args: [commitment, getAddress(to)],
   });
@@ -184,7 +184,7 @@ export interface BridgeOutEvent {
   l1Recipient: EvmAddress;
 }
 
-/** Topic symbol the WraithBridge `bridge_out` event is published under (configurable). */
+/** Topic symbol the ObscuraBridge `bridge_out` event is published under (configurable). */
 export const BRIDGE_OUT_TOPIC = "bridge_out";
 
 function bytesToHexMaybe(v: unknown): Hex | undefined {
@@ -232,7 +232,7 @@ export function parseBridgeOutEvent(value: unknown): BridgeOutEvent {
 }
 
 /**
- * Poll the Soroban RPC for `WraithBridge` `bridge_out` events and invoke
+ * Poll the Soroban RPC for `ObscuraBridge` `bridge_out` events and invoke
  * `onEvent` for each. Integration-only (needs a reachable Soroban RPC). Returns a
  * stop handle. The event decoding uses {@link parseBridgeOutEvent}.
  */

@@ -14,17 +14,17 @@ use soroban_sdk::{
 
 use crate::types::{
     BridgeMintEvent, DataKey, DepositEvent, OrderCancelledEvent, OrderMatchedEvent,
-    OrderPlacedEvent, TransferEvent, WithdrawEvent, WraithError,
+    OrderPlacedEvent, TransferEvent, WithdrawEvent, ObscuraError,
 };
 
 /// UltraHonk proof length (SHARED.md §6): exactly 456 * 32 bytes.
 const PROOF_BYTES: usize = 456 * 32;
 
 #[contract]
-pub struct WraithPool;
+pub struct ObscuraPool;
 
 #[contractimpl]
-impl WraithPool {
+impl ObscuraPool {
     pub fn __constructor(
         env: Env,
         transfer_vf: Address,
@@ -45,7 +45,7 @@ impl WraithPool {
         s.set(&DataKey::NativeAsset, &native_asset);
     }
 
-    /// Bridge: deposit a classic Stellar asset into Wraith. The amount is public;
+    /// Bridge: deposit a classic Stellar asset into Obscura. The amount is public;
     /// the depositor supplies the note `commitment` (computed off-chain from secret
     /// data) which is inserted as a Merkle leaf. No ZK proof required (SPEC §5.1).
     pub fn deposit(
@@ -57,7 +57,7 @@ impl WraithPool {
     ) -> u32 {
         from.require_auth();
         if amount <= 0 {
-            panic_with_error!(&env, WraithError::InvalidAmount);
+            panic_with_error!(&env, ObscuraError::InvalidAmount);
         }
         let token = token::Client::new(&env, &asset);
         let contract: MuxedAddress = env.current_contract_address().into();
@@ -74,7 +74,7 @@ impl WraithPool {
         index
     }
 
-    /// One-time setter that records the `WraithBridge` contract address allowed to
+    /// One-time setter that records the `ObscuraBridge` contract address allowed to
     /// call `bridge_mint` (BRIDGE_SPEC §3/§7). A setter (rather than a constructor
     /// arg) breaks the deploy-time circular dependency: the bridge needs the pool
     /// address and the pool needs the bridge address.
@@ -83,14 +83,14 @@ impl WraithPool {
     /// established governance admin if one already exists (reused from the binding
     /// work; otherwise this first caller establishes it), and the bridge can only
     /// be set while still unset.
-    pub fn set_bridge(env: Env, admin: Address, bridge: Address) -> Result<(), WraithError> {
+    pub fn set_bridge(env: Env, admin: Address, bridge: Address) -> Result<(), ObscuraError> {
         admin.require_auth();
         let s = env.storage().instance();
         if s.has(&DataKey::Bridge) {
-            return Err(WraithError::BridgeAlreadySet);
+            return Err(ObscuraError::BridgeAlreadySet);
         }
         match s.get::<DataKey, Address>(&DataKey::Admin) {
-            Some(existing) if existing != admin => return Err(WraithError::Unauthorized),
+            Some(existing) if existing != admin => return Err(ObscuraError::Unauthorized),
             None => s.set(&DataKey::Admin, &admin),
             _ => {}
         }
@@ -103,12 +103,12 @@ impl WraithPool {
     /// same Merkle tree as native deposits — so bridged notes interoperate with
     /// transfer/swap — and returns the leaf index. No SAC transfer: the backing
     /// lives in the Ethereum L1 lock, not in this pool.
-    pub fn bridge_mint(env: Env, commitment: BytesN<32>) -> Result<u32, WraithError> {
+    pub fn bridge_mint(env: Env, commitment: BytesN<32>) -> Result<u32, ObscuraError> {
         let bridge: Address = env
             .storage()
             .instance()
             .get(&DataKey::Bridge)
-            .ok_or(WraithError::BridgeNotSet)?;
+            .ok_or(ObscuraError::BridgeNotSet)?;
         bridge.require_auth();
 
         let index = merkle::insert(&env, &commitment);
@@ -121,7 +121,7 @@ impl WraithPool {
         env.storage().instance().get(&DataKey::Bridge)
     }
 
-    /// Bridge: withdraw from Wraith to a classic Stellar account.
+    /// Bridge: withdraw from Obscura to a classic Stellar account.
     ///
     /// SHARED.md §7 — `withdraw` public inputs, in declared order:
     ///   [0] merkle_root  [1] nullifier  [2] recipient_hash  [3] amount  [4] asset_id
@@ -132,7 +132,7 @@ impl WraithPool {
         recipient: Address,
         amount: i128,
         asset: Address,
-    ) -> Result<(), WraithError> {
+    ) -> Result<(), ObscuraError> {
         let f = parse_fields(&env, &public_inputs, 5)?;
         let root = f.get(0).unwrap();
         let nullifier = f.get(1).unwrap();
@@ -141,27 +141,27 @@ impl WraithPool {
         let pub_asset_id = f.get(4).unwrap();
 
         if !merkle::is_known_root(&env, &root) {
-            return Err(WraithError::UnknownRoot);
+            return Err(ObscuraError::UnknownRoot);
         }
         if is_spent(&env, &nullifier) {
-            return Err(WraithError::NullifierUsed);
+            return Err(ObscuraError::NullifierUsed);
         }
         if amount <= 0 {
-            return Err(WraithError::InvalidAmount);
+            return Err(ObscuraError::InvalidAmount);
         }
         // Bind the SAC transfer amount to the amount proven public in the circuit,
         // so a valid proof cannot be replayed against a different transfer amount.
         if pub_amount.to_array() != amount_to_field(amount) {
-            return Err(WraithError::AmountMismatch);
+            return Err(ObscuraError::AmountMismatch);
         }
         // Bind the recipient/asset Addresses to the values the ZK proof commits to.
         // Without this a valid proof for one asset could draw a different pool-held
         // asset, or be redirected to a different recipient (SHARED §4/§7).
         if recipient_hash_of(&env, &recipient) != pub_recipient_hash {
-            return Err(WraithError::RecipientMismatch);
+            return Err(ObscuraError::RecipientMismatch);
         }
         if asset_id_of(&env, &asset) != pub_asset_id {
-            return Err(WraithError::AssetMismatch);
+            return Err(ObscuraError::AssetMismatch);
         }
         verify(&env, DataKey::WithdrawVf, &public_inputs, &proof)?;
 
@@ -196,7 +196,7 @@ impl WraithPool {
         proof: Bytes,
         public_inputs: Bytes,
         memos: Vec<Bytes>,
-    ) -> Result<(), WraithError> {
+    ) -> Result<(), ObscuraError> {
         let f = parse_fields(&env, &public_inputs, 6)?;
         let root = f.get(0).unwrap();
         let nullifier_0 = f.get(1).unwrap();
@@ -205,13 +205,13 @@ impl WraithPool {
         let out_commitment_1 = f.get(4).unwrap();
 
         if !merkle::is_known_root(&env, &root) {
-            return Err(WraithError::UnknownRoot);
+            return Err(ObscuraError::UnknownRoot);
         }
         if nullifier_0 == nullifier_1 {
-            return Err(WraithError::DuplicateNullifier);
+            return Err(ObscuraError::DuplicateNullifier);
         }
         if is_spent(&env, &nullifier_0) || is_spent(&env, &nullifier_1) {
-            return Err(WraithError::NullifierUsed);
+            return Err(ObscuraError::NullifierUsed);
         }
         verify(&env, DataKey::TransferVf, &public_inputs, &proof)?;
 
@@ -245,7 +245,7 @@ impl WraithPool {
     /// SHARED.md §7 — `place_order` public inputs, in declared order:
     ///   [0] merkle_root [1] nullifier [2] order_commitment
     ///   [3] change_commitment [4] locked_asset_id
-    pub fn place_order(env: Env, proof: Bytes, public_inputs: Bytes) -> Result<(), WraithError> {
+    pub fn place_order(env: Env, proof: Bytes, public_inputs: Bytes) -> Result<(), ObscuraError> {
         let f = parse_fields(&env, &public_inputs, 5)?;
         let root = f.get(0).unwrap();
         let nullifier = f.get(1).unwrap();
@@ -253,13 +253,13 @@ impl WraithPool {
         let change_commitment = f.get(3).unwrap();
 
         if !merkle::is_known_root(&env, &root) {
-            return Err(WraithError::UnknownRoot);
+            return Err(ObscuraError::UnknownRoot);
         }
         if is_spent(&env, &nullifier) {
-            return Err(WraithError::NullifierUsed);
+            return Err(ObscuraError::NullifierUsed);
         }
         if order_active(&env, &order_commitment) {
-            return Err(WraithError::DuplicateOrder);
+            return Err(ObscuraError::DuplicateOrder);
         }
         verify(&env, DataKey::OrderVf, &public_inputs, &proof)?;
 
@@ -297,7 +297,7 @@ impl WraithPool {
         public_inputs: Bytes,
         leaf_memos: Vec<Bytes>,
         residual_memos: Vec<Bytes>,
-    ) -> Result<(), WraithError> {
+    ) -> Result<(), ObscuraError> {
         let f = parse_fields(&env, &public_inputs, 8)?;
         let order_a = f.get(0).unwrap();
         let order_b = f.get(1).unwrap();
@@ -309,10 +309,10 @@ impl WraithPool {
         let refund_b = f.get(7).unwrap();
 
         if order_a == order_b {
-            return Err(WraithError::DuplicateOrder);
+            return Err(ObscuraError::DuplicateOrder);
         }
         if !order_active(&env, &order_a) || !order_active(&env, &order_b) {
-            return Err(WraithError::OrderNotActive);
+            return Err(ObscuraError::OrderNotActive);
         }
 
         // Bind the memo lists to the actual outputs (2 fills + non-zero refunds; non-zero
@@ -321,7 +321,7 @@ impl WraithPool {
             2 + (!is_zero(&refund_a)) as u32 + (!is_zero(&refund_b)) as u32;
         let expected_residuals = (!is_zero(&residual_a)) as u32 + (!is_zero(&residual_b)) as u32;
         if leaf_memos.len() != expected_leaves || residual_memos.len() != expected_residuals {
-            return Err(WraithError::InvalidPublicInputs);
+            return Err(ObscuraError::InvalidPublicInputs);
         }
 
         verify(&env, DataKey::MatchVf, &public_inputs, &proof)?;
@@ -368,13 +368,13 @@ impl WraithPool {
     ///
     /// SHARED.md §7 — `cancel_order` public inputs, in declared order:
     ///   [0] order_commitment [1] refund_commitment [2] refund_asset_id
-    pub fn cancel_order(env: Env, proof: Bytes, public_inputs: Bytes) -> Result<(), WraithError> {
+    pub fn cancel_order(env: Env, proof: Bytes, public_inputs: Bytes) -> Result<(), ObscuraError> {
         let f = parse_fields(&env, &public_inputs, 3)?;
         let order_commitment = f.get(0).unwrap();
         let refund_commitment = f.get(1).unwrap();
 
         if !order_active(&env, &order_commitment) {
-            return Err(WraithError::OrderNotActive);
+            return Err(ObscuraError::OrderNotActive);
         }
         verify(&env, DataKey::CancelVf, &public_inputs, &proof)?;
 
@@ -431,21 +431,21 @@ fn verify(
     vf_key: DataKey,
     public_inputs: &Bytes,
     proof: &Bytes,
-) -> Result<(), WraithError> {
+) -> Result<(), ObscuraError> {
     if proof.len() as usize != PROOF_BYTES {
-        return Err(WraithError::VerificationFailed);
+        return Err(ObscuraError::VerificationFailed);
     }
     let verifier: Address = env
         .storage()
         .instance()
         .get(&vf_key)
-        .ok_or(WraithError::VerifierNotSet)?;
+        .ok_or(ObscuraError::VerifierNotSet)?;
     let mut args: Vec<Val> = Vec::new(env);
     args.push_back(public_inputs.into_val(env));
     args.push_back(proof.into_val(env));
     env.try_invoke_contract::<(), InvokeError>(&verifier, &Symbol::new(env, "verify_proof"), args)
-        .map_err(|_| WraithError::VerificationFailed)?
-        .map_err(|_| WraithError::VerificationFailed)
+        .map_err(|_| ObscuraError::VerificationFailed)?
+        .map_err(|_| ObscuraError::VerificationFailed)
 }
 
 /// Parse `public_inputs` as `n` consecutive 32-byte big-endian field elements.
@@ -453,9 +453,9 @@ fn parse_fields(
     env: &Env,
     public_inputs: &Bytes,
     n: u32,
-) -> Result<Vec<BytesN<32>>, WraithError> {
+) -> Result<Vec<BytesN<32>>, ObscuraError> {
     if public_inputs.len() != n * 32 {
-        return Err(WraithError::InvalidPublicInputs);
+        return Err(ObscuraError::InvalidPublicInputs);
     }
     let mut out = Vec::new(env);
     let mut i = 0u32;

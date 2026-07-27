@@ -1,7 +1,7 @@
 /**
  * The app-wide client indexer, wired to the note store's cache.
  *
- * Holds one live {@link WraithIndexer} per shielded identity. On start it hydrates the
+ * Holds one live {@link ObscuraIndexer} per shielded identity. On start it hydrates the
  * in-memory Merkle tree from the per-identity leaf cache and resumes from the persisted
  * cursor; each {@link syncIndexer} pass pulls new events, updates owned notes + spent
  * flags (via the note store), and persists the extended leaf set + cursor.
@@ -11,12 +11,12 @@
  * and the standalone note-scanner.
  */
 import { rpc } from '@stellar/stellar-sdk'
-import { fieldToHex, type Field } from '@wraith/sdk'
+import { fieldToHex, type Field } from '@obscura/sdk'
 import { POOL_DEPLOY_LEDGER, SOROBAN_RPC_URL } from './config'
-import { WraithIndexer, identityFromSpendingKey, type SyncStats } from './indexer'
+import { ObscuraIndexer, identityFromSpendingKey, type SyncStats } from './indexer'
 import { loadIndexCursor, loadLeaves, loadNotes, saveIndexCursor, saveLeaves } from './note-store'
 
-let active: { key: string; indexer: WraithIndexer } | null = null
+let active: { key: string; indexer: ObscuraIndexer } | null = null
 // Serialize sync passes so an interval tick can't overlap an in-flight deposit-triggered sync.
 let inflight: Promise<SyncStats | null> | null = null
 
@@ -28,17 +28,17 @@ function server(): rpc.Server {
  * Create (or reuse) the indexer for `spendingKey`, hydrated from the per-identity cache.
  * The note-store active address must already be set (so the cache is correctly namespaced).
  */
-export function startIndexer(spendingKey: Field): WraithIndexer {
+export function startIndexer(spendingKey: Field): ObscuraIndexer {
   const key = fieldToHex(spendingKey)
   if (active?.key === key) return active.indexer
-  const indexer = new WraithIndexer(identityFromSpendingKey(spendingKey))
+  const indexer = new ObscuraIndexer(identityFromSpendingKey(spendingKey))
   indexer.hydrate(loadLeaves(), loadIndexCursor(), loadNotes())
   active = { key, indexer }
   return indexer
 }
 
 /** The live indexer, or null before an identity is established. */
-export function getIndexer(): WraithIndexer | null {
+export function getIndexer(): ObscuraIndexer | null {
   return active?.indexer ?? null
 }
 

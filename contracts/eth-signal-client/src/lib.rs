@@ -1,7 +1,7 @@
 #![no_std]
 //! # EthSignalClient — Ethereum finality light client on Soroban via Boundless "The Signal"
 //!
-//! Trustless provenance core of the Wraith bridge, **replacing** the native BLS
+//! Trustless provenance core of the Obscura bridge, **replacing** the native BLS
 //! sync-committee client (`eth-light-client`). Instead of verifying Ethereum
 //! consensus on-chain ourselves, we verify a **Boundless "The Signal"** RISC Zero
 //! zkVM proof of Casper-FFG finality (the consensus check runs inside the zkVM;
@@ -14,7 +14,7 @@
 //! * [`Self::prove_execution`] — link the Signal-proven finalized **beacon block
 //!   root** to the Ethereum **execution** `state_root` via an `execution_branch`
 //!   SSZ Merkle proof, and expose it as `state_root_at(block_number)` — the exact
-//!   interface `WraithBridge.bridge_in` already calls (so the bridge is unchanged).
+//!   interface `ObscuraBridge.bridge_in` already calls (so the bridge is unchanged).
 //!
 //! ## Two-step trust flow
 //! 1. [`Self::receive`] `(seal, journal)` — verify the Signal proof, require the
@@ -214,7 +214,7 @@ impl EthSignalClient {
         Self::record_root(&env, block_number, &state_root, true);
     }
 
-    // --- read-only interface (consumed by WraithBridge / relayer / frontend) ---
+    // --- read-only interface (consumed by ObscuraBridge / relayer / frontend) ---
 
     /// The proven execution state root at a block — the value `bridge_in` reads.
     /// Identical signature to the superseded `eth-light-client`, so the bridge is
@@ -283,7 +283,7 @@ impl EthSignalClient {
 
 // ---------------------------------------------------------------------------
 // Cross-contract call to the RISC Zero verifier (manual invoke, like
-// WraithBridge — avoids depending on the sdk-25 `groth16-verifier` crate).
+// ObscuraBridge — avoids depending on the sdk-25 `groth16-verifier` crate).
 // ---------------------------------------------------------------------------
 
 /// `verifier.verify(seal, image_id, journal_digest)` — panics/returns-Err on an

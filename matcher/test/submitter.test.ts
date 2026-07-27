@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PROOF_BYTES, decodePublicInputs, type Field, type ProofData } from "@wraith/sdk";
+import { PROOF_BYTES, decodePublicInputs, type Field, type ProofData } from "@obscura/sdk";
 import { xdr } from "@stellar/stellar-sdk";
 import { MatchSubmitter, resolveContractId } from "../src/submitter.js";
 
@@ -17,19 +17,19 @@ describe("resolveContractId — precedence", () => {
     expect(
       resolveContractId({
         contractId: "C_EXPLICIT",
-        env: { WRAITH_POOL_CONTRACT: "C_ENV" },
-        deployments: { contracts: { wraithPool: "C_DEP" } },
+        env: { OBSCURA_POOL_CONTRACT: "C_ENV" },
+        deployments: { contracts: { obscuraPool: "C_DEP" } },
       }),
     ).toBe("C_EXPLICIT");
 
     expect(
       resolveContractId({
-        env: { WRAITH_POOL_CONTRACT: "C_ENV" },
-        deployments: { contracts: { wraithPool: "C_DEP" } },
+        env: { OBSCURA_POOL_CONTRACT: "C_ENV" },
+        deployments: { contracts: { obscuraPool: "C_DEP" } },
       }),
     ).toBe("C_ENV");
 
-    expect(resolveContractId({ env: {}, deployments: { contracts: { wraithPool: "C_DEP" } } })).toBe("C_DEP");
+    expect(resolveContractId({ env: {}, deployments: { contracts: { obscuraPool: "C_DEP" } } })).toBe("C_DEP");
   });
 
   it("throws when nothing is configured", () => {
@@ -88,7 +88,7 @@ describe("MatchSubmitter.fromSources", () => {
     const sub = MatchSubmitter.fromSources({
       deployments: {
         networkPassphrase: "Test SDF Network ; September 2015",
-        contracts: { wraithPool: POOL },
+        contracts: { obscuraPool: POOL },
       },
     });
     expect(sub.contractId).toBe(POOL);

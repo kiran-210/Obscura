@@ -1,14 +1,14 @@
-// MOCK — replace with @wraith/sdk
+// MOCK — replace with @obscura/sdk
 //
-// This module is the SINGLE seam between the Wraith UI and the protocol SDK.
-// Every component talks ONLY to the `WraithSdk` interface below, so swapping in
-// the real `@wraith/sdk` (which exposes the same method names — deposit, withdraw,
+// This module is the SINGLE seam between the Obscura UI and the protocol SDK.
+// Every component talks ONLY to the `ObscuraSdk` interface below, so swapping in
+// the real `@obscura/sdk` (which exposes the same method names — deposit, withdraw,
 // transfer, placeOrder, cancelOrder, getShieldedBalances, getOpenOrders) is a
-// one-file change: make `createWraithSdk()` return the real client instead of
-// `MockWraithSdk`. No UI code imports anything else from the SDK layer.
+// one-file change: make `createObscuraSdk()` return the real client instead of
+// `MockObscuraSdk`. No UI code imports anything else from the SDK layer.
 
 import { formatAmount, parseAmount } from './format'
-import { RealWraithSdk } from './real-sdk'
+import { RealObscuraSdk } from './real-sdk'
 
 /**
  * A shielded asset's display code. The protocol is asset-agnostic — any Stellar Asset
@@ -67,7 +67,7 @@ export interface WithdrawParams {
 }
 
 export interface TransferParams {
-  /** Recipient's Wraith owner key, shared out-of-band. */
+  /** Recipient's Obscura owner key, shared out-of-band. */
   recipientKey: string
   asset: AssetCode
   amount: string
@@ -86,10 +86,10 @@ export interface PlaceOrderResult extends TxResult {
 }
 
 /**
- * The Wraith client surface. The real `@wraith/sdk` exposes these exact method
+ * The Obscura client surface. The real `@obscura/sdk` exposes these exact method
  * names; the UI is written against this interface only.
  */
-export interface WraithSdk {
+export interface ObscuraSdk {
   deposit(params: DepositParams): Promise<TxResult>
   withdraw(params: WithdrawParams): Promise<TxResult>
   transfer(params: TransferParams): Promise<TxResult>
@@ -127,7 +127,7 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100
 }
 
-class MockWraithSdk implements WraithSdk {
+class MockObscuraSdk implements ObscuraSdk {
   private balances: Record<AssetCode, number> = { XLM: 1240.5, USDC: 3500, bETH: 0, bUSDC: 0 }
 
   private orders: OpenOrder[] = [
@@ -243,19 +243,19 @@ class MockWraithSdk implements WraithSdk {
   }
 }
 
-let singleton: WraithSdk | null = null
+let singleton: ObscuraSdk | null = null
 
 /**
- * Returns the app-wide Wraith client.
+ * Returns the app-wide Obscura client.
  *
- * By default this is the LIVE `RealWraithSdk`, wired to the deployed WraithPool on
+ * By default this is the LIVE `RealObscuraSdk`, wired to the deployed ObscuraPool on
  * Stellar Testnet (real deposit + portfolio; experimental withdraw). Set
- * `VITE_USE_MOCK=true` to fall back to the offline `MockWraithSdk` for UI dev with no
+ * `VITE_USE_MOCK=true` to fall back to the offline `MockObscuraSdk` for UI dev with no
  * wallet / network. Nothing else in the UI changes between the two.
  */
-export function createWraithSdk(): WraithSdk {
+export function createObscuraSdk(): ObscuraSdk {
   if (!singleton) {
-    singleton = import.meta.env.VITE_USE_MOCK === 'true' ? new MockWraithSdk() : new RealWraithSdk()
+    singleton = import.meta.env.VITE_USE_MOCK === 'true' ? new MockObscuraSdk() : new RealObscuraSdk()
   }
   return singleton
 }

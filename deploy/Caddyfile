@@ -1,4 +1,4 @@
-# TLS termination + CORS in front of the Wraith matcher.
+# TLS termination + CORS in front of the Obscura matcher.
 #
 # {$MATCHER_DOMAIN} must have a DNS A/AAAA record pointing to this host and ports
 # 80+443 reachable, so Caddy can issue and renew a Let's Encrypt certificate.

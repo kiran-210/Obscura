@@ -1,4 +1,4 @@
-/** Formatting and validation helpers for the Wraith UI. */
+/** Formatting and validation helpers for the Obscura UI. */
 
 /** Shorten a long key/hash to `ABCDE…WXYZ`. */
 export function truncateKey(key: string, lead = 5, tail = 4): string {

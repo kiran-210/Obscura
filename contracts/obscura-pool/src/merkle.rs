@@ -1,7 +1,7 @@
 use soroban_poseidon::{poseidon2_hash, Field};
 use soroban_sdk::{crypto::BnScalar, panic_with_error, Bytes, BytesN, Env, Vec, U256};
 
-use crate::types::{DataKey, WraithError};
+use crate::types::{DataKey, ObscuraError};
 
 pub const TREE_DEPTH: u32 = 20;
 pub const MAX_LEAVES: u32 = 1u32 << TREE_DEPTH;
@@ -52,7 +52,7 @@ pub fn insert(env: &Env, leaf: &BytesN<32>) -> u32 {
         .get(&DataKey::NextIndex)
         .unwrap_or(0u32);
     if next_index >= MAX_LEAVES {
-        panic_with_error!(env, WraithError::TreeFull);
+        panic_with_error!(env, ObscuraError::TreeFull);
     }
     let idx = next_index;
     let mut cur = leaf.clone();

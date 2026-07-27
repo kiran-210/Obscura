@@ -4,7 +4,7 @@
  * The circuit takes BOTH orders' full plaintext as its private witness and enforces the
  * settlement; the matcher must compute the exact same fills + settlement commitments off-chain
  * to build the proof. This module is that computation — kept byte-identical to
- * `circuits/noir/match_orders` + `wraith_lib` (midpoint exec price, min fill, floor quote,
+ * `circuits/noir/match_orders` + `obscura_lib` (midpoint exec price, min fill, floor quote,
  * residual/refund policy) and golden-tested against the circuit's own `#[test]` vectors.
  *
  * Trading model (fixed by the deployed circuit):
@@ -23,7 +23,7 @@ import { computeOrderCommitment } from "./order.js";
 import { OrderSide, type Order } from "./types.js";
 import type { Field } from "./poseidon.js";
 
-// wraith_lib integer helpers (all operands are range-checked < 2^64 in-circuit).
+// obscura_lib integer helpers (all operands are range-checked < 2^64 in-circuit).
 const midpoint = (a: bigint, b: bigint): bigint => (a + b) / 2n;
 const min64 = (a: bigint, b: bigint): bigint => (a < b ? a : b);
 const mulDivPrice = (a: bigint, b: bigint): bigint => (a * b) / PRICE_SCALE;

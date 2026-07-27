@@ -1,5 +1,5 @@
 # Standalone package (own [workspace] table) so it is NOT pulled into the
-# wraith-pool workspace at ../Cargo.toml and we never touch that crate.
+# obscura-pool workspace at ../Cargo.toml and we never touch that crate.
 [package]
 name = "eth-light-client"
 version = "0.1.0"

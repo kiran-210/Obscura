@@ -2,19 +2,19 @@
  * bridge.ts — the typed client for the cross-chain Bridge tab (Ethereum Sepolia <->
  * Stellar). This is the single seam between the Bridge UI and the two chains:
  *
- *   • EVM side  — `WraithBridgeL1.lock` via wagmi/viem (MetaMask). Native ETH locks
+ *   • EVM side  — `ObscuraBridgeL1.lock` via wagmi/viem (MetaMask). Native ETH locks
  *                 `value = amount`; ERC20 locks `approve` + `lock` (BRIDGE_SPEC §4).
- *   • Stellar   — reads the `EthLightClient` trusted head and the `WraithBridge`
+ *   • Stellar   — reads the `EthLightClient` trusted head and the `ObscuraBridge`
  *                 mint state over Soroban RPC; the relayer (untrusted transport)
  *                 proves the L1 lock and calls `bridge_in`, which mints a shielded
  *                 note (BRIDGE_SPEC §7/§8).
  *
- * A "bridge in" creates a Wraith note with a *bridged* `asset_id` (BRIDGE_SPEC §3),
+ * A "bridge in" creates a Obscura note with a *bridged* `asset_id` (BRIDGE_SPEC §3),
  * locks the backing on L1, then waits for the Stellar mint. Everything here is
  * structured to run in MOCK mode today and go LIVE by filling the `VITE_BRIDGE_*`
  * config — see `config.ts`.
  */
-import { buildTransaction, createNote, fieldToHex, type BalanceNote, type Field } from '@wraith/sdk'
+import { buildTransaction, createNote, fieldToHex, type BalanceNote, type Field } from '@obscura/sdk'
 import { Account, Contract, rpc, scValToNative, xdr } from '@stellar/stellar-sdk'
 import type { Address, Hex, PublicClient, WalletClient } from 'viem'
 import { sepolia } from 'wagmi/chains'
@@ -27,9 +27,9 @@ import {
   RELAYER_URL,
   SOROBAN_RPC_URL,
   USDC_L1_ADDRESS,
-  WRAITH_BRIDGE_ID,
+  OBSCURA_BRIDGE_ID,
 } from './config'
-import type { AssetCode } from './wraith-sdk'
+import type { AssetCode } from './obscura-sdk'
 
 // ---------------------------------------------------------------------------
 // Token registry
@@ -46,7 +46,7 @@ export interface BridgeToken {
   decimals: number
   /** Whether this token is native ETH (locked with `value`) or an ERC20 (approve+lock). */
   native: boolean
-  /** The Wraith shielded `AssetCode` this bridges into. */
+  /** The Obscura shielded `AssetCode` this bridges into. */
   assetCode: AssetCode
 }
 
@@ -75,10 +75,10 @@ export const BRIDGE_TOKEN_OPTIONS = Object.values(BRIDGE_TOKENS).map((t) => ({
 }))
 
 // ---------------------------------------------------------------------------
-// ABIs (inlined — matches bridge/l1/src/WraithBridgeL1.sol)
+// ABIs (inlined — matches bridge/l1/src/ObscuraBridgeL1.sol)
 // ---------------------------------------------------------------------------
 
-export const WRAITH_BRIDGE_L1_ABI = [
+export const OBSCURA_BRIDGE_L1_ABI = [
   {
     type: 'function',
     name: 'lock',
@@ -152,7 +152,7 @@ function l1Configured(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Create the Wraith note that backs a bridge-in. The note's `asset_id` is the bridged
+ * Create the Obscura note that backs a bridge-in. The note's `asset_id` is the bridged
  * id (derived per BRIDGE_SPEC §3, see `config.deriveBridgedAssetId`), so the minted
  * note interoperates with the pool's transfer/swap but redeems only back to Ethereum.
  */
@@ -186,7 +186,7 @@ export interface LockResult {
 }
 
 /**
- * Write `WraithBridgeL1.lock(commitment, token, amount)` on Sepolia.
+ * Write `ObscuraBridgeL1.lock(commitment, token, amount)` on Sepolia.
  * Native ETH: `value = amount`. ERC20: `approve` (if needed) then `lock(value = 0)`.
  * Waits for the lock receipt and returns its block number.
  */
@@ -200,7 +200,7 @@ export async function lockOnL1(params: {
 }): Promise<LockResult> {
   if (!l1Configured()) {
     throw new Error(
-      'L1 bridge address is not configured. Set VITE_L1_BRIDGE_ADDRESS to the deployed WraithBridgeL1, or use mock mode (VITE_USE_MOCK).',
+      'L1 bridge address is not configured. Set VITE_L1_BRIDGE_ADDRESS to the deployed ObscuraBridgeL1, or use mock mode (VITE_USE_MOCK).',
     )
   }
   const { walletClient, publicClient, account, token, amountBase, commitment } = params
@@ -229,7 +229,7 @@ export async function lockOnL1(params: {
 
   const hash = await walletClient.writeContract({
     address: bridge,
-    abi: WRAITH_BRIDGE_L1_ABI,
+    abi: OBSCURA_BRIDGE_L1_ABI,
     functionName: 'lock',
     args: [commitment, token.l1Address, amountBase],
     account,
@@ -320,11 +320,11 @@ export async function readLightClientHead(): Promise<LightClientHead | null> {
   }
 }
 
-/** Has the `WraithBridge` already minted this inbound commitment? (BRIDGE_SPEC §7/§12). */
+/** Has the `ObscuraBridge` already minted this inbound commitment? (BRIDGE_SPEC §7/§12). */
 export async function readIsBridged(commitment: Hex): Promise<boolean | null> {
-  if (!WRAITH_BRIDGE_ID) return null
+  if (!OBSCURA_BRIDGE_ID) return null
   const arg = xdr.ScVal.scvBytes(Buffer.from(hexToBytes(commitment)))
-  const native = await simulateRead(WRAITH_BRIDGE_ID, 'is_bridged', [arg])
+  const native = await simulateRead(OBSCURA_BRIDGE_ID, 'is_bridged', [arg])
   if (typeof native !== 'boolean') return null
   return native
 }
@@ -341,4 +341,4 @@ export function stellarContractUrl(contractId: string): string {
   return `https://stellar.expert/explorer/testnet/contract/${contractId}`
 }
 
-export { WRAITH_BRIDGE_ID, ETH_LIGHT_CLIENT_ID, L1_BRIDGE_ADDRESS }
+export { OBSCURA_BRIDGE_ID, ETH_LIGHT_CLIENT_ID, L1_BRIDGE_ADDRESS }

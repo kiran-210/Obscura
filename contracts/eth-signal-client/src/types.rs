@@ -18,7 +18,7 @@ pub enum DataKey {
     /// `BytesN<32>`: the Signal-proven finalized **beacon block root** at a slot.
     BeaconRoot(u64),
     /// `BytesN<32>`: the proven **execution** state root at a block number — the
-    /// value `WraithBridge.bridge_in` reads via `state_root_at`. Same key shape as
+    /// value `ObscuraBridge.bridge_in` reads via `state_root_at`. Same key shape as
     /// the superseded `eth-light-client`, so the bridge is unchanged.
     Root(u64),
     /// `u64`: execution block number of the current trusted head.

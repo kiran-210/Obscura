@@ -1,6 +1,6 @@
-# @wraith/sdk
+# @obscura/sdk
 
-TypeScript client library for **Wraith**, the privacy platform on Stellar. It provides
+TypeScript client library for **Obscura**, the privacy platform on Stellar. It provides
 the cryptographic primitives (Poseidon2, note/order commitments, an incremental Merkle
 tree), UltraHonk proof generation wiring, and Soroban transaction building used by the
 frontend and matcher.
@@ -10,8 +10,8 @@ frontend and matcher.
   (Poseidon2 params, commitment field order, Merkle bit ordering, public-input encoding).
 
 ```bash
-pnpm --filter @wraith/sdk build
-pnpm --filter @wraith/sdk test
+pnpm --filter @obscura/sdk build
+pnpm --filter @obscura/sdk test
 ```
 
 ---
@@ -74,8 +74,8 @@ beta.9, hence the external dep.)
 | `src/order.ts` | `createOrder`, `computeOrderCommitment`, `orderLockedAmount` | Order commitments (`hash7`) + locked-balance math. |
 | `src/prover.ts` | `NoirProver`, `buildWithdrawInputs`/`buildPlaceOrderInputs`/`buildCancelOrderInputs`, `isValidProofLength` | UltraHonk proof gen via `@noir-lang/noir_js` + `@aztec/bb.js` with the **keccak** transcript. |
 | `src/wallet.ts` | `Wallet` | In-memory note store, per-asset balance aggregation, greedy note selection, open-order tracking. |
-| `src/stellar.ts` | `WraithContract`, `encodePublicInputs`/`decodePublicInputs`, `addressToField`, `assetIdFromAddress`, `recipientHash`, `nativeAsset`, `assetFromSac`, `buildTransaction`, `PUBLIC_INPUT_ORDER` | Soroban invoke-op building + public-input encoding (32-byte BE concat). |
-| `src/index.ts` | `Wraith` (impl. of `WraithSdk`) + re-exports | High-level surface the frontend uses: `deposit`, `withdraw`, `transfer`, `placeOrder`, `cancelOrder`, `getShieldedBalances`, `getOpenOrders`. |
+| `src/stellar.ts` | `ObscuraContract`, `encodePublicInputs`/`decodePublicInputs`, `addressToField`, `assetIdFromAddress`, `recipientHash`, `nativeAsset`, `assetFromSac`, `buildTransaction`, `PUBLIC_INPUT_ORDER` | Soroban invoke-op building + public-input encoding (32-byte BE concat). |
+| `src/index.ts` | `Obscura` (impl. of `ObscuraSdk`) + re-exports | High-level surface the frontend uses: `deposit`, `withdraw`, `transfer`, `placeOrder`, `cancelOrder`, `getShieldedBalances`, `getOpenOrders`. |
 
 ---
 
@@ -91,7 +91,7 @@ const { proof, publicInputs } = await prover.prove(inputs);          // proof: U
 
 `{ keccak: true }` is bb.js's equivalent of `bb prove --oracle_hash keccak` (verified
 against `@aztec/bb.js@0.87.0` `UltraHonkBackendOptions`). `bb.js`/`noir_js` are imported
-lazily, so importing `@wraith/sdk` does not spin up the Barretenberg WASM/threads.
+lazily, so importing `@obscura/sdk` does not spin up the Barretenberg WASM/threads.
 
 Public inputs are serialized in each circuit's declared `pub` order (`PUBLIC_INPUT_ORDER`,
 SHARED §7) as concatenated 32-byte big-endian field elements; the 16 pairing-point-object
@@ -122,7 +122,7 @@ elements live inside the proof, not in `public_inputs`.
 - Wallet: balances, greedy note selection, order tracking.
 - `public_inputs` encode/decode, address→field, SAC asset helpers, and Soroban invoke-op
   construction (deposit/withdraw/transfer/place_order/match_orders/cancel_order).
-- `Wraith` orchestrator: `deposit` (no proof) end-to-end; local Merkle mirror sync;
+- `Obscura` orchestrator: `deposit` (no proof) end-to-end; local Merkle mirror sync;
   balance/order views; proof flows assemble notes/commitments/nullifiers/inputs and build
   the submittable op once a prover is supplied.
 
@@ -132,26 +132,26 @@ elements live inside the proof, not in `public_inputs`.
   (`target/<circuit>.json`) live on the `feat/circuits` branch and are not present here.
   `NoirProver` is implemented against the noir_js/bb.js interface; the full pipeline test
   is `it.skip`ped (it also needs the Barretenberg CRS). Wire by passing each compiled
-  circuit via `WraithConfig.provers`.
+  circuit via `ObscuraConfig.provers`.
 - **`addressToField` convention.** The SDK maps a Stellar address to a field by decoding
   its StrKey to the raw 32 bytes and interpreting them big-endian (mod r). This must match
-  whatever the deployed `wraith-pool` contract uses to derive `asset_id` / `recipient_hash`;
+  whatever the deployed `obscura-pool` contract uses to derive `asset_id` / `recipient_hash`;
   it is the one mapping not verifiable until the contract branch lands.
 - **Tx submission / RPC.** `buildTransaction` returns an unsigned tx; footprint prep
   (`rpc.Server.prepareTransaction`) and signing are left to the caller.
 - **Note discovery** is out-of-band (MVP, SPEC §6.3) — the wallet is a local cache that
   must be synced from on-chain Deposit/Transfer/settlement commitments in global order via
-  `Wraith.observeCommitment` for Merkle proofs to be valid.
+  `Obscura.observeCommitment` for Merkle proofs to be valid.
 
 ---
 
 ## Usage sketch
 
 ```ts
-import { Wraith, nativeAsset, NoirProver } from "@wraith/sdk";
+import { Obscura, nativeAsset, NoirProver } from "@obscura/sdk";
 
-const sdk = new Wraith({
-  contractId: "C...WRAITHPOOL",
+const sdk = new Obscura({
+  contractId: "C...OBSCURAPOOL",
   // provers: { withdraw: new NoirProver(withdrawJson), ... }  // once feat/circuits lands
 });
 

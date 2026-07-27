@@ -1,4 +1,4 @@
-# Wraith — dev task runner.  `just` (or `just --list`) shows all recipes.
+# Obscura — dev task runner.  `just` (or `just --list`) shows all recipes.
 #
 # Prereqs: pnpm (workspace deps). The frontend reads bridge wiring from
 # frontend/.env.local (contract addresses + RPCs; no secrets).
@@ -15,9 +15,9 @@ default:
 install:
     pnpm install
 
-# Build the TypeScript SDK — the frontend & relayer import @wraith/sdk from dist/.
+# Build the TypeScript SDK — the frontend & relayer import @obscura/sdk from dist/.
 sdk:
-    pnpm --filter @wraith/sdk build
+    pnpm --filter @obscura/sdk build
 
 # One-time first-run setup: install deps + build the SDK.
 setup: install sdk
@@ -44,8 +44,8 @@ build:
 
 # Build + run the relayer CLI, reading env from your shell. e.g. `just relayer watch`.
 relayer *ARGS:
-    pnpm --filter @wraith/relayer build >/dev/null && node bridge/relayer/dist/index.js {{ARGS}}
+    pnpm --filter @obscura/relayer build >/dev/null && node bridge/relayer/dist/index.js {{ARGS}}
 
 # Run the relayer test suite.
 relayer-test:
-    pnpm --filter @wraith/relayer test
+    pnpm --filter @obscura/relayer test

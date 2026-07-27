@@ -1,14 +1,14 @@
-# Wraith Bridge — Trustless ZK-Private Cross-Chain Bridge (Ethereum Sepolia → Stellar)
+# Obscura Bridge — Trustless ZK-Private Cross-Chain Bridge (Ethereum Sepolia → Stellar)
 
 ## Technical Specification v1.0
 
-> A **trust-minimized** bridge that moves assets from Ethereum into the Wraith shielded pool on
+> A **trust-minimized** bridge that moves assets from Ethereum into the Obscura shielded pool on
 > Stellar. Assets arrive **private** (as shielded notes), and provenance is established by an
 > **Ethereum light client running natively on Soroban** — not a trusted relayer. This is feasible on
 > Stellar specifically because it has native **BLS12-381** host functions (CAP-0059): the
 > sync-committee signature check that costs ~80M gas on the EVM costs ~30M of the 100M Soroban budget,
 > so **no SNARK-wrapping of the light client is needed**. The ZK in the system is the privacy layer
-> (the existing Wraith pool); the bridge's trustlessness comes from native BLS + native Keccak.
+> (the existing Obscura pool); the bridge's trustlessness comes from native BLS + native Keccak.
 
 ---
 
@@ -18,7 +18,7 @@
 |---|---|
 | **Header provenance** (Ethereum → Stellar) | Honest **2/3 of the 512-validator Ethereum sync committee** (identical to Helios / Succinct Telepathy). The relayer is **untrusted transport** — it cannot forge a header or signature. |
 | **Inclusion** (state root → lock record) | None beyond the header. An Ethereum Merkle-Patricia storage proof is verified **in-contract** (Keccak/RLP in Rust) against the light-client's trusted execution `state_root`. |
-| **Privacy** | The Wraith shielded pool (existing UltraHonk ZK). The link between the Ethereum lock and the Stellar recipient is broken by the note/nullifier scheme. |
+| **Privacy** | The Obscura shielded pool (existing UltraHonk ZK). The link between the Ethereum lock and the Stellar recipient is broken by the note/nullifier scheme. |
 
 ### Honest, documented limitations (hackathon scope)
 - **Single committee period.** The light client is seeded with one recent checkpoint's 512 sync-committee pubkeys (~27h validity). **No committee rotation** (`next_sync_committee`, gindex 55) — *future work*.
@@ -32,7 +32,7 @@
 ```
 ETHEREUM SEPOLIA            RELAYER (untrusted)          STELLAR (Soroban)
                                                           ┌──────────────────────────────┐
- WraithBridgeL1.sol                                       │ EthLightClient               │
+ ObscuraBridgeL1.sol                                       │ EthLightClient               │
    lock(commitment,        beacon API:                    │  update_header(finality_upd)  │
         token, amount) ──►  LightClientFinalityUpdate ───►│   • 2/3 participation          │
    locks[commitment]                                      │   • BLS FastAggregateVerify    │
@@ -40,7 +40,7 @@ ETHEREUM SEPOLIA            RELAYER (untrusted)          STELLAR (Soroban)
                                                           │   • finality + execution branch│
                                                           │   -> trusted execution state_root│
                                                           ├──────────────────────────────┤
-                                                          │ WraithBridge                  │
+                                                          │ ObscuraBridge                  │
                                                           │  bridge_in(storage_proof,     │
                                                           │            commitment, token, amt)│
                                                           │   • MPT verify vs state_root   │
@@ -48,7 +48,7 @@ ETHEREUM SEPOLIA            RELAYER (untrusted)          STELLAR (Soroban)
                                                           │   • not already minted         │
                                                           │   -> pool.bridge_mint(commitment)│
                                                           ├──────────────────────────────┤
- unlock(commitment,    ◄── relayer submits burn proof    │ WraithPool (existing + mint)  │
+ unlock(commitment,    ◄── relayer submits burn proof    │ ObscuraPool (existing + mint)  │
         amount, to)        + Stellar unlock event         │  bridge_mint(commitment)       │
    (releases L1 funds)                                    │   -> insert into Merkle tree   │
                                                           │   (shielded note, asset=bToken)│
@@ -56,7 +56,7 @@ ETHEREUM SEPOLIA            RELAYER (untrusted)          STELLAR (Soroban)
 ```
 
 Two **native** on-chain verifications on Soroban (BLS for the header, Keccak/MPT for inclusion). The
-existing Wraith UltraHonk verifier (Noir/bb 0.87.0) is **untouched** — the bridge adds new contracts
+existing Obscura UltraHonk verifier (Noir/bb 0.87.0) is **untouched** — the bridge adds new contracts
 and one new pool entrypoint.
 
 ---
@@ -70,7 +70,7 @@ with all existing shielded flows (transfer, swap) but are redeemable only back t
 asset_id(bToken) = hash2( hash2(eth_chain_id, eth_token_address_as_field), BRIDGE_DOMAIN )
 ```
 
-- A Wraith balance note for bridged ETH/USDC uses this `asset_id`. The note is
+- A Obscura balance note for bridged ETH/USDC uses this `asset_id`. The note is
   `commitment = hash4(asset_id, amount, owner_key, blinding)` — the **same commitment scheme** as
   native notes, so the pool's Merkle tree, nullifiers, transfer and swap circuits work unchanged.
 - `bridge_in` **mints** (inserts the commitment) without moving Stellar tokens — the backing lives in
@@ -80,12 +80,12 @@ asset_id(bToken) = hash2( hash2(eth_chain_id, eth_token_address_as_field), BRIDG
 
 ---
 
-## 4. Ethereum L1 contract — `WraithBridgeL1.sol`
+## 4. Ethereum L1 contract — `ObscuraBridgeL1.sol`
 
 Minimal lock/unlock escrow. Solidity ^0.8.24, deployed on Sepolia.
 
 ```solidity
-contract WraithBridgeL1 {
+contract ObscuraBridgeL1 {
     // commitment => packed lock record. Declaration slot p = 0 (see storage proof).
     mapping(bytes32 => LockRecord) public locks;          // slot 0
     mapping(bytes32 => bool)       public spentOnL2;      // slot 1 (set on unlock)
@@ -181,7 +181,7 @@ pub fn head(env: Env) -> (u64, BytesN<32>);
 
 ## 6. In-contract MPT storage proof (no ZK)
 
-A small Rust verifier inside `WraithBridge` (or a shared module). Verifies an EIP-1186 `eth_getProof`
+A small Rust verifier inside `ObscuraBridge` (or a shared module). Verifies an EIP-1186 `eth_getProof`
 against a trusted `state_root`.
 
 ```rust
@@ -207,7 +207,7 @@ descend to the child hash; at the leaf, return the value. Cost ≈ depth (≤ ~9
 
 ---
 
-## 7. Soroban contract — `WraithBridge`
+## 7. Soroban contract — `ObscuraBridge`
 
 ```rust
 pub fn __constructor(env: Env, light_client: Address, pool: Address,
@@ -217,7 +217,7 @@ pub fn __constructor(env: Env, light_client: Address, pool: Address,
 pub fn bridge_in(
     env: Env,
     block_number: u64,
-    commitment: BytesN<32>,          // Wraith note commitment = hash4(asset_id, amount, owner, blinding)
+    commitment: BytesN<32>,          // Obscura note commitment = hash4(asset_id, amount, owner, blinding)
     token: BytesN<20>, amount: i128, // the L1 token + amount being claimed
     account_proof: Vec<Bytes>, storage_proof: Vec<Bytes>,
 ) -> Result<(), BridgeError> {
@@ -240,7 +240,7 @@ Merkle tree and emits a `BridgeMintEvent`. No SAC transfer (backing is on L1).
 
 `bridge_out` reuses the existing **withdraw** circuit/verifier: the user proves ownership of a bridged
 note; instead of releasing a SAC, the contract records an unlock authorization (event) that the
-relayer/governor settles on L1 via `WraithBridgeL1.unlock`.
+relayer/governor settles on L1 via `ObscuraBridgeL1.unlock`.
 
 ---
 
@@ -253,7 +253,7 @@ Node/TS service. Holds no authority — every value it relays is re-verified on-
 - **Inclusion feed**: on a `Locked` event (or user request), call `eth_getProof(bridgeL1, [slot],
   block)` on a Sepolia execution RPC, package `(account_proof, storage_proof)`, hand to the user /
   submit `bridge_in`.
-- **Out feed**: on a Stellar `bridge_out` event, submit `WraithBridgeL1.unlock` (governor-gated for
+- **Out feed**: on a Stellar `bridge_out` event, submit `ObscuraBridgeL1.unlock` (governor-gated for
   the hackathon; future: verify the Stellar proof on L1).
 
 ---
@@ -263,7 +263,7 @@ Node/TS service. Holds no authority — every value it relays is re-verified on-
 The existing **Bridge** tab becomes a real cross-chain bridge:
 - Connect **two** wallets: an EVM wallet (MetaMask via wagmi/viem) for Sepolia, and the Stellar
   Wallets Kit for Stellar.
-- **Bridge in**: pick token + amount → create a Wraith note (SDK) → `lock(commitment, token, amount)`
+- **Bridge in**: pick token + amount → create a Obscura note (SDK) → `lock(commitment, token, amount)`
   on Sepolia (MetaMask) → wait for the relayer's `bridge_in` → the shielded balance appears in the
   Portfolio. Show the cross-chain progress (L1 lock → header finalized → L2 mint).
 - **Bridge out**: select a bridged note → `bridge_out` (in-browser ZK proof, withdraw circuit) →
@@ -276,11 +276,11 @@ The existing **Bridge** tab becomes a real cross-chain bridge:
 
 | # | Component | Path | Stack |
 |---|---|---|---|
-| 1 | L1 lock contract | `bridge/l1/WraithBridgeL1.sol` | Solidity + Foundry, Sepolia |
+| 1 | L1 lock contract | `bridge/l1/ObscuraBridgeL1.sol` | Solidity + Foundry, Sepolia |
 | 2 | Light client | `contracts/eth-light-client/` | Rust/Soroban, BLS12-381 host fns |
-| 3 | MPT verifier | `contracts/wraith-bridge/src/mpt.rs` | Rust (Keccak host fn, RLP) |
-| 4 | Bridge contract | `contracts/wraith-bridge/` | Rust/Soroban |
-| 5 | Pool `bridge_mint` | `contracts/wraith-pool/` (extend) | Rust/Soroban (redeploy) |
+| 3 | MPT verifier | `contracts/obscura-bridge/src/mpt.rs` | Rust (Keccak host fn, RLP) |
+| 4 | Bridge contract | `contracts/obscura-bridge/` | Rust/Soroban |
+| 5 | Pool `bridge_mint` | `contracts/obscura-pool/` (extend) | Rust/Soroban (redeploy) |
 | 6 | Relayer | `bridge/relayer/` | TS (viem + beacon API + stellar-sdk) |
 | 7 | Frontend Bridge tab | `frontend/src/components/Bridge.tsx` (rewire) | React + wagmi/viem + kit |
 

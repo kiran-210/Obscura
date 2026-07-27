@@ -1,6 +1,6 @@
 # Toolchain
 
-Pinned versions used to build Wraith. Source `env.sh` to put these on your `PATH`.
+Pinned versions used to build Obscura. Source `env.sh` to put these on your `PATH`.
 
 | Tool | Version | Install |
 |------|---------|---------|

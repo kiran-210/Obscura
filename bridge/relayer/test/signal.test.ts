@@ -94,7 +94,7 @@ describe("SignalClientSubmitter op building (pure, no network)", () => {
 });
 
 // Live integration smoke test — hits the public Boundless feed. Opt-in:
-//   SIGNAL_LIVE=1 pnpm --filter @wraith/relayer test
+//   SIGNAL_LIVE=1 pnpm --filter @obscura/relayer test
 describe.skipIf(!process.env.SIGNAL_LIVE)("live Signal feed", () => {
   it("fetches a fulfilled (seal, journal) and the journal parses", async () => {
     const proof = await fetchLatestSignalProof();

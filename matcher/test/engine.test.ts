@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PRICE_SCALE } from "@wraith/sdk";
+import { PRICE_SCALE } from "@obscura/sdk";
 import {
   MatchingEngine,
   OrderValidationError,

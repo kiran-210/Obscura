@@ -1,9 +1,9 @@
 {
-  "name": "@wraith/matcher",
+  "name": "@obscura/matcher",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Wraith off-chain order-matching service — price-time matching that mirrors the match_orders circuit, plus match_orders proof assembly and Soroban submission.",
+  "description": "Obscura off-chain order-matching service — price-time matching that mirrors the match_orders circuit, plus match_orders proof assembly and Soroban submission.",
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -26,7 +26,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@wraith/sdk": "workspace:*"
+    "@obscura/sdk": "workspace:*"
   },
   "devDependencies": {
     "@stellar/stellar-sdk": "^14.6.1",

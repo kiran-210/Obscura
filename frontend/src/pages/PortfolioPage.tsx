@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useWraith } from '../hooks/useWraith'
+import { useObscura } from '../hooks/useObscura'
 import { useReveal } from '../hooks/useReveal'
 import { loadNotes, type StoredNote } from '../lib/note-store'
 import { assetMeta } from '../lib/tokens'
@@ -8,7 +8,7 @@ import { formatAmount, formatUsd } from '../lib/format'
 import { cx } from '../lib/cx'
 import { AssetAvatar, ChevronDownIcon, EyeGlyph } from '../components/ui'
 import { ScrambleNumber } from '../components/ScrambleNumber'
-import type { AssetCode } from '../lib/wraith-sdk'
+import type { AssetCode } from '../lib/obscura-sdk'
 
 const MASK = '••••••'
 
@@ -38,7 +38,7 @@ function groupUnspentNotes(): Map<AssetCode, StoredNote[]> {
 }
 
 export function PortfolioPage() {
-  const { balances, loadingBalances } = useWraith()
+  const { balances, loadingBalances } = useObscura()
   const { revealed, toggle } = useReveal()
   const [open, setOpen] = useState<AssetCode | null>(null)
 

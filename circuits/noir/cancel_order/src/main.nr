@@ -1,4 +1,4 @@
-//! Wraith `cancel_order` circuit (SPEC sec 8.5).
+//! Obscura `cancel_order` circuit (SPEC sec 8.5).
 //!
 //! Proves ownership of an open order (via spending key -> owner key) and that
 //! the refund balance note returning the locked funds is correctly formed.
@@ -10,7 +10,7 @@
 //! Public inputs (SHARED sec 7, IN THIS ORDER):
 //!   order_commitment, refund_commitment, refund_asset_id
 
-use dep::wraith_lib as w;
+use dep::obscura_lib as w;
 
 fn main(
     // ---- public inputs (order is load-bearing: SHARED sec 7) ----

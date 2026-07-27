@@ -1,5 +1,5 @@
 #![cfg(test)]
-//! Integration tests for `WraithBridge`.
+//! Integration tests for `ObscuraBridge`.
 //!
 //! Two complementary strategies prove the inbound flow end-to-end *in-process*:
 //!
@@ -26,7 +26,7 @@ use soroban_sdk::{
 };
 
 use crate::types::BridgeError;
-use crate::{WraithBridge, WraithBridgeClient};
+use crate::{ObscuraBridge, ObscuraBridgeClient};
 
 // ===========================================================================
 // hex helpers
@@ -186,7 +186,7 @@ fn synth_proof(
     (BytesN::from_array(env, &state_root), ap, sp)
 }
 
-/// Storage slot of `locks[commitment]` exactly as `WraithBridge::bridge_in`
+/// Storage slot of `locks[commitment]` exactly as `ObscuraBridge::bridge_in`
 /// derives it: `keccak256(commitment ‖ bytes32(0))`.
 fn locks_slot_bytes(env: &Env, commitment: &[u8; 32]) -> [u8; 32] {
     let mut pre = [0u8; 64];
@@ -238,7 +238,7 @@ impl MockLightClient {
     }
 }
 
-/// Mock `WraithPool`: records minted commitments; reports all roots as known.
+/// Mock `ObscuraPool`: records minted commitments; reports all roots as known.
 #[contract]
 pub struct MockPool;
 
@@ -304,11 +304,11 @@ impl MockVerifierFail {
 const L1_CHAIN_ID: u32 = 11155111; // Sepolia
 const BLOCK: u64 = 11173387;
 
-/// Register a `WraithBridge` wired to fresh mocks, returning the client + the
+/// Register a `ObscuraBridge` wired to fresh mocks, returning the client + the
 /// mock pool address (for asserting mints) + the commitment/token/amount used.
 struct InCtx {
     env: Env,
-    client: WraithBridgeClient<'static>,
+    client: ObscuraBridgeClient<'static>,
     pool: soroban_sdk::Address,
     commitment: BytesN<32>,
     token: BytesN<20>,
@@ -336,7 +336,7 @@ fn setup_bridge_in() -> InCtx {
     let pool = env.register(MockPool, ());
     let vf = env.register(MockVerifierOk, ());
     let bridge = env.register(
-        WraithBridge,
+        ObscuraBridge,
         (
             lc,
             pool.clone(),
@@ -345,7 +345,7 @@ fn setup_bridge_in() -> InCtx {
             vf,
         ),
     );
-    let client = WraithBridgeClient::new(&env, &bridge);
+    let client = ObscuraBridgeClient::new(&env, &bridge);
 
     InCtx {
         commitment: BytesN::from_array(&env, &commitment_arr),
@@ -563,7 +563,7 @@ fn withdraw_inputs(
 fn setup_bridge_out(
     verifier_ok: bool,
     roots_known: bool,
-) -> (Env, WraithBridgeClient<'static>) {
+) -> (Env, ObscuraBridgeClient<'static>) {
     let env = Env::default();
     env.mock_all_auths();
     env.cost_estimate().budget().reset_unlimited();
@@ -580,7 +580,7 @@ fn setup_bridge_out(
         env.register(MockVerifierFail, ())
     };
     let bridge = env.register(
-        WraithBridge,
+        ObscuraBridge,
         (
             lc,
             pool,
@@ -589,7 +589,7 @@ fn setup_bridge_out(
             vf,
         ),
     );
-    let client = WraithBridgeClient::new(&env, &bridge);
+    let client = ObscuraBridgeClient::new(&env, &bridge);
     (env, client)
 }
 

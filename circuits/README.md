@@ -1,7 +1,7 @@
-# Wraith Circuits (Noir / UltraHonk)
+# Obscura Circuits (Noir / UltraHonk)
 
-Five zero-knowledge circuits that gate every state transition out of Wraith's
-shielded layer, plus a shared library (`wraith_lib`) holding the cryptographic
+Five zero-knowledge circuits that gate every state transition out of Obscura's
+shielded layer, plus a shared library (`obscura_lib`) holding the cryptographic
 invariants that must stay byte-for-byte identical across the Noir circuits, the
 Soroban contract, and the TypeScript SDK.
 
@@ -39,7 +39,7 @@ bb --version              # must print 0.87.0
 ```
 circuits/
   noir/
-    wraith_lib/      shared lib: hashes, commitments, nullifier, Merkle, int math
+    obscura_lib/      shared lib: hashes, commitments, nullifier, Merkle, int math
     withdraw/        bin circuit + Prover.toml + #[test]s
     transfer/
     place_order/
@@ -83,7 +83,7 @@ bb verify --scheme ultra_honk --oracle_hash keccak \
 
 All five committed fixtures verify with these flags.
 
-## Shared library (`wraith_lib`)
+## Shared library (`obscura_lib`)
 
 Poseidon2 (BN254, t=4, RATE 3, HADES, x^5 S-box, IV = `message_size << 64`):
 
@@ -144,7 +144,7 @@ this order. `public_inputs.json` in each artifact dir lists the concrete values.
 Field division in Noir is multiplicative inverse, **not** integer division, and a
 `Field as u64`/`as u128` cast **truncates silently** (it does not range-check).
 So every amount/price is first constrained with `assert_max_bit_size::<64>()`
-(`wraith_lib::assert_64`) and only then cast to `u64`/`u128` for the price math:
+(`obscura_lib::assert_64`) and only then cast to `u64`/`u128` for the price math:
 
 - `midpoint(a,b)   = floor((a+b)/2)`  via `u128`
 - `mul_div_price(a,b) = floor((a*b)/PRICE_SCALE)` via `u128` (product of two
@@ -203,7 +203,7 @@ one valid witness and several expected-failure cases:
 
 | Package | Tests | Coverage highlights |
 |---------|-------|---------------------|
-| `wraith_lib` | 6 | hash/commitment field order, Merkle L/R orientation, non-boolean bit rejection, int helpers |
+| `obscura_lib` | 6 | hash/commitment field order, Merkle L/R orientation, non-boolean bit rejection, int helpers |
 | `withdraw` | 4 | valid; wrong nullifier; wrong root; amount mismatch |
 | `transfer` | 5 | valid (1 real + dummy); two real inputs in a 2-leaf tree; value mismatch; duplicate nullifier; bad output commitment |
 | `place_order` | 5 | valid buy; valid sell (no change); insufficient balance; wrong locked asset; wrong order commitment |

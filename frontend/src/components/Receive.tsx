@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CopyIcon, WraithMark } from './ui'
+import { CopyIcon, ObscuraMark } from './ui'
 
 /** The receive cipher: a shareable code senders encrypt to, revealing nothing
  *  about balance or history. Extracted from the former single-scroll wallet. */
@@ -18,7 +18,7 @@ export function Receive({ receiveCode }: { receiveCode: string | null }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-center rounded-2xl border border-ink-700 bg-ink-900/40 p-8">
-        <WraithMark className="h-20 w-20 text-spectral/70" />
+        <ObscuraMark className="h-20 w-20 text-spectral/70" />
       </div>
       {receiveCode ? (
         <>

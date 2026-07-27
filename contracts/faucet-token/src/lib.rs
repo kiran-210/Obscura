@@ -1,7 +1,7 @@
 #![no_std]
 //! A minimal, permissionless faucet token for testnet.
 //!
-//! Implements just enough of the SEP-41 token interface for the WraithPool to deposit and
+//! Implements just enough of the SEP-41 token interface for the ObscuraPool to deposit and
 //! withdraw it (`transfer` + `balance` + metadata), plus an OPEN `mint` so anyone can fund
 //! themselves from the app — no admin, no trustlines. This is a testnet mock; do not use
 //! on mainnet.

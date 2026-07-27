@@ -1,7 +1,7 @@
 /**
  * Match settlement delivery: the matcher seals each fill/refund note + residual order to its
  * owner (in the contract's exact insertion order), and the owner recovers them with their
- * viewing key. Uses the shared @wraith/sdk sealing, so this is the same path the wallet's
+ * viewing key. Uses the shared @obscura/sdk sealing, so this is the same path the wallet's
  * indexer runs on-chain.
  */
 import { describe, expect, it } from "vitest";
@@ -17,7 +17,7 @@ import {
   OrderSide,
   randomField,
   type Order,
-} from "@wraith/sdk";
+} from "@obscura/sdk";
 import { computeMatch } from "../src/engine.js";
 import { assembleMatchInputs, type MatchBlindings } from "../src/prover.js";
 import { buildMatchMemos } from "../src/memo.js";

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { hexToBytes, type Hex } from "viem";
 import {
   LOCKED_EVENT,
-  WRAITH_BRIDGE_L1_ABI,
+  OBSCURA_BRIDGE_L1_ABI,
   parseBridgeOutEvent,
   parseLockedLog,
 } from "../src/l1.js";
@@ -13,13 +13,13 @@ const RECIPIENT = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 
 describe("L1 ABI", () => {
   it("exposes unlock / locks / Locked / Unlocked", () => {
-    const names = WRAITH_BRIDGE_L1_ABI.map((x) => x.name);
+    const names = OBSCURA_BRIDGE_L1_ABI.map((x) => x.name);
     expect(names).toContain("unlock");
     expect(names).toContain("locks");
     expect(names).toContain("Locked");
     expect(names).toContain("Unlocked");
   });
-  it("Locked event has the WraithBridgeL1 signature", () => {
+  it("Locked event has the ObscuraBridgeL1 signature", () => {
     expect(LOCKED_EVENT.name).toBe("Locked");
     expect(LOCKED_EVENT.inputs.map((i) => i.type)).toEqual(["bytes32", "address", "uint256"]);
   });

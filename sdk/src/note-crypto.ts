@@ -188,7 +188,7 @@ export interface ReceiveCode {
 export function decodeReceiveCode(code: string): ReceiveCode {
   const c = code.trim();
   if (!c.startsWith(RECEIVE_PREFIX)) {
-    throw new Error("Not a Wraith receive code. Ask the recipient for their code from the Receive screen.");
+    throw new Error("Not a Obscura receive code. Ask the recipient for their code from the Receive screen.");
   }
   const raw = b64uDecode(c.slice(RECEIVE_PREFIX.length));
   if (raw.length !== 64) throw new Error("Malformed receive code.");
