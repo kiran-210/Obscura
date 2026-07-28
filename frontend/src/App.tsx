@@ -7,6 +7,7 @@ import { Hub } from './pages/Hub'
 import { PortfolioPage } from './pages/PortfolioPage'
 import { BridgePage } from './pages/BridgePage'
 import { PayPage } from './pages/PayPage'
+import { LendPage } from './pages/LendPage'
 import { SwapPage } from './pages/SwapPage'
 import { ReceivePage } from './pages/ReceivePage'
 
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/deposit" element={<BridgePage />} />
         <Route path="/pay" element={<PayPage />} />
         <Route path="/swap" element={<SwapPage />} />
+        <Route path="/lend" element={<LendPage />} />
         <Route path="/receive" element={<ReceivePage />} />
         {/* Deposit/Withdraw was previously "Bridge" — keep old links working. */}
         <Route path="/bridge" element={<Navigate to="/deposit" replace />} />

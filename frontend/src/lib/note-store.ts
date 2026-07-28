@@ -9,7 +9,7 @@
  *
  * BN254 field elements (bigint) are serialized as 0x-hex; amounts as decimal strings.
  */
-import { fieldToHex, hexToField, type BalanceNote, type Field } from '@obscura/sdk'
+import { fieldToHex, hexToField, type BalanceNote, type Field, type Position } from '@obscura/sdk'
 import { POOL_CONTRACT_ID } from './config'
 import type { AssetCode } from './obscura-sdk'
 
@@ -21,6 +21,11 @@ const LEAVES_PREFIX = 'obscura.leaves.v1'
 const CURSOR_PREFIX = 'obscura.indexcursor.v1'
 // Placed dark-pool orders (per identity).
 const ORDERS_PREFIX = 'obscura.orders.v1'
+// Lending positions (per identity). Unlike collateral — which the contract
+// publishes — a position's `debtScaled` and `nonce` exist NOWHERE on-chain. Lose
+// them and the position can never be attested or repaid: it simply freezes and is
+// seized once its deadline lapses. This store is the only copy.
+const POSITIONS_PREFIX = 'obscura.positions.v1'
 
 // The shielded identity is derived per Stellar address (see lib/shielded-identity).
 // `activeAddress` namespaces both the notes list and the cached spending key, so
@@ -340,6 +345,140 @@ export function loadOrders(): StoredOrder[] {
 
 function saveOrders(orders: StoredOrder[]): void {
   write(ordersStorageKey(), orders)
+}
+
+// ---------------------------------------------------------------------------
+// Lending positions (LENDING_SPEC)
+// ---------------------------------------------------------------------------
+
+function positionsStorageKey(): string {
+  return `${POSITIONS_PREFIX}:${POOL_TAG}:${activeAddress ?? 'anon'}`
+}
+
+/**
+ * A persisted lending position.
+ *
+ * `collateralAmount` is public on-chain, so it is recoverable. `debtScaled` and
+ * `nonce` are NOT — they exist only inside the position commitment. This record is
+ * the only thing that lets the owner attest solvency or repay.
+ */
+export interface StoredPosition {
+  /** Position commitment (0x-hex) — the on-chain registry key. */
+  commitment: string
+  collateralAsset: string // 0x-hex asset_id
+  collateralAssetCode: AssetCode
+  collateralAmount: string // decimal base units
+  collateralAssetAddress?: string
+  debtAsset: string // 0x-hex asset_id
+  debtAssetCode: AssetCode
+  /** PRIVATE. Real debt is `debtScaled * borrowIndex / 1e9`. */
+  debtScaled: string
+  /** PRIVATE. Part of the commitment preimage. */
+  nonce: string
+  ownerKey: string
+  spendingKey: string
+  /** Merkle leaf index of the position commitment, once observed on-chain. */
+  leafIndex?: number
+  /** Ledger after which anyone may seize this position. Mirrors contract state. */
+  deadline?: number
+  status: 'open' | 'closed' | 'seized'
+  createdAt: number
+  txHash?: string
+}
+
+export function loadPositions(): StoredPosition[] {
+  return read<StoredPosition[]>(positionsStorageKey(), [])
+}
+
+function savePositions(positions: StoredPosition[]): void {
+  write(positionsStorageKey(), positions)
+}
+
+/** Persist a position, replacing any prior record with the same commitment. */
+export function addPosition(position: StoredPosition): void {
+  const rest = loadPositions().filter((p) => p.commitment !== position.commitment)
+  rest.push(position)
+  savePositions(rest)
+}
+
+/**
+ * Replace a position after an operation that re-commits it (borrow / repay /
+ * withdraw collateral). The old commitment is nullified on-chain, so it is marked
+ * closed rather than deleted — keeping it makes the history legible and avoids a
+ * window where a failed submission leaves NO record of the secrets.
+ */
+export function replacePosition(oldCommitment: string, next: StoredPosition): void {
+  const positions = loadPositions().map((p) =>
+    p.commitment === oldCommitment ? { ...p, status: 'closed' as const } : p,
+  )
+  savePositions([...positions.filter((p) => p.commitment !== next.commitment), next])
+}
+
+/** Update a tracked position's lifecycle status. */
+export function setPositionStatus(commitmentHex: string, status: StoredPosition['status']): void {
+  savePositions(
+    loadPositions().map((p) => (p.commitment === commitmentHex ? { ...p, status } : p)),
+  )
+}
+
+/** Record a refreshed attestation deadline (or a leaf index once observed). */
+export function updatePosition(
+  commitmentHex: string,
+  patch: Partial<Pick<StoredPosition, 'deadline' | 'leafIndex' | 'txHash'>>,
+): void {
+  savePositions(
+    loadPositions().map((p) => (p.commitment === commitmentHex ? { ...p, ...patch } : p)),
+  )
+}
+
+/** Rehydrate an SDK {@link Position} from a stored record. */
+export function toSdkPosition(stored: StoredPosition): Position {
+  return {
+    collateralAsset: hexToField(stored.collateralAsset),
+    collateralAmount: BigInt(stored.collateralAmount),
+    debtAsset: hexToField(stored.debtAsset),
+    debtScaled: BigInt(stored.debtScaled),
+    ownerKey: hexToField(stored.ownerKey),
+    nonce: hexToField(stored.nonce),
+    spendingKey: hexToField(stored.spendingKey),
+    commitment: hexToField(stored.commitment),
+  }
+}
+
+/** Serialize an SDK {@link Position} for storage. */
+export function fromSdkPosition(
+  position: Position,
+  meta: {
+    collateralAssetCode: AssetCode
+    debtAssetCode: AssetCode
+    collateralAssetAddress?: string
+    leafIndex?: number
+    deadline?: number
+    txHash?: string
+  },
+): StoredPosition {
+  if (!position.spendingKey) {
+    throw new Error('cannot persist a position without its spendingKey')
+  }
+  const out: StoredPosition = {
+    commitment: fieldToHex(position.commitment),
+    collateralAsset: fieldToHex(position.collateralAsset),
+    collateralAssetCode: meta.collateralAssetCode,
+    collateralAmount: position.collateralAmount.toString(),
+    debtAsset: fieldToHex(position.debtAsset),
+    debtAssetCode: meta.debtAssetCode,
+    debtScaled: position.debtScaled.toString(),
+    nonce: fieldToHex(position.nonce),
+    ownerKey: fieldToHex(position.ownerKey),
+    spendingKey: fieldToHex(position.spendingKey),
+    status: 'open',
+    createdAt: Date.now(),
+  }
+  if (meta.collateralAssetAddress) out.collateralAssetAddress = meta.collateralAssetAddress
+  if (meta.leafIndex !== undefined) out.leafIndex = meta.leafIndex
+  if (meta.deadline !== undefined) out.deadline = meta.deadline
+  if (meta.txHash) out.txHash = meta.txHash
+  return out
 }
 
 /** Persist a freshly placed order (keyed by commitment; replaces any prior copy). */

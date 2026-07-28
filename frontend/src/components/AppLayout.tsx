@@ -14,6 +14,7 @@ const NAV = [
   ['Deposit / Withdraw', '/deposit'],
   ['Pay', '/pay'],
   ['Swap', '/swap'],
+  ['Lend', '/lend'],
   ['Receive', '/receive'],
 ] as const
 
