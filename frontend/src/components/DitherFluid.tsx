@@ -141,7 +141,7 @@ function prefersReducedMotion(): boolean {
 }
 
 const DitherFluid = ({
-  bgColor = '#060709',
+  bgColor = '#00CDCD',
   inkColor = '#EEF1F6',
   scale = 3.0,
   speed = 1.0,

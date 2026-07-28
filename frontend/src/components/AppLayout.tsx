@@ -96,18 +96,18 @@ function AppFooter() {
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-5 px-8 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <ObscuraMark className="h-7 w-7 shrink-0" style={{ filter: 'brightness(0)', opacity: 0.85 }} />
-          <p className="max-w-[18rem] text-[12.5px] font-normal leading-relaxed text-[#1b1610]/70">
+          <p className="max-w-[18rem] text-[12.5px] font-normal leading-relaxed text-[#00B8B8]/70">
             Private money on Stellar. Bridge in, hold, pay and trade — proven on-chain, never revealed.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#1b1610]/55">
-          <NavLink to="/faucet" className="transition hover:text-[#1b1610]">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#00B8B8]/55">
+          <NavLink to="/faucet" className="transition hover:text-[#00B8B8]">
             Faucet
           </NavLink>
-          <button type="button" onClick={() => void clearLocalData()} className="uppercase transition hover:text-[#1b1610]">
+          <button type="button" onClick={() => void clearLocalData()} className="uppercase transition hover:text-[#00B8B8]">
             Clear data
           </button>
-          <span className="text-[#1b1610]/45">© Obscura 2026</span>
+          <span className="text-[#00B8B8]/45">© Obscura 2026</span>
         </div>
       </div>
     </footer>

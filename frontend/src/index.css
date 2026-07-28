@@ -19,13 +19,17 @@
   }
 
   body {
-    @apply min-h-screen bg-ink-950 font-sans text-zinc-300;
+    /* ShieldBid surface: a cyan field (#00CDCD -> #00FFFF) that white cards sit
+       on top of. The palette in tailwind.config.js drives the components; this
+       is the page itself. */
+    @apply min-h-screen font-sans text-zinc-300;
+    background-color: #00CDCD;
     /* Warm gold haze (the sun through fog) + a fine fractal-noise grain in the
        negative space. Cards sit cleanly on top of the texture. */
     background-image:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E"),
-      radial-gradient(60rem 40rem at 50% -14rem, rgba(0, 255, 255, 0.18), transparent 60%),
-      radial-gradient(42rem 32rem at 86% 2rem, rgba(0, 205, 205, 0.14), transparent 58%);
+      radial-gradient(70rem 46rem at 50% -12rem, rgba(0, 255, 255, 0.95), transparent 62%),
+      radial-gradient(52rem 38rem at 88% 4rem, rgba(255, 255, 255, 0.55), transparent 60%);
     background-repeat: repeat, no-repeat, no-repeat;
     background-size: 140px 140px, auto, auto;
     background-blend-mode: overlay, normal, normal;
@@ -44,7 +48,7 @@
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: #3b382d transparent;
+    scrollbar-color: #33DEDE transparent;
   }
   *::-webkit-scrollbar {
     width: 10px;
@@ -119,7 +123,7 @@
 
   /* The cream spread that closes the film — same world as the landing footer. */
   .cream-panel {
-    @apply relative overflow-hidden text-[#1b1610];
+    @apply relative overflow-hidden text-[#00B8B8];
     background: #00CDCD;
   }
 }

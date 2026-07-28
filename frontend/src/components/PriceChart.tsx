@@ -15,7 +15,7 @@ import {
 // rescaled so its last close sits on that price — the dark-pool testnet has no
 // historical feed of its own.
 const UP = '#d9c9a3'
-const DOWN = '#a06a52'
+const DOWN = '#00FFFF'
 
 function mockCandles(seed: string, anchor?: number, n = 90): CandlestickData[] {
   let s = 0
@@ -61,7 +61,7 @@ export function PriceChart({ pair, price }: { pair: string; price?: number | nul
       autoSize: true,
       layout: {
         background: { type: ColorType.Solid, color: 'transparent' },
-        textColor: '#8f8672',
+        textColor: '#B3F5F5',
         fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, monospace",
         attributionLogo: false,
       },

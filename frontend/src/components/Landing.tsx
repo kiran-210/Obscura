@@ -102,7 +102,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
   }, [])
 
   return (
-    <div className="relative w-full bg-[#211b12] text-[#00CDCD]">
+    <div className="relative w-full bg-[#00CDCD] text-[#00CDCD]">
       <section
         ref={heroRef}
         className="relative min-h-screen w-full overflow-hidden"
@@ -191,7 +191,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
 
       <StoryShielded onEnter={onEnter} />
 
-      <footer className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#f4efe4] px-8 py-16 text-[#1b1610]">
+      <footer className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#f4efe4] px-8 py-16 text-[#00B8B8]">
         <div
           className="pointer-events-none absolute inset-0 opacity-50"
           style={{
@@ -211,20 +211,20 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         <div className="relative">
           <a
             href="mailto:hello@obscura.money"
-            className="block font-display font-light uppercase leading-none tracking-[-0.02em] text-[#b3a081] transition-colors hover:text-[#4f3e22]"
+            className="block font-display font-light uppercase leading-none tracking-[-0.02em] text-[#b3a081] transition-colors hover:text-[#00FFFF]"
             style={{ fontSize: 'clamp(2rem, 8.2vw, 6.5rem)' }}
           >
             hello@obscura.money
           </a>
-          <div className="mt-6 h-px w-full bg-[#1b1610]/20" />
+          <div className="mt-6 h-px w-full bg-[#00B8B8]/20" />
         </div>
 
         <div className="relative">
           <div className="flex flex-col gap-12 md:flex-row md:items-end md:justify-between">
-            <nav className="flex gap-6 font-mono text-[13px] uppercase tracking-[0.14em] text-[#1b1610]/70">
-              <a href="#" className="transition hover:text-[#1b1610]">X</a>
-              <a href="#" className="transition hover:text-[#1b1610]">GitHub</a>
-              <a href="#" className="transition hover:text-[#1b1610]">Discord</a>
+            <nav className="flex gap-6 font-mono text-[13px] uppercase tracking-[0.14em] text-[#00B8B8]/70">
+              <a href="#" className="transition hover:text-[#00B8B8]">X</a>
+              <a href="#" className="transition hover:text-[#00B8B8]">GitHub</a>
+              <a href="#" className="transition hover:text-[#00B8B8]">Discord</a>
             </nav>
 
             <div className="grid max-w-2xl grid-cols-1 gap-10 sm:grid-cols-2">
@@ -235,7 +235,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                   </svg>
                   Open source
                 </div>
-                <p className="text-[13px] leading-relaxed text-[#1b1610]/70">
+                <p className="text-[13px] leading-relaxed text-[#00B8B8]/70">
                   Obscura is open source and community-run. We're always looking for cryptographers, Soroban engineers and designers. Reach out with what you'd build.
                 </p>
               </div>
@@ -247,18 +247,18 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                   </svg>
                   Security
                 </div>
-                <p className="text-[13px] leading-relaxed text-[#1b1610]/70">
+                <p className="text-[13px] leading-relaxed text-[#00B8B8]/70">
                   Found a vulnerability in the circuits or contracts? Disclose it responsibly at security@obscura.money — privacy protects everyone.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-14 flex items-center justify-between border-t border-[#1b1610]/12 pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-[#1b1610]/50">
+          <div className="mt-14 flex items-center justify-between border-t border-[#00B8B8]/12 pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-[#00B8B8]/50">
             <span>© Obscura 2026</span>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="transition hover:text-[#1b1610]"
+              className="transition hover:text-[#00B8B8]"
             >
               Top ↑
             </button>
