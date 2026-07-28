@@ -23,6 +23,79 @@ pub enum DataKey {
     Frontier(u32),
     Nullifier(BytesN<32>),
     Order(BytesN<32>),
+
+    // ---- lending (LENDING_SPEC) ------------------------------------------
+    // Set via `set_lending_verifiers` rather than the constructor: the pool was
+    // already deployed with a 6-arg constructor, and widening it to 13 would
+    // break the existing deploy script for no benefit.
+    PositionOpenVf,
+    BorrowVf,
+    RepayVf,
+    WithdrawCollateralVf,
+    AttestVf,
+    SupplyVf,
+    RedeemVf,
+    /// Live position registry, keyed by position commitment. Positions are
+    /// necessarily distinguishable from ordinary notes -- enforcing a deadline
+    /// requires the contract to know which commitments are positions
+    /// (LENDING_SPEC §1.1).
+    Position(BytesN<32>),
+    /// Per-asset reserve accounting, keyed by `asset_id`.
+    Reserve(BytesN<32>),
+    /// Placeholder price feed, keyed by `asset_id`. See `set_price`.
+    Price(BytesN<32>),
+    /// Governance risk parameters (LTV, liquidation threshold, attestation period).
+    RiskParams,
+}
+
+/// A live lending position. `collateral_*` is PUBLIC by design: it is what makes
+/// a stale position seizable by anyone with no keeper (LENDING_SPEC §1). The debt
+/// is NOT here -- it lives only inside the position commitment.
+#[contracttype]
+#[derive(Clone)]
+pub struct Position {
+    pub collateral_asset: Address,
+    pub collateral_amount: i128,
+    pub debt_asset: Address,
+    /// Ledger sequence after which this position may be seized.
+    pub deadline: u32,
+}
+
+/// Per-asset reserve. Indices are fixed-point with `INDEX_SCALE` = 1e9.
+#[contracttype]
+#[derive(Clone)]
+pub struct Reserve {
+    pub total_supplied: i128,
+    pub total_borrowed: i128,
+    pub borrow_index: i128,
+    pub supply_index: i128,
+    /// Ledger at which the indices were last accrued.
+    pub last_accrual: u32,
+}
+
+/// Governance-settable risk parameters. These are PLACEHOLDERS: `Verdex_PRD.md`
+/// was not supplied. All are passed to the circuits as public inputs, so they can
+/// change without recompiling any circuit.
+#[contracttype]
+#[derive(Clone)]
+pub struct RiskParams {
+    /// Borrow ceiling in basis points (placeholder 7500 = 75%).
+    pub max_ltv_bps: u32,
+    /// Liquidation threshold in basis points (placeholder 8000 = 80%).
+    pub liq_threshold_bps: u32,
+    /// Ledgers a solvency attestation stays valid for.
+    pub attestation_period: u32,
+    /// Maximum age in ledgers of an oracle price before it is refused.
+    pub max_price_age: u32,
+}
+
+/// A price observation. `ledger` gates staleness so a favourable price cannot be
+/// replayed indefinitely (LENDING_SPEC §6).
+#[contracttype]
+#[derive(Clone)]
+pub struct PriceData {
+    pub price: i128,
+    pub ledger: u32,
 }
 
 #[contracterror]
@@ -50,6 +123,31 @@ pub enum ObscuraError {
     BridgeNotSet = 15,
     /// `set_bridge` was called after the bridge was already configured (one-time).
     BridgeAlreadySet = 16,
+
+    // ---- lending (LENDING_SPEC) ------------------------------------------
+    /// No position is registered under that commitment.
+    PositionNotFound = 17,
+    /// A position is already registered under that commitment.
+    PositionExists = 18,
+    /// `liquidate_stale` called before `deadline` elapsed.
+    PositionNotStale = 19,
+    /// A position whose attestation deadline has passed may not borrow, repay,
+    /// withdraw collateral, or be mutated -- only seized.
+    PositionStale = 20,
+    /// The proof's public price does not match the contract's oracle reading.
+    PriceMismatch = 21,
+    /// The oracle price for this asset is older than `max_price_age` ledgers.
+    StalePrice = 22,
+    /// The reserve does not hold enough free liquidity to satisfy this borrow or
+    /// redemption. The circuit proves entitlement, not availability.
+    InsufficientLiquidity = 23,
+    /// A lending entrypoint was called before `set_lending_verifiers`.
+    LendingNotConfigured = 24,
+    /// The proof's public `borrow_index` / `supply_index` disagrees with the
+    /// reserve's accrued index.
+    IndexMismatch = 25,
+    /// No price has ever been recorded for this asset.
+    PriceNotSet = 26,
 }
 
 #[contractevent(topics = ["deposit"], data_format = "map")]
@@ -123,4 +221,96 @@ pub struct OrderCancelledEvent {
     #[topic]
     pub order_commitment: BytesN<32>,
     pub refund: BytesN<32>,
+}
+
+// ---- lending events (LENDING_SPEC) ----------------------------------------
+//
+// Collateral figures appear in the clear here because they are public by design.
+// Debt never does: the contract does not know it.
+
+#[contractevent(topics = ["position_open"], data_format = "map")]
+pub struct PositionOpenedEvent {
+    #[topic]
+    pub position: BytesN<32>,
+    pub collateral_asset: Address,
+    pub collateral_amount: i128,
+    pub deadline: u32,
+}
+
+/// `amount` is public because a pooled protocol cannot stay solvent without
+/// tracking aggregate borrowings (LENDING_SPEC §1.1).
+#[contractevent(topics = ["borrow"], data_format = "map")]
+pub struct BorrowEvent {
+    #[topic]
+    pub old_position: BytesN<32>,
+    pub new_position: BytesN<32>,
+    pub asset: Address,
+    pub amount: i128,
+    /// Leaf index of the minted borrowed note.
+    pub index: u32,
+    /// Sealed note payload for the borrower (untrusted transport, same model as
+    /// `transfer`).
+    pub memo: Bytes,
+}
+
+#[contractevent(topics = ["repay"], data_format = "map")]
+pub struct RepayEvent {
+    #[topic]
+    pub old_position: BytesN<32>,
+    pub new_position: BytesN<32>,
+    pub asset: Address,
+    pub amount: i128,
+}
+
+#[contractevent(topics = ["collateral_withdrawn"], data_format = "map")]
+pub struct CollateralWithdrawnEvent {
+    #[topic]
+    pub old_position: BytesN<32>,
+    pub new_position: BytesN<32>,
+    pub asset: Address,
+    pub amount: i128,
+    pub index: u32,
+    pub memo: Bytes,
+}
+
+/// Refreshes the deadline only. Mutates no notes, burns no nullifier, consumes no
+/// tree leaf -- see LENDING_SPEC §2.
+#[contractevent(topics = ["attested"], data_format = "map")]
+pub struct AttestedEvent {
+    #[topic]
+    pub position: BytesN<32>,
+    pub new_deadline: u32,
+}
+
+/// All-or-nothing: the caller takes the full public collateral and the protocol
+/// writes off the hidden debt. Proportional liquidation is impossible here
+/// because computing the surplus would require knowing the debt.
+#[contractevent(topics = ["seized"], data_format = "map")]
+pub struct SeizedEvent {
+    #[topic]
+    pub position: BytesN<32>,
+    pub liquidator: Address,
+    pub collateral_asset: Address,
+    pub collateral_amount: i128,
+}
+
+#[contractevent(topics = ["supplied"], data_format = "map")]
+pub struct SuppliedEvent {
+    #[topic]
+    pub supply_commitment: BytesN<32>,
+    pub asset: Address,
+    pub amount: i128,
+    pub index: u32,
+    pub memo: Bytes,
+}
+
+#[contractevent(topics = ["redeemed"], data_format = "map")]
+pub struct RedeemedEvent {
+    #[topic]
+    pub nullifier: BytesN<32>,
+    pub asset: Address,
+    pub amount: i128,
+    /// Leaf indices of the payout note and any remainder supply note.
+    pub indices: Vec<u32>,
+    pub memos: Vec<Bytes>,
 }

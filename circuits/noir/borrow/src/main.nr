@@ -9,10 +9,17 @@
 //! LENDING_SPEC sec 1.1 -- following one position's operation chain reveals its
 //! debt by accumulation. The debt is still never *stored* on-chain.
 //!
+//! `old_position_commitment` is public so the contract can bind the registry entry
+//! it mutates to the position this proof is actually about. Without it the
+//! contract must trust a caller-supplied key: an attacker holding a position with
+//! identical collateral figures could prove against their own while naming a
+//! victim's commitment, and delete the victim's registry entry.
+//!
 //! Public inputs (IN THIS ORDER):
-//!   merkle_root, position_nullifier, new_position_commitment, out_note_commitment,
-//!   collateral_asset, collateral_amount, debt_asset, borrow_amount,
-//!   collateral_price, debt_price, borrow_index, max_ltv_bps
+//!   merkle_root, old_position_commitment, position_nullifier,
+//!   new_position_commitment, out_note_commitment, collateral_asset,
+//!   collateral_amount, debt_asset, borrow_amount, collateral_price, debt_price,
+//!   borrow_index, max_ltv_bps
 
 use dep::lending_lib as l;
 use dep::obscura_lib as w;
@@ -20,6 +27,7 @@ use dep::obscura_lib as w;
 fn main(
     // ---- public inputs ----
     merkle_root: pub Field,
+    old_position_commitment: pub Field,
     position_nullifier: pub Field,
     new_position_commitment: pub Field,
     out_note_commitment: pub Field,
@@ -53,6 +61,7 @@ fn main(
         owner_key,
         old_nonce,
     );
+    assert(old_position == old_position_commitment, "old position commitment mismatch");
     assert(
         w::nullifier(old_position, spending_key) == position_nullifier,
         "bad position nullifier",
@@ -120,7 +129,7 @@ fn test_borrow_within_ltv() {
     let out = w::note_commitment(1, 700, ok, 999);
 
     main(
-        root, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
+        root, old_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
         [0; TD], [0; TD], 11, 12, 999,
     );
 }
@@ -137,7 +146,7 @@ fn test_borrow_over_ltv_rejected() {
     let out = w::note_commitment(1, 751, ok, 999);
 
     main(
-        root, nf, new_pos, out, 0, 1000, 1, 751, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
+        root, old_pos, nf, new_pos, out, 0, 1000, 1, 751, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
         [0; TD], [0; TD], 11, 12, 999,
     );
 }
@@ -157,8 +166,31 @@ fn test_borrow_blocked_by_accrued_interest() {
     let out = w::note_commitment(1, 1, ok, 999);
 
     main(
-        root, nf, new_pos, out, 0, 1000, 1, 1, ONE_PRICE, ONE_PRICE, two_index, 7500, 400, sk,
+        root, old_pos, nf, new_pos, out, 0, 1000, 1, 1, ONE_PRICE, ONE_PRICE, two_index, 7500, 400, sk,
         [0; TD], [0; TD], 11, 12, 999,
+    );
+}
+
+#[test(should_fail_with = "old position commitment mismatch")]
+fn test_borrow_cannot_name_a_different_position() {
+    // Regression: without `old_position_commitment` as a public input, the
+    // contract had to trust a caller-supplied registry key. An attacker holding a
+    // position with identical collateral figures could prove against their own
+    // while naming a victim's commitment, deleting the victim's entry.
+    let attacker_sk = 7;
+    let ok = w::owner_key(attacker_sk);
+    let attacker_pos = l::position_commitment(0, 1000, 1, 0, ok, 11);
+    let nf = w::nullifier(attacker_pos, attacker_sk);
+    let root = root_allzero(attacker_pos);
+    let new_pos = l::position_commitment(0, 1000, 1, 700, ok, 12);
+    let out = w::note_commitment(1, 700, ok, 999);
+
+    // Same collateral (1000) but a different owner -- the victim's position.
+    let victim_pos = l::position_commitment(0, 1000, 1, 0, w::owner_key(8), 11);
+
+    main(
+        root, victim_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500,
+        0, attacker_sk, [0; TD], [0; TD], 11, 12, 999,
     );
 }
 
@@ -174,7 +206,7 @@ fn test_borrow_cannot_mint_more_than_declared() {
     let out = w::note_commitment(1, 900, ok, 999);
 
     main(
-        root, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
+        root, old_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
         [0; TD], [0; TD], 11, 12, 999,
     );
 }

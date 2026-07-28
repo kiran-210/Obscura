@@ -1,5 +1,6 @@
 #![no_std]
 
+mod lending;
 mod merkle;
 mod types;
 
@@ -13,8 +14,8 @@ use soroban_sdk::{
 };
 
 use crate::types::{
-    BridgeMintEvent, DataKey, DepositEvent, OrderCancelledEvent, OrderMatchedEvent,
-    OrderPlacedEvent, TransferEvent, WithdrawEvent, ObscuraError,
+    BridgeMintEvent, DataKey, DepositEvent, ObscuraError, OrderCancelledEvent, OrderMatchedEvent,
+    OrderPlacedEvent, Position, PriceData, Reserve, RiskParams, TransferEvent, WithdrawEvent,
 };
 
 /// UltraHonk proof length (SHARED.md §6): exactly 456 * 32 bytes.
@@ -386,6 +387,212 @@ impl ObscuraPool {
         }
         .publish(&env);
         Ok(())
+    }
+
+    // =======================================================================
+    // Lending (LENDING_SPEC). Collateral amounts are PUBLIC so a stale position
+    // can be seized with no keeper; debt is PRIVATE and never stored here.
+    // =======================================================================
+
+    /// One-time, admin-gated registration of the seven lending verifiers and the
+    /// initial risk parameters. A setter rather than constructor args: the pool
+    /// was deployed with a 6-arg constructor and widening it to 13 would break
+    /// the existing deploy script for no benefit.
+    pub fn set_lending_verifiers(
+        env: Env,
+        admin: Address,
+        position_open_vf: Address,
+        borrow_vf: Address,
+        repay_vf: Address,
+        withdraw_collateral_vf: Address,
+        attest_vf: Address,
+        supply_vf: Address,
+        redeem_vf: Address,
+    ) -> Result<(), ObscuraError> {
+        admin.require_auth();
+        let s = env.storage().instance();
+        match s.get::<DataKey, Address>(&DataKey::Admin) {
+            Some(existing) if existing != admin => return Err(ObscuraError::Unauthorized),
+            None => s.set(&DataKey::Admin, &admin),
+            _ => {}
+        }
+        s.set(&DataKey::PositionOpenVf, &position_open_vf);
+        s.set(&DataKey::BorrowVf, &borrow_vf);
+        s.set(&DataKey::RepayVf, &repay_vf);
+        s.set(&DataKey::WithdrawCollateralVf, &withdraw_collateral_vf);
+        s.set(&DataKey::AttestVf, &attest_vf);
+        s.set(&DataKey::SupplyVf, &supply_vf);
+        s.set(&DataKey::RedeemVf, &redeem_vf);
+        Ok(())
+    }
+
+    /// Admin-set governance risk parameters. All of these reach the circuits as
+    /// public inputs, so changing them recompiles nothing.
+    pub fn set_risk_params(
+        env: Env,
+        admin: Address,
+        params: RiskParams,
+    ) -> Result<(), ObscuraError> {
+        admin.require_auth();
+        match env.storage().instance().get::<DataKey, Address>(&DataKey::Admin) {
+            Some(existing) if existing != admin => return Err(ObscuraError::Unauthorized),
+            None => env.storage().instance().set(&DataKey::Admin, &admin),
+            _ => {}
+        }
+        env.storage().instance().set(&DataKey::RiskParams, &params);
+        Ok(())
+    }
+
+    /// PLACEHOLDER price feed. Pushing prices makes `admin` a TRUSTED party: a
+    /// wrong price can get a healthy position seized, or let an underwater one
+    /// attest. Replacing this with Reflector means changing only
+    /// `lending::oracle_price`; the staleness gate is unaffected.
+    pub fn set_price(
+        env: Env,
+        admin: Address,
+        asset: Address,
+        price: i128,
+    ) -> Result<(), ObscuraError> {
+        admin.require_auth();
+        match env.storage().instance().get::<DataKey, Address>(&DataKey::Admin) {
+            Some(existing) if existing != admin => return Err(ObscuraError::Unauthorized),
+            None => env.storage().instance().set(&DataKey::Admin, &admin),
+            _ => {}
+        }
+        if price <= 0 {
+            return Err(ObscuraError::InvalidAmount);
+        }
+        let asset_id = asset_id_of(&env, &asset);
+        env.storage().persistent().set(
+            &DataKey::Price(asset_id),
+            &PriceData {
+                price,
+                ledger: env.ledger().sequence(),
+            },
+        );
+        Ok(())
+    }
+
+    pub fn open_position(
+        env: Env,
+        proof: Bytes,
+        public_inputs: Bytes,
+        collateral_asset: Address,
+        collateral_amount: i128,
+    ) -> Result<(), ObscuraError> {
+        lending::open_position(&env, proof, public_inputs, collateral_asset, collateral_amount)
+    }
+
+    pub fn borrow(
+        env: Env,
+        proof: Bytes,
+        public_inputs: Bytes,
+        old_position: BytesN<32>,
+        debt_asset: Address,
+        borrow_amount: i128,
+        memo: Bytes,
+    ) -> Result<(), ObscuraError> {
+        lending::borrow(
+            &env,
+            proof,
+            public_inputs,
+            old_position,
+            debt_asset,
+            borrow_amount,
+            memo,
+        )
+    }
+
+    pub fn repay(
+        env: Env,
+        proof: Bytes,
+        public_inputs: Bytes,
+        old_position: BytesN<32>,
+        debt_asset: Address,
+        repay_amount: i128,
+    ) -> Result<(), ObscuraError> {
+        lending::repay(&env, proof, public_inputs, old_position, debt_asset, repay_amount)
+    }
+
+    pub fn withdraw_collateral(
+        env: Env,
+        proof: Bytes,
+        public_inputs: Bytes,
+        old_position: BytesN<32>,
+        new_collateral_amount: i128,
+        memo: Bytes,
+    ) -> Result<(), ObscuraError> {
+        lending::withdraw_collateral(
+            &env,
+            proof,
+            public_inputs,
+            old_position,
+            new_collateral_amount,
+            memo,
+        )
+    }
+
+    /// Refresh a position's deadline by proving it is still above the liquidation
+    /// threshold. Returns the new deadline.
+    pub fn attest_solvency(
+        env: Env,
+        proof: Bytes,
+        public_inputs: Bytes,
+    ) -> Result<u32, ObscuraError> {
+        lending::attest_solvency(&env, proof, public_inputs)
+    }
+
+    /// Seize a position whose deadline elapsed. Needs no proof — the collateral
+    /// figure is public, which is the whole point of the design.
+    pub fn liquidate_stale(
+        env: Env,
+        liquidator: Address,
+        position: BytesN<32>,
+    ) -> Result<i128, ObscuraError> {
+        lending::liquidate_stale(&env, liquidator, position)
+    }
+
+    pub fn supply(
+        env: Env,
+        proof: Bytes,
+        public_inputs: Bytes,
+        asset: Address,
+        amount: i128,
+        memo: Bytes,
+    ) -> Result<(), ObscuraError> {
+        lending::supply(&env, proof, public_inputs, asset, amount, memo)
+    }
+
+    pub fn redeem(
+        env: Env,
+        proof: Bytes,
+        public_inputs: Bytes,
+        asset: Address,
+        amount: i128,
+        memos: Vec<Bytes>,
+    ) -> Result<(), ObscuraError> {
+        lending::redeem(&env, proof, public_inputs, asset, amount, memos)
+    }
+
+    /// Read a live position. Collateral is public; debt is absent because the
+    /// contract does not know it.
+    pub fn get_position(env: Env, commitment: BytesN<32>) -> Option<Position> {
+        lending::get_position(&env, &commitment)
+    }
+
+    /// Per-asset reserve state, accrued to the current ledger.
+    pub fn get_reserve(env: Env, asset: Address) -> Reserve {
+        let id = asset_id_of(&env, &asset);
+        lending::reserve_accrued(&env, &id)
+    }
+
+    pub fn get_risk_params(env: Env) -> RiskParams {
+        lending::risk_params(&env)
+    }
+
+    pub fn get_price(env: Env, asset: Address) -> Result<i128, ObscuraError> {
+        let id = asset_id_of(&env, &asset);
+        lending::oracle_price(&env, &id)
     }
 
     pub fn get_last_root(env: Env) -> BytesN<32> {

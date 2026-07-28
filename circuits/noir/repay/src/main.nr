@@ -6,10 +6,14 @@
 //!
 //! `repay_amount` is PUBLIC for the same reserve-accounting reason as `borrow`.
 //!
+//! `old_position_commitment` is public so the contract can bind the registry entry
+//! it mutates to the position this proof is about (see `borrow` for the attack it
+//! prevents).
+//!
 //! Public inputs (IN THIS ORDER):
-//!   merkle_root, position_nullifier, note_nullifier, new_position_commitment,
-//!   change_commitment, collateral_asset, collateral_amount, debt_asset,
-//!   repay_amount, borrow_index
+//!   merkle_root, old_position_commitment, position_nullifier, note_nullifier,
+//!   new_position_commitment, change_commitment, collateral_asset,
+//!   collateral_amount, debt_asset, repay_amount, borrow_index
 
 use dep::lending_lib as l;
 use dep::obscura_lib as w;
@@ -17,6 +21,7 @@ use dep::obscura_lib as w;
 fn main(
     // ---- public inputs ----
     merkle_root: pub Field,
+    old_position_commitment: pub Field,
     position_nullifier: pub Field,
     note_nullifier: pub Field,
     new_position_commitment: pub Field,
@@ -54,6 +59,7 @@ fn main(
         owner_key,
         old_nonce,
     );
+    assert(old_position == old_position_commitment, "old position commitment mismatch");
     assert(
         w::nullifier(old_position, spending_key) == position_nullifier,
         "bad position nullifier",
