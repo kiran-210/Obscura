@@ -35,6 +35,13 @@ import {
   recipientHash,
   toField,
   ObscuraContract,
+  buildBorrowInputs,
+  buildPositionOpenInputs,
+  buildSolvencyAttestationInputs,
+  computeNullifier,
+  createPosition,
+  isSolvent,
+  toScaled,
   type CircuitInputMap,
   type Field,
 } from '@obscura/sdk'
@@ -48,13 +55,19 @@ import { formatAmount } from './format'
 import {
   addNote,
   addOrder,
+  addPosition,
+  fromSdkPosition,
   getSpendingKey,
   loadNotes,
   loadOrders,
   markSpent,
+  replacePosition,
   setOrderStatus,
   toBalanceNote,
+  toSdkPosition,
+  updatePosition,
   type StoredNote,
+  type StoredPosition,
 } from './note-store'
 import { dummyPath, readPoolTreeState, witnessesAfterInserts, type MerkleWitness } from './merkle-witness'
 import { getIndexer, syncIndexer } from './indexer-service'
@@ -262,6 +275,322 @@ export class RealObscuraSdk implements ObscuraSdk {
       throw new Error('This note is not yet visible on-chain (still indexing). Try again in a moment.')
     }
     return indexer.witnessFor(stored.leafIndex)
+  }
+
+  // =====================================================================
+  // Lending (LENDING_SPEC)
+  //
+  // Collateral is public on-chain; debt is private and lives only in the
+  // position commitment, so `debtScaled` and `nonce` are persisted locally by
+  // note-store. Losing them makes a position unprovable — it cannot be attested
+  // or repaid, and is seized once its deadline lapses.
+  // =====================================================================
+
+  /** Live risk parameters as the contract reports them. */
+  async getRiskParams(): Promise<{
+    maxLtvBps: number
+    liqThresholdBps: number
+    attestationPeriod: number
+    maxPriceAge: number
+  }> {
+    const raw = await this.readView('get_risk_params', [])
+    const v = scValToNative(raw) as Record<string, number>
+    return {
+      maxLtvBps: Number(v.max_ltv_bps),
+      liqThresholdBps: Number(v.liq_threshold_bps),
+      attestationPeriod: Number(v.attestation_period),
+      maxPriceAge: Number(v.max_price_age),
+    }
+  }
+
+  /** Oracle price for an asset, PRICE_SCALE fixed point. Throws if unset/stale. */
+  async getPrice(assetSac: string): Promise<bigint> {
+    const raw = await this.readView('get_price', [new Contract(assetSac).address().toScVal()])
+    return BigInt(scValToNative(raw) as string | number)
+  }
+
+  /** Per-asset reserve, accrued to the current ledger. */
+  async getReserve(assetSac: string): Promise<{ borrowIndex: bigint; supplyIndex: bigint; available: bigint }> {
+    const raw = await this.readView('get_reserve', [new Contract(assetSac).address().toScVal()])
+    const v = scValToNative(raw) as Record<string, string | number>
+    const supplied = BigInt(v.total_supplied)
+    const borrowed = BigInt(v.total_borrowed)
+    return {
+      borrowIndex: BigInt(v.borrow_index),
+      supplyIndex: BigInt(v.supply_index),
+      available: supplied - borrowed,
+    }
+  }
+
+  /** The on-chain record for a position: public collateral plus the deadline. */
+  async getPositionOnChain(
+    commitmentHex: string,
+  ): Promise<{ collateralAmount: bigint; deadline: number } | null> {
+    const raw = await this.readView('get_position', [
+      xdr.ScVal.scvBytes(Buffer.from(fieldToBytes(hexToField(commitmentHex)))),
+    ])
+    const v = scValToNative(raw) as Record<string, string | number> | null
+    if (!v) return null
+    return { collateralAmount: BigInt(v.collateral_amount), deadline: Number(v.deadline) }
+  }
+
+  /** Lock a shielded note as collateral, opening a position with zero debt. */
+  async openPosition(params: {
+    note: StoredNote
+    debtAssetCode: string
+  }): Promise<{ hash: string; position: StoredPosition }> {
+    const from = await this.requireAddress()
+    const spendingKey = getSpendingKey()
+    const input = toBalanceNote(params.note)
+    const witness = await this.spendWitness(params.note)
+    const debtAssetId = assetIdFor(assetMeta(params.debtAssetCode))
+
+    const position = createPosition({
+      collateralAsset: input.assetId,
+      collateralAmount: input.amount,
+      debtAsset: debtAssetId,
+      spendingKey,
+    })
+
+    const inputs = buildPositionOpenInputs({
+      merkleRoot: witness.root,
+      nullifier: noteNullifier(input),
+      positionCommitment: position.commitment,
+      collateralAsset: input.assetId,
+      collateralAmount: input.amount,
+      noteBlinding: input.blinding,
+      spendingKey,
+      merklePath: witness.pathElements,
+      merkleIndices: witness.pathIndices,
+      debtAsset: debtAssetId,
+      positionNonce: position.nonce,
+    })
+    const proof = await this.proveAndVerify('position_open', inputs)
+
+    const op = this.contract.openPositionOp({
+      proof: proof.proof,
+      publicInputs: encodePublicInputs(proof.publicInputs),
+      collateralAsset: this.assetAddressOf(params.note),
+      collateralAmount: input.amount,
+    })
+    const { hash } = await this.submitOp(op, from)
+    markSpent(params.note.commitment)
+
+    const stored = fromSdkPosition(position, {
+      collateralAssetCode: params.note.assetCode,
+      debtAssetCode: params.debtAssetCode,
+      ...(params.note.assetAddress ? { collateralAssetAddress: params.note.assetAddress } : {}),
+      txHash: hash,
+    })
+    addPosition(stored)
+    // Pull the contract-assigned deadline rather than recomputing it locally.
+    const onChain = await this.getPositionOnChain(stored.commitment).catch(() => null)
+    if (onChain) updatePosition(stored.commitment, { deadline: onChain.deadline })
+    return { hash, position: stored }
+  }
+
+  /** Borrow against a position. `borrowAmount` is public on-chain. */
+  async borrowAgainst(params: {
+    position: StoredPosition
+    borrowAmount: bigint
+  }): Promise<{ hash: string; position: StoredPosition }> {
+    const from = await this.requireAddress()
+    const old = toSdkPosition(params.position)
+    const debtMeta = assetMeta(params.position.debtAssetCode)
+    const debtSac = debtMeta.sac
+    if (!debtSac) throw new Error(`No SAC configured for ${params.position.debtAssetCode}.`)
+    const collateralSac = params.position.collateralAssetAddress ?? NATIVE_SAC
+
+    const [risk, cPrice, dPrice, reserve] = await Promise.all([
+      this.getRiskParams(),
+      this.getPrice(collateralSac),
+      this.getPrice(debtSac),
+      this.getReserve(debtSac),
+    ])
+    if (reserve.available < params.borrowAmount) {
+      throw new Error(
+        `The ${params.position.debtAssetCode} reserve has only ${formatAmount(
+          baseUnitsToNumber(reserve.available, debtMeta.decimals),
+        )} free. Someone must supply liquidity first.`,
+      )
+    }
+
+    const newScaled = old.debtScaled + toScaled(params.borrowAmount, reserve.borrowIndex)
+    if (
+      !isSolvent({
+        collateralAmount: old.collateralAmount,
+        collateralPrice: cPrice,
+        debtScaled: newScaled,
+        debtPrice: dPrice,
+        borrowIndex: reserve.borrowIndex,
+        bps: risk.maxLtvBps,
+      })
+    ) {
+      throw new Error(`That would breach the ${risk.maxLtvBps / 100}% borrow ceiling.`)
+    }
+
+    const witness = await this.positionWitness(params.position)
+    const next = createPosition({
+      collateralAsset: old.collateralAsset,
+      collateralAmount: old.collateralAmount,
+      debtAsset: old.debtAsset,
+      debtScaled: newScaled,
+      spendingKey: old.spendingKey as Field,
+    })
+    const outNote = createNote({
+      assetId: old.debtAsset,
+      amount: params.borrowAmount,
+      spendingKey: getSpendingKey(),
+    })
+
+    const inputs = buildBorrowInputs({
+      merkleRoot: witness.root,
+      oldPositionCommitment: old.commitment,
+      positionNullifier: computeNullifier(old.commitment, old.spendingKey as Field),
+      newPositionCommitment: next.commitment,
+      outNoteCommitment: outNote.commitment,
+      collateralAsset: old.collateralAsset,
+      collateralAmount: old.collateralAmount,
+      debtAsset: old.debtAsset,
+      borrowAmount: params.borrowAmount,
+      collateralPrice: cPrice,
+      debtPrice: dPrice,
+      borrowIndex: reserve.borrowIndex,
+      maxLtvBps: risk.maxLtvBps,
+      oldDebtScaled: old.debtScaled,
+      spendingKey: old.spendingKey as Field,
+      merklePath: witness.pathElements,
+      merkleIndices: witness.pathIndices,
+      oldNonce: old.nonce,
+      newNonce: next.nonce,
+      outBlinding: outNote.blinding,
+    })
+    const proof = await this.proveAndVerify('borrow', inputs)
+
+    const op = this.contract.borrowOp({
+      proof: proof.proof,
+      publicInputs: encodePublicInputs(proof.publicInputs),
+      oldPosition: old.commitment,
+      debtAsset: debtSac,
+      borrowAmount: params.borrowAmount,
+    })
+    const { hash } = await this.submitOp(op, from)
+
+    const stored = fromSdkPosition(next, {
+      collateralAssetCode: params.position.collateralAssetCode,
+      debtAssetCode: params.position.debtAssetCode,
+      ...(params.position.collateralAssetAddress
+        ? { collateralAssetAddress: params.position.collateralAssetAddress }
+        : {}),
+      ...(params.position.deadline !== undefined ? { deadline: params.position.deadline } : {}),
+      txHash: hash,
+    })
+    replacePosition(params.position.commitment, stored)
+    outNote.assetAddress = debtSac
+    addNote(outNote, {
+      assetCode: params.position.debtAssetCode,
+      decimals: debtMeta.decimals,
+      txHash: hash,
+      source: 'received',
+    })
+    return { hash, position: stored }
+  }
+
+  /** Refresh a position's attestation deadline by proving it is still healthy. */
+  async attestSolvency(params: { position: StoredPosition }): Promise<{ hash: string; deadline: number }> {
+    const from = await this.requireAddress()
+    const pos = toSdkPosition(params.position)
+    const debtSac = assetMeta(params.position.debtAssetCode).sac
+    if (!debtSac) throw new Error(`No SAC configured for ${params.position.debtAssetCode}.`)
+    const collateralSac = params.position.collateralAssetAddress ?? NATIVE_SAC
+
+    const [risk, cPrice, dPrice, reserve] = await Promise.all([
+      this.getRiskParams(),
+      this.getPrice(collateralSac),
+      this.getPrice(debtSac),
+      this.getReserve(debtSac),
+    ])
+
+    if (
+      !isSolvent({
+        collateralAmount: pos.collateralAmount,
+        collateralPrice: cPrice,
+        debtScaled: pos.debtScaled,
+        debtPrice: dPrice,
+        borrowIndex: reserve.borrowIndex,
+        bps: risk.liqThresholdBps,
+      })
+    ) {
+      // No valid proof exists for an underwater position; the circuit would reject.
+      throw new Error(
+        'This position is below the liquidation threshold, so it cannot attest. Repay debt or add collateral first.',
+      )
+    }
+
+    const inputs = buildSolvencyAttestationInputs({
+      positionCommitment: pos.commitment,
+      collateralAsset: pos.collateralAsset,
+      collateralAmount: pos.collateralAmount,
+      debtAsset: pos.debtAsset,
+      collateralPrice: cPrice,
+      debtPrice: dPrice,
+      borrowIndex: reserve.borrowIndex,
+      liqThresholdBps: risk.liqThresholdBps,
+      debtScaled: pos.debtScaled,
+      spendingKey: pos.spendingKey as Field,
+      nonce: pos.nonce,
+    })
+    const proof = await this.proveAndVerify('solvency_attestation', inputs)
+
+    const op = this.contract.attestSolvencyOp({
+      proof: proof.proof,
+      publicInputs: encodePublicInputs(proof.publicInputs),
+    })
+    const { hash } = await this.submitOp(op, from)
+
+    const onChain = await this.getPositionOnChain(params.position.commitment).catch(() => null)
+    const deadline = onChain?.deadline ?? 0
+    updatePosition(params.position.commitment, { deadline })
+    return { hash, deadline }
+  }
+
+  /** Merkle witness for a position commitment (same tree as balance notes). */
+  private async positionWitness(stored: StoredPosition): Promise<MerkleWitness> {
+    if (stored.leafIndex === undefined) {
+      throw new Error(
+        'This position has no leaf index yet — wait for the indexer to observe it on-chain.',
+      )
+    }
+    const indexer = getIndexer()
+    if (!indexer) throw new Error('The wallet indexer is not ready — reconnect your Stellar wallet.')
+    await syncIndexer()
+    return indexer.witnessFor(stored.leafIndex)
+  }
+
+  /** Read-only contract call via simulation (no signing, no fee). */
+  private async readView(method: string, args: xdr.ScVal[]): Promise<xdr.ScVal> {
+    const server = this.server()
+    const account = new Account(
+      'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+      '0',
+    )
+    const op = new Contract(POOL_CONTRACT_ID).call(method, ...args)
+    const tx = buildTransaction(account, op, {
+      networkPassphrase: NETWORK_PASSPHRASE,
+      timeoutSeconds: 30,
+    })
+    const sim = await server.simulateTransaction(tx)
+    if (rpc.Api.isSimulationError(sim)) {
+      throw new Error(`${method} failed: ${sim.error}`)
+    }
+    const ret = (sim as rpc.Api.SimulateTransactionSuccessResponse).result?.retval
+    if (!ret) throw new Error(`${method} returned nothing`)
+    return ret
+  }
+
+  /** SAC address for a stored note, defaulting to native. */
+  private assetAddressOf(note: StoredNote): string {
+    return note.assetAddress ?? NATIVE_SAC
   }
 
   /** Fetch a compiled circuit, generate the UltraHonk proof, and verify it locally (against

@@ -20,6 +20,7 @@ import {
 } from '../lib/lending-view'
 import { SOROBAN_RPC_URL } from '../lib/config'
 import { loadPositions, type StoredPosition } from '../lib/note-store'
+import { RealObscuraSdk, toBaseUnits } from '../lib/real-sdk'
 import { assetMeta } from '../lib/tokens'
 import { AssetAvatar, Badge, Button, Card, Field, SectionHeading, TextInput } from './ui'
 
@@ -278,10 +279,9 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
   const [ledger, setLedger] = useState<number | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [active, setActive] = useState<{ view: PositionView; action: Action } | null>(null)
+  const [busy, setBusy] = useState<string | null>(null)
   const risk = DEFAULT_RISK
-  // No action can be in flight until the verifiers are deployed; the prop is kept
-  // so the plumbing is ready once they are.
-  const busy: string | null = null
+  const sdk = useMemo(() => new RealObscuraSdk(), [])
 
   useEffect(() => {
     setStored(loadPositions().filter((p) => p.status === 'open'))
@@ -336,10 +336,45 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
     (v) => v.deadline && (v.deadline.urgency === 'critical' || v.deadline.urgency === 'expired'),
   )
 
-  function notImplemented(what: string) {
-    setMsg(
-      `${what} needs the lending verifiers deployed on-chain first — the circuits and contract are ready, but no verifier contract exists to check the proof yet.`,
-    )
+  function refresh() {
+    setStored(loadPositions().filter((p) => p.status === 'open'))
+  }
+
+  /** Run a lending action, surfacing the real error rather than a generic one. */
+  async function run(key: string, fn: () => Promise<string>) {
+    setBusy(key)
+    setMsg(null)
+    try {
+      setMsg(await fn())
+      refresh()
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : 'The action failed.')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function onAttest(view: PositionView) {
+    await run(`attest:${view.stored.commitment}`, async () => {
+      const { hash, deadline } = await sdk.attestSolvency({ position: view.stored })
+      return `Solvency attested — deadline extended to ledger ${deadline}. tx ${hash.slice(0, 12)}…`
+    })
+  }
+
+  async function onSubmit(view: PositionView, action: Action, amount: string) {
+    const meta = assetMeta(action === 'withdraw' ? view.collateralCode : view.debtCode)
+    const base = toBaseUnits(amount, meta.decimals)
+    await run(`${action}:${view.stored.commitment}`, async () => {
+      if (action === 'borrow') {
+        const { hash } = await sdk.borrowAgainst({ position: view.stored, borrowAmount: base })
+        return `Borrowed ${amount} ${view.debtCode}. tx ${hash.slice(0, 12)}…`
+      }
+      // repay and withdraw-collateral are implemented in the circuits, the contract
+      // and the SDK, but not yet wired through this client.
+      throw new Error(
+        `${action === 'repay' ? 'Repay' : 'Withdraw collateral'} is not wired into the app yet — the circuit, contract entrypoint and verifier are all deployed, but this button has no client implementation.`,
+      )
+    })
   }
 
   return (
@@ -366,7 +401,9 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
             so the position can be liquidated trustlessly; how much you borrow against it
             stays private.
           </p>
-          <Button onClick={() => notImplemented('Opening a position')}>Open a position</Button>
+          <p className="text-xs text-zinc-500">
+            Open one from Portfolio by locking a deposited note as collateral.
+          </p>
         </Card>
       ) : active ? (
         <ActionForm
@@ -375,9 +412,10 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
           risk={risk}
           busy={busy}
           onCancel={() => setActive(null)}
-          onSubmit={() => {
+          onSubmit={(amount) => {
+            const { view, action } = active
             setActive(null)
-            notImplemented('This action')
+            void onSubmit(view, action, amount)
           }}
         />
       ) : (
@@ -388,7 +426,7 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
               view={v}
               risk={risk}
               busy={busy}
-              onAttest={() => notImplemented('Attesting solvency')}
+              onAttest={(v) => void onAttest(v)}
               onAct={(view, action) => setActive({ view, action })}
             />
           ))}
