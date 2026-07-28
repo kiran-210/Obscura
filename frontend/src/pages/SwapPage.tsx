@@ -17,7 +17,7 @@ function OperatorInfo() {
       </button>
       <span
         role="tooltip"
-        className="pointer-events-none absolute left-0 top-full z-30 mt-2 w-72 rounded-xl border border-[#efe9dc]/12 bg-[#1c1710]/95 px-4 py-3 text-xs leading-relaxed text-zinc-300 opacity-0 shadow-xl backdrop-blur-md transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+        className="pointer-events-none absolute left-0 top-full z-30 mt-2 w-72 rounded-xl border border-[#00CDCD]/12 bg-[#FFFFFF]/95 px-4 py-3 text-xs leading-relaxed text-zinc-300 opacity-0 shadow-xl backdrop-blur-md transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
       >
         <span className="font-mono uppercase tracking-[0.14em] text-spectral/80">Operator</span> — orders place and cancel
         on-chain now; live matching connects when a matcher operator is running. Fills stay ZK-enforced at the midpoint,

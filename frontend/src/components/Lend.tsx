@@ -43,7 +43,7 @@ function HealthBar({ health }: { health: number }) {
   const pct = Number.isFinite(health) ? Math.min(100, Math.max(0, ((health - 1) / 1.5) * 100)) : 100
   return (
     <div className="space-y-1">
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#efe9dc]/10">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#00CDCD]/10">
         <div
           className={cx(
             'h-full rounded-full transition-[width] duration-500',
@@ -78,7 +78,7 @@ function DeadlineChip({ view }: { view: PositionView }) {
       : d.urgency === 'due-soon'
         ? 'warn'
         : 'neutral'
-  return <Badge tone={tone}>attest · {deadlineLabel(d)}</Badge>
+  return <Badge tone={tone}>next check · {deadlineLabel(d)}</Badge>
 }
 
 function PositionCard({
@@ -117,8 +117,8 @@ function PositionCard({
 
       {seizable && (
         <p className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs leading-relaxed text-rose-200">
-          This position missed its attestation deadline. Anyone may now seize the full
-          collateral, and it can no longer be repaid or topped up.
+          This loan missed its health check. It is now locked and the collateral can be
+          claimed &mdash; it can no longer be repaid or topped up.
         </p>
       )}
 
@@ -172,7 +172,7 @@ function PositionCard({
           disabled={seizable || busy !== null}
           onClick={() => onAttest(view)}
         >
-          {busy === `attest:${view.stored.commitment}` ? 'Proving…' : 'Attest solvency'}
+          {busy === `attest:${view.stored.commitment}` ? 'Working…' : 'Confirm loan is healthy'}
         </Button>
         <Button className="flex-1" disabled={seizable || busy !== null} onClick={() => onAct(view, 'borrow')}>
           Borrow
@@ -254,7 +254,7 @@ function OpenPositionForm({
         />
       </Field>
 
-      <div className="space-y-1 rounded-lg border border-[#efe9dc]/10 bg-[#efe9dc]/[0.03] px-3 py-2 text-xs">
+      <div className="space-y-1 rounded-lg border border-[#00CDCD]/10 bg-[#00CDCD]/[0.03] px-3 py-2 text-xs">
         <div className="flex justify-between">
           <span className="text-zinc-500">Collateral locked</span>
           <span className="font-mono tabular-nums text-zinc-200">
@@ -279,7 +279,7 @@ function OpenPositionForm({
 
       {selected?.leafIndex === undefined && (
         <p className="text-xs text-amber-300">
-          This note has no leaf index yet — wait for the indexer to observe it on-chain.
+          Still confirming your deposit…
         </p>
       )}
 
@@ -288,7 +288,7 @@ function OpenPositionForm({
         disabled={!selected || selected.leafIndex === undefined || busy !== null}
         onClick={() => selected && onOpen(selected, debtAsset)}
       >
-        {busy === 'open' ? 'Proving…' : 'Open position'}
+        {busy === 'open' ? 'Working…' : 'Open position'}
       </Button>
     </Card>
   )
@@ -325,7 +325,7 @@ function SupplyForm({
       <SectionHeading title="Supply liquidity" />
 
       {open.length > 0 && (
-        <div className="space-y-1 rounded-lg border border-[#efe9dc]/10 bg-[#efe9dc]/[0.03] px-3 py-2 text-xs">
+        <div className="space-y-1 rounded-lg border border-[#00CDCD]/10 bg-[#00CDCD]/[0.03] px-3 py-2 text-xs">
           <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">
             Your supplied positions <span className="text-spectral/70">· private</span>
           </div>
@@ -370,7 +370,7 @@ function SupplyForm({
 
           {selected?.leafIndex === undefined && (
             <p className="text-xs text-amber-300">
-              This note has no leaf index yet — wait for the indexer to observe it on-chain.
+              Still confirming your deposit…
             </p>
           )}
 
@@ -379,7 +379,7 @@ function SupplyForm({
             disabled={!selected || selected.leafIndex === undefined || busy !== null}
             onClick={() => selected && onSupply(selected)}
           >
-            {busy === 'supply' ? 'Proving…' : 'Supply'}
+            {busy === 'supply' ? 'Working…' : 'Supply'}
           </Button>
         </>
       )}
@@ -466,7 +466,7 @@ function ActionForm({
 
       <div className="flex gap-2">
         <Button className="flex-1" disabled={invalid || busy !== null} onClick={() => onSubmit(amount)}>
-          {busy ? 'Proving…' : 'Confirm'}
+          {busy ? 'Working…' : 'Confirm'}
         </Button>
         <Button className="flex-1" onClick={onCancel}>
           Cancel
@@ -579,7 +579,7 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
   async function onAttest(view: PositionView) {
     await run(`attest:${view.stored.commitment}`, async () => {
       const { hash, deadline } = await sdk.attestSolvency({ position: view.stored })
-      return `Solvency attested — deadline extended to ledger ${deadline}. tx ${hash.slice(0, 12)}…`
+      return `Loan confirmed healthy — next check due at ledger ${deadline}. tx ${hash.slice(0, 12)}…`
     })
   }
 
@@ -616,7 +616,7 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
         return `Repaid ${amount} ${view.debtCode}. tx ${hash.slice(0, 12)}…`
       }
       throw new Error(
-        'Withdraw collateral is not wired into the app yet — the circuit, contract entrypoint and verifier are all deployed, but this button has no client implementation.',
+        'Withdraw collateral is not available yet.',
       )
     })
   }
@@ -632,7 +632,7 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
       )}
 
       {msg && (
-        <div className="rounded-xl border border-[#efe9dc]/12 bg-[#1c1710]/70 px-4 py-3 text-sm leading-relaxed text-zinc-300">
+        <div className="rounded-xl border border-[#00CDCD]/12 bg-[#FFFFFF]/70 px-4 py-3 text-sm leading-relaxed text-zinc-300">
           {msg}
         </div>
       )}

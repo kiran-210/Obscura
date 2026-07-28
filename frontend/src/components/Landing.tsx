@@ -54,17 +54,17 @@ function CoordsBackground() {
         />
       ))}
 
-      <ul className="absolute inset-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[#efe9dc]/55">
+      <ul className="absolute inset-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[#00CDCD]/55">
         <li className="absolute left-[5%] top-[45%]">
-          <span className="block text-[#efe9dc]/80">Testnet</span>
+          <span className="block text-[#00CDCD]/80">Testnet</span>
           <span className="block">[ Stellar · SDF Horizon ]</span>
         </li>
         <li className="absolute right-[5%] top-[38%] text-right">
-          <span className="block text-[#efe9dc]/80">Proof</span>
+          <span className="block text-[#00CDCD]/80">Proof</span>
           <span className="block">[ Groth16 · BN254 ]</span>
         </li>
         <li className="absolute bottom-[16%] left-1/2 -translate-x-1/2 text-center">
-          <span className="block text-[#efe9dc]/80">Shielded</span>
+          <span className="block text-[#00CDCD]/80">Shielded</span>
           <span className="block">[ Poseidon · Merkle ]</span>
         </li>
       </ul>
@@ -102,7 +102,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
   }, [])
 
   return (
-    <div className="relative w-full bg-[#211b12] text-[#efe9dc]">
+    <div className="relative w-full bg-[#211b12] text-[#00CDCD]">
       <section
         ref={heroRef}
         className="relative min-h-screen w-full overflow-hidden"
@@ -140,14 +140,14 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <a href="#/" className="flex items-center gap-2.5">
             <img src={markUrl} alt="Obscura" className="h-7 w-auto" />
             <span className="font-display text-sm font-semibold tracking-tight">
-              obscura <span className="align-super font-mono text-[10px] tracking-[0.2em] text-[#efe9dc]/60">ZK</span>
+              obscura <span className="align-super font-mono text-[10px] tracking-[0.2em] text-[#00CDCD]/60">ZK</span>
             </span>
           </a>
           <nav className="flex items-center gap-8 font-mono text-[11px] uppercase tracking-[0.18em]">
-            <a href="#/faucet" className="text-[#efe9dc]/70 transition hover:text-[#efe9dc]">
+            <a href="#/faucet" className="text-[#00CDCD]/70 transition hover:text-[#00CDCD]">
               Faucet
             </a>
-            <button onClick={onEnter} className="text-[#efe9dc]/70 transition hover:text-[#efe9dc]">
+            <button onClick={onEnter} className="text-[#00CDCD]/70 transition hover:text-[#00CDCD]">
               Enter →
             </button>
           </nav>
@@ -157,7 +157,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
       {/* Hero — two fixed word-lines + one rotating, scrambling line. */}
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6">
         <h1
-          className="text-center font-display font-medium uppercase leading-[0.98] tracking-[-0.04em] text-[#f6f1e6]"
+          className="text-center font-display font-medium uppercase leading-[0.98] tracking-[-0.04em] text-[#062626]"
           style={{ fontSize: 'clamp(2.6rem, 7.4vw, 5.75rem)', textShadow: '0 2px 30px rgba(20,16,9,0.45)' }}
         >
           <span className="flex flex-wrap justify-center gap-x-[0.26em]">
@@ -173,7 +173,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           </span>
         </h1>
 
-        <span className="mt-10 font-mono text-[11px] uppercase tracking-[0.3em] text-[#efe9dc]/55">scroll</span>
+        <span className="mt-10 font-mono text-[11px] uppercase tracking-[0.3em] text-[#00CDCD]/55">scroll</span>
       </div>
 
       {/* Clean seam into the footer: a long, gradual cream wash over the bottom

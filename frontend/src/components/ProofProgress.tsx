@@ -30,7 +30,7 @@ export function ProofProgress({
   const current = flow.steps[Math.min(flow.step, flow.steps.length - 1)]
 
   return (
-    <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center overflow-hidden bg-[#1c1710]/88 p-6 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center overflow-hidden bg-[#FFFFFF]/88 p-6 backdrop-blur-sm animate-fade-in">
       {/* the field intensifying — a slow warm pulse while proving */}
       {running && (
         <div
@@ -79,7 +79,7 @@ export function ProofProgress({
                   'h-1.5 rounded-full transition-all duration-300',
                   state === 'active' ? 'w-8 bg-spectral' : 'w-4',
                   state === 'done' && 'bg-patina-400/80',
-                  state === 'pending' && 'bg-[#efe9dc]/15',
+                  state === 'pending' && 'bg-[#00CDCD]/15',
                   state === 'error' && 'w-8 bg-red-400',
                 )}
               />

@@ -39,12 +39,12 @@ function Coords() {
  */
 export function BrandCanvas() {
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10 bg-[#1c1710]">
+    <div className="pointer-events-none fixed inset-0 -z-10 bg-[#FFFFFF]">
       <div className="absolute inset-0">
-        <FluidVolume baseColor="#4f3e22" background="#1c1710" quality="medium" speed={0.85} />
+        <FluidVolume baseColor="#4f3e22" background="#FFFFFF" quality="medium" speed={0.85} />
       </div>
       {/* Sepia scrim — keeps the field as atmosphere, not a distraction under forms. */}
-      <div className="absolute inset-0 bg-[#1c1710]/60" />
+      <div className="absolute inset-0 bg-[#FFFFFF]/60" />
       <div className="wr-grain absolute inset-0 opacity-40" />
       <Coords />
     </div>

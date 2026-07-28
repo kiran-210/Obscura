@@ -25,7 +25,7 @@ export function Act({
   children: ReactNode
 }) {
   return (
-    <section id={id} className="scroll-mt-24 border-t border-[#efe9dc]/10">
+    <section id={id} className="scroll-mt-24 border-t border-[#00CDCD]/10">
       <div className={`mx-auto w-full ${maxWidthClassName} px-5 py-16 sm:py-24`}>
         <div className="mb-9 flex items-start justify-between gap-6">
           <div>

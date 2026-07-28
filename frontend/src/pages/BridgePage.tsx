@@ -15,7 +15,7 @@ function CrossingRule({ progress }: { progress: BridgeProgress }) {
         <span>shielded pool</span>
       </div>
       <div className="relative h-6">
-        <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[#efe9dc]/12" />
+        <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[#00CDCD]/12" />
         <div
           className="absolute left-0 top-1/2 h-px -translate-y-1/2 bg-spectral/60 transition-all duration-700"
           style={{ width: `${pct}%` }}
@@ -24,7 +24,7 @@ function CrossingRule({ progress }: { progress: BridgeProgress }) {
           <span
             className={cx(
               'block h-2.5 w-2.5 rounded-full transition-colors',
-              lit ? 'bg-spectral shadow-[0_0_10px_2px_rgba(237,235,230,0.45)]' : 'bg-[#efe9dc]/40',
+              lit ? 'bg-spectral shadow-[0_0_10px_2px_rgba(237,235,230,0.45)]' : 'bg-[#00CDCD]/40',
             )}
           />
         </div>

@@ -169,7 +169,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         <div className={`mt-8 ${CARD}`} style={CARD_BG}>
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[1rem] border border-[#1b1610]/12 bg-[#1b1610]/12 sm:grid-cols-4">
             {MODULES.map((m) => (
-              <a key={m.k} href={`#${m.to}`} className="group block bg-[#f4efe4] px-5 py-7 transition hover:bg-[#efe9dc]">
+              <a key={m.k} href={`#${m.to}`} className="group block bg-[#f4efe4] px-5 py-7 transition hover:bg-[#00CDCD]">
                 <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#3B382D]">{m.k}</div>
                 <p className="mt-3 text-[13px] leading-relaxed text-[#565243]">{m.d}</p>
                 <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#78735F] transition-colors group-hover:text-[#4f3e22]">

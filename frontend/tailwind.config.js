@@ -5,28 +5,35 @@
 // through fog), pulled from the obscura-in-mist mood image. `mist`/`halo` are the
 // canonical names; `ink`/`spectral` alias them so existing classes re-theme with
 // no edits, and the default cool `zinc` text ramp is warmed to match.
+// ShieldBid palette — cyan on white.
+//
+// The ramp is INVERTED relative to the old dark theme: `950` (which the body and
+// panels use) is now white and `50` is the deepest cyan. Every existing
+// `bg-ink-*` / `border-ink-*` class re-themes with no component edits, which is
+// why the surface names were kept.
 const mist = {
-  50: '#F3F0E7',
-  100: '#E9E4D5',
-  200: '#D6D0BC',
-  300: '#BBB49E',
-  400: '#9A9583',
-  500: '#78735F',
-  600: '#565243',
-  700: '#3B382D',
-  750: '#302E24',
-  800: '#24221B',
-  850: '#1C1A14',
-  900: '#16150F',
-  950: '#0F0E09',
+  50: '#007A7A',
+  100: '#009B9B',
+  200: '#00B8B8',
+  300: '#00CDCD',
+  400: '#33D6D6',
+  500: '#5CDEDE',
+  600: '#8AE8E8',
+  700: '#B3F0F0',
+  750: '#CCF7F7',
+  800: '#DFFAFA',
+  850: '#ECFDFD',
+  900: '#F5FEFE',
+  950: '#FFFFFF',
 }
 
+// Accent — the two brand cyans.
 const halo = {
-  DEFAULT: '#EDEBE6',
-  soft: '#F7F6F2',
-  dim: '#B6B3AC',
-  glow: '#F2F0EB',
-  deep: '#6E6B64',
+  DEFAULT: '#00CDCD',
+  soft: '#00FFFF',
+  dim: '#4DD9D9',
+  glow: '#00FFFF',
+  deep: '#009B9B',
 }
 
 // Warm antique-gold accent for positive/confirmed states — the sepia-world
@@ -40,18 +47,21 @@ const patina = {
 
 // Warm the default grey text scale so existing `text-zinc-*` reads warm (fog),
 // not cool. Deep-merges with Tailwind's zinc, overriding the shades in use.
+// Text ramp, also INVERTED: `text-zinc-100/200` (headings) are now near-black
+// teal and `text-zinc-500/600` (muted) are mid-teal, so existing classes stay
+// legible on the white surfaces above instead of turning invisible.
 const warmZinc = {
-  50: '#F6F3EA',
-  100: '#ECE7D9',
-  200: '#D8D2BF',
-  300: '#BBB49E',
-  400: '#948F7D',
-  500: '#726E5C',
-  600: '#524E41',
-  700: '#3B382D',
-  800: '#24221B',
-  900: '#16150F',
-  950: '#0F0E09',
+  50: '#062626',
+  100: '#0B3333',
+  200: '#0F4244',
+  300: '#154F52',
+  400: '#2F6E71',
+  500: '#4F8C8F',
+  600: '#74A9AC',
+  700: '#9EC6C8',
+  800: '#C6E2E4',
+  900: '#E4F4F5',
+  950: '#FFFFFF',
 }
 
 export default {

@@ -78,11 +78,11 @@ export function PortfolioPage() {
       {loadingBalances ? (
         <div className="space-y-2">
           {[0, 1].map((i) => (
-            <div key={i} className="h-[68px] animate-pulse rounded-2xl border border-[#efe9dc]/10 bg-[#1c1710]/40" />
+            <div key={i} className="h-[68px] animate-pulse rounded-2xl border border-[#00CDCD]/10 bg-[#FFFFFF]/40" />
           ))}
         </div>
       ) : balances.length === 0 ? (
-        <div className="rounded-2xl border border-[#efe9dc]/10 bg-[#1c1710]/40 px-6 py-14 text-center">
+        <div className="rounded-2xl border border-[#00CDCD]/10 bg-[#FFFFFF]/40 px-6 py-14 text-center">
           <p className="text-sm text-zinc-400">Nothing shielded yet.</p>
           <Link to="/deposit" className="coord-label mt-3 inline-block text-spectral/70 transition hover:text-spectral">
             deposit assets →
@@ -95,22 +95,22 @@ export function PortfolioPage() {
             const isOpen = open === b.asset
             const meta = assetMeta(b.asset)
             return (
-              <div key={b.asset} className="overflow-hidden rounded-2xl border border-[#efe9dc]/10 bg-[#1c1710]/40">
+              <div key={b.asset} className="overflow-hidden rounded-2xl border border-[#00CDCD]/10 bg-[#FFFFFF]/40">
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : b.asset)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-[#efe9dc]/[0.03]"
+                  className="flex w-full items-center gap-3 p-4 text-left transition hover:bg-[#00CDCD]/[0.03]"
                 >
                   <AssetAvatar code={b.asset} className="h-10 w-10" />
                   <div className="min-w-0">
-                    <div className="font-display text-sm font-semibold text-[#f6f1e6]">{b.asset}</div>
+                    <div className="font-display text-sm font-semibold text-[#062626]">{b.asset}</div>
                     <div className="truncate text-xs text-zinc-500">
                       {meta.name} · {notes.length} note{notes.length === 1 ? '' : 's'}
                     </div>
                   </div>
                   <div className="ml-auto text-right">
-                    <div className="font-mono text-sm tabular-nums text-[#f6f1e6]">{revealed ? b.amount : MASK}</div>
+                    <div className="font-mono text-sm tabular-nums text-[#062626]">{revealed ? b.amount : MASK}</div>
                     <div className="text-xs text-zinc-500">{revealed ? `≈ ${formatUsd(b.usdEstimate)}` : ''}</div>
                   </div>
                   <ChevronDownIcon
@@ -119,7 +119,7 @@ export function PortfolioPage() {
                 </button>
 
                 {isOpen && (
-                  <div className="border-t border-[#efe9dc]/8 px-4 py-3">
+                  <div className="border-t border-[#00CDCD]/8 px-4 py-3">
                     <div className="coord-label mb-2">notes</div>
                     {notes.length === 0 ? (
                       <p className="text-xs text-zinc-500">No spendable notes.</p>

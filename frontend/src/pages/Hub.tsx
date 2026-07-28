@@ -81,10 +81,10 @@ export function Hub() {
           <Link
             key={to}
             to={to}
-            className="group rounded-2xl border border-[#efe9dc]/10 bg-[#1c1710]/40 p-6 backdrop-blur-sm transition hover:border-spectral/40"
+            className="group rounded-2xl border border-[#00CDCD]/10 bg-[#FFFFFF]/40 p-6 backdrop-blur-sm transition hover:border-spectral/40"
           >
             <div className="coord-label mb-2">{label}</div>
-            <h3 className="display-hd text-xl text-[#f6f1e6]">{title}</h3>
+            <h3 className="display-hd text-xl text-[#062626]">{title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-zinc-400">{desc}</p>
             <span className="coord-label mt-4 inline-block text-spectral/70 transition group-hover:text-spectral">enter →</span>
           </Link>

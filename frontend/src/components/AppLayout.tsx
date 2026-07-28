@@ -26,7 +26,7 @@ function ShieldedChip() {
   return (
     <div className="hidden items-center gap-2 md:flex">
       <span className="coord-label">shielded</span>
-      <ScrambleNumber value={formatUsd(total)} revealed={revealed} className="font-mono text-sm text-[#f6f1e6]" />
+      <ScrambleNumber value={formatUsd(total)} revealed={revealed} className="font-mono text-sm text-[#062626]" />
       <button
         type="button"
         onClick={toggle}
@@ -41,11 +41,11 @@ function ShieldedChip() {
 
 function AppNav() {
   return (
-    <header className="sticky top-0 z-40 border-b border-[#efe9dc]/8 bg-[#1c1710]/40 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-[#00CDCD]/8 bg-[#FFFFFF]/40 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3">
         <NavLink to="/app" className="flex items-center gap-2">
           <ObscuraMark className="h-5 w-5 text-spectral" />
-          <span className="font-display text-sm font-semibold tracking-tight text-[#f6f1e6]">
+          <span className="font-display text-sm font-semibold tracking-tight text-[#062626]">
             obscura <sup className="align-super font-mono text-[9px] tracking-[0.2em] text-spectral/60">ZK</sup>
           </span>
         </NavLink>
@@ -55,7 +55,7 @@ function AppNav() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                cx('transition hover:text-[#f6f1e6]', isActive ? 'text-[#f6f1e6]' : 'text-spectral/70')
+                cx('transition hover:text-[#062626]', isActive ? 'text-[#062626]' : 'text-spectral/70')
               }
             >
               {label}
