@@ -459,7 +459,6 @@ export class RealObscuraSdk implements ObscuraSdk {
       throw new Error(`That would breach the ${risk.maxLtvBps / 100}% borrow ceiling.`)
     }
 
-    const witness = await this.positionWitness(params.position)
     const next = createPosition({
       collateralAsset: old.collateralAsset,
       collateralAmount: old.collateralAmount,
@@ -474,7 +473,6 @@ export class RealObscuraSdk implements ObscuraSdk {
     })
 
     const inputs = buildBorrowInputs({
-      merkleRoot: witness.root,
       oldPositionCommitment: old.commitment,
       positionNullifier: computeNullifier(old.commitment, old.spendingKey as Field),
       newPositionCommitment: next.commitment,
@@ -489,8 +487,6 @@ export class RealObscuraSdk implements ObscuraSdk {
       maxLtvBps: risk.maxLtvBps,
       oldDebtScaled: old.debtScaled,
       spendingKey: old.spendingKey as Field,
-      merklePath: witness.pathElements,
-      merkleIndices: witness.pathIndices,
       oldNonce: old.nonce,
       newNonce: next.nonce,
       outBlinding: outNote.blinding,
@@ -672,7 +668,6 @@ export class RealObscuraSdk implements ObscuraSdk {
     const debtSac = this.assetAddressOf(params.fromNote)
     const reserve = await this.getReserve(debtSac)
 
-    const posWitness = await this.positionWitness(params.position)
     const noteWitness = await this.spendWitness(params.fromNote)
 
     // The circuit floors scaled debt at zero, so overpaying simply closes the loan.
@@ -697,7 +692,7 @@ export class RealObscuraSdk implements ObscuraSdk {
         : null
 
     const inputs = buildRepayInputs({
-      merkleRoot: posWitness.root,
+      merkleRoot: noteWitness.root,
       oldPositionCommitment: old.commitment,
       positionNullifier: computeNullifier(old.commitment, old.spendingKey as Field),
       noteNullifier: noteNullifier(note),
@@ -710,8 +705,6 @@ export class RealObscuraSdk implements ObscuraSdk {
       borrowIndex: reserve.borrowIndex,
       oldDebtScaled: old.debtScaled,
       spendingKey: old.spendingKey as Field,
-      positionPath: posWitness.pathElements,
-      positionIndices: posWitness.pathIndices,
       noteAmount: note.amount,
       noteBlinding: note.blinding,
       notePath: noteWitness.pathElements,
@@ -752,19 +745,6 @@ export class RealObscuraSdk implements ObscuraSdk {
     })
     replacePosition(params.position.commitment, stored)
     return { hash, position: stored }
-  }
-
-  /** Merkle witness for a position commitment (same tree as balance notes). */
-  private async positionWitness(stored: StoredPosition): Promise<MerkleWitness> {
-    if (stored.leafIndex === undefined) {
-      throw new Error(
-        'This position has no leaf index yet — wait for the indexer to observe it on-chain.',
-      )
-    }
-    const indexer = getIndexer()
-    if (!indexer) throw new Error('The wallet indexer is not ready — reconnect your Stellar wallet.')
-    await syncIndexer()
-    return indexer.witnessFor(stored.leafIndex)
   }
 
   /** Read-only contract call via simulation (no signing, no fee). */

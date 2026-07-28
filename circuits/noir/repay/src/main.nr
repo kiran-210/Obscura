@@ -34,8 +34,6 @@ fn main(
     // ---- private inputs ----
     old_debt_scaled: Field,
     spending_key: Field,
-    position_path: [Field; 20],
-    position_indices: [Field; 20],
     note_amount: Field,
     note_blinding: Field,
     note_path: [Field; 20],
@@ -64,8 +62,6 @@ fn main(
         w::nullifier(old_position, spending_key) == position_nullifier,
         "bad position nullifier",
     );
-    let p_root = w::compute_merkle_root(old_position, position_path, position_indices);
-    assert(p_root == merkle_root, "position merkle root mismatch");
 
     // 2. Own a funding note of the debt asset with enough value.
     let note = w::note_commitment(debt_asset, note_amount, owner_key, note_blinding);

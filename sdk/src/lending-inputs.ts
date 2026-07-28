@@ -67,7 +67,6 @@ export function buildPositionOpenInputs(p: {
  * borrow_index, max_ltv_bps
  */
 export function buildBorrowInputs(p: {
-  merkleRoot: Field;
   oldPositionCommitment: Field;
   positionNullifier: Field;
   newPositionCommitment: Field;
@@ -82,14 +81,11 @@ export function buildBorrowInputs(p: {
   maxLtvBps: number;
   oldDebtScaled: bigint;
   spendingKey: Field;
-  merklePath: Field[];
-  merkleIndices: number[];
   oldNonce: Field;
   newNonce: Field;
   outBlinding: Field;
 }): CircuitInputMap {
   return {
-    merkle_root: fv(p.merkleRoot),
     old_position_commitment: fv(p.oldPositionCommitment),
     position_nullifier: fv(p.positionNullifier),
     new_position_commitment: fv(p.newPositionCommitment),
@@ -104,8 +100,6 @@ export function buildBorrowInputs(p: {
     max_ltv_bps: iv(p.maxLtvBps),
     old_debt_scaled: iv(p.oldDebtScaled),
     spending_key: fv(p.spendingKey),
-    merkle_path: p.merklePath.map(fv),
-    merkle_indices: p.merkleIndices.map(iv),
     old_nonce: fv(p.oldNonce),
     new_nonce: fv(p.newNonce),
     out_blinding: fv(p.outBlinding),
@@ -131,8 +125,6 @@ export function buildRepayInputs(p: {
   borrowIndex: bigint;
   oldDebtScaled: bigint;
   spendingKey: Field;
-  positionPath: Field[];
-  positionIndices: number[];
   noteAmount: bigint;
   noteBlinding: Field;
   notePath: Field[];
@@ -142,6 +134,8 @@ export function buildRepayInputs(p: {
   changeBlinding: Field;
 }): CircuitInputMap {
   return {
+    // repay KEEPS a merkle proof -- not of the position (that lives in the
+    // contract's registry) but of the funding note, which is a real tree leaf.
     merkle_root: fv(p.merkleRoot),
     old_position_commitment: fv(p.oldPositionCommitment),
     position_nullifier: fv(p.positionNullifier),
@@ -155,8 +149,6 @@ export function buildRepayInputs(p: {
     borrow_index: iv(p.borrowIndex),
     old_debt_scaled: iv(p.oldDebtScaled),
     spending_key: fv(p.spendingKey),
-    position_path: p.positionPath.map(fv),
-    position_indices: p.positionIndices.map(iv),
     note_amount: iv(p.noteAmount),
     note_blinding: fv(p.noteBlinding),
     note_path: p.notePath.map(fv),
@@ -174,7 +166,6 @@ export function buildRepayInputs(p: {
  * collateral_price, debt_price, borrow_index, max_ltv_bps
  */
 export function buildWithdrawCollateralInputs(p: {
-  merkleRoot: Field;
   oldPositionCommitment: Field;
   positionNullifier: Field;
   newPositionCommitment: Field;
@@ -189,14 +180,11 @@ export function buildWithdrawCollateralInputs(p: {
   maxLtvBps: number;
   debtScaled: bigint;
   spendingKey: Field;
-  merklePath: Field[];
-  merkleIndices: number[];
   oldNonce: Field;
   newNonce: Field;
   outBlinding: Field;
 }): CircuitInputMap {
   return {
-    merkle_root: fv(p.merkleRoot),
     old_position_commitment: fv(p.oldPositionCommitment),
     position_nullifier: fv(p.positionNullifier),
     new_position_commitment: fv(p.newPositionCommitment),
@@ -211,8 +199,6 @@ export function buildWithdrawCollateralInputs(p: {
     max_ltv_bps: iv(p.maxLtvBps),
     debt_scaled: iv(p.debtScaled),
     spending_key: fv(p.spendingKey),
-    merkle_path: p.merklePath.map(fv),
-    merkle_indices: p.merkleIndices.map(iv),
     old_nonce: fv(p.oldNonce),
     new_nonce: fv(p.newNonce),
     out_blinding: fv(p.outBlinding),
@@ -301,8 +287,6 @@ export function buildRedeemInputs(p: {
   supplyIndex: bigint;
   supplyScaled: bigint;
   spendingKey: Field;
-  merklePath: Field[];
-  merkleIndices: number[];
   oldNonce: Field;
   newNonce: Field;
   outBlinding: Field;
@@ -317,8 +301,6 @@ export function buildRedeemInputs(p: {
     supply_index: iv(p.supplyIndex),
     supply_scaled: iv(p.supplyScaled),
     spending_key: fv(p.spendingKey),
-    merkle_path: p.merklePath.map(fv),
-    merkle_indices: p.merkleIndices.map(iv),
     old_nonce: fv(p.oldNonce),
     new_nonce: fv(p.newNonce),
     out_blinding: fv(p.outBlinding),

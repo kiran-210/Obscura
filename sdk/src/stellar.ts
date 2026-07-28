@@ -67,7 +67,6 @@ export const PUBLIC_INPUT_ORDER = {
     "collateral_amount",
   ],
   borrow: [
-    "merkle_root",
     "old_position_commitment",
     "position_nullifier",
     "new_position_commitment",
@@ -95,7 +94,6 @@ export const PUBLIC_INPUT_ORDER = {
     "borrow_index",
   ],
   withdraw_collateral: [
-    "merkle_root",
     "old_position_commitment",
     "position_nullifier",
     "new_position_commitment",

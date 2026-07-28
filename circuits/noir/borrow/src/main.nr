@@ -16,7 +16,7 @@
 //! victim's commitment, and delete the victim's registry entry.
 //!
 //! Public inputs (IN THIS ORDER):
-//!   merkle_root, old_position_commitment, position_nullifier,
+//!   old_position_commitment, position_nullifier,
 //!   new_position_commitment, out_note_commitment, collateral_asset,
 //!   collateral_amount, debt_asset, borrow_amount, collateral_price, debt_price,
 //!   borrow_index, max_ltv_bps
@@ -26,7 +26,6 @@ use dep::obscura_lib as w;
 
 fn main(
     // ---- public inputs ----
-    merkle_root: pub Field,
     old_position_commitment: pub Field,
     position_nullifier: pub Field,
     new_position_commitment: pub Field,
@@ -42,8 +41,6 @@ fn main(
     // ---- private inputs ----
     old_debt_scaled: Field,
     spending_key: Field,
-    merkle_path: [Field; 20],
-    merkle_indices: [Field; 20],
     old_nonce: Field,
     new_nonce: Field,
     out_blinding: Field,
@@ -51,7 +48,8 @@ fn main(
     w::assert_64(borrow_amount);
     assert(borrow_amount != 0, "borrow must be non-zero");
 
-    // 1. Own the existing position and prove membership.
+    // 1. Own the position. Membership is established by the contract's registry
+    //    lookup, not a Merkle proof -- the position is registry state, not a tree leaf.
     let owner_key = w::owner_key(spending_key);
     let old_position = l::position_commitment(
         collateral_asset,
@@ -66,8 +64,6 @@ fn main(
         w::nullifier(old_position, spending_key) == position_nullifier,
         "bad position nullifier",
     );
-    let root = w::compute_merkle_root(old_position, merkle_path, merkle_indices);
-    assert(root == merkle_root, "merkle root mismatch");
 
     // 2. Accrue the new borrowing into the scaled debt. Scaling against the
     //    public index is what lets interest accrue later without touching the note.
@@ -105,17 +101,9 @@ fn main(
 // Tests
 // ===========================================================================
 
-global TD: u32 = 20;
 global ONE_PRICE: Field = 10000000;
 global ONE_INDEX: Field = 1000000000;
 
-fn root_allzero(leaf: Field) -> Field {
-    let mut cur = leaf;
-    for _ in 0..TD {
-        cur = w::hash2(cur, 0);
-    }
-    cur
-}
 
 #[test]
 fn test_borrow_within_ltv() {
@@ -124,13 +112,12 @@ fn test_borrow_within_ltv() {
     // 1000 collateral @1.0, no debt yet; borrow 700 @75% LTV (limit 750).
     let old_pos = l::position_commitment(0, 1000, 1, 0, ok, 11);
     let nf = w::nullifier(old_pos, sk);
-    let root = root_allzero(old_pos);
     let new_pos = l::position_commitment(0, 1000, 1, 700, ok, 12);
     let out = w::note_commitment(1, 700, ok, 999);
 
     main(
-        root, old_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
-        [0; TD], [0; TD], 11, 12, 999,
+        old_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
+        11, 12, 999,
     );
 }
 
@@ -140,14 +127,13 @@ fn test_borrow_over_ltv_rejected() {
     let ok = w::owner_key(sk);
     let old_pos = l::position_commitment(0, 1000, 1, 0, ok, 11);
     let nf = w::nullifier(old_pos, sk);
-    let root = root_allzero(old_pos);
     // 751 > 750 ceiling.
     let new_pos = l::position_commitment(0, 1000, 1, 751, ok, 12);
     let out = w::note_commitment(1, 751, ok, 999);
 
     main(
-        root, old_pos, nf, new_pos, out, 0, 1000, 1, 751, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
-        [0; TD], [0; TD], 11, 12, 999,
+        old_pos, nf, new_pos, out, 0, 1000, 1, 751, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
+        11, 12, 999,
     );
 }
 
@@ -158,7 +144,6 @@ fn test_borrow_blocked_by_accrued_interest() {
     // Existing scaled debt 400; index has doubled so real debt is 800 > 750.
     let old_pos = l::position_commitment(0, 1000, 1, 400, ok, 11);
     let nf = w::nullifier(old_pos, sk);
-    let root = root_allzero(old_pos);
     let two_index = 2000000000;
     // Borrowing 1 more scales to 0 at index 2.0, but existing debt already breaches.
     let new_scaled = 400 + 0;
@@ -166,8 +151,8 @@ fn test_borrow_blocked_by_accrued_interest() {
     let out = w::note_commitment(1, 1, ok, 999);
 
     main(
-        root, old_pos, nf, new_pos, out, 0, 1000, 1, 1, ONE_PRICE, ONE_PRICE, two_index, 7500, 400, sk,
-        [0; TD], [0; TD], 11, 12, 999,
+        old_pos, nf, new_pos, out, 0, 1000, 1, 1, ONE_PRICE, ONE_PRICE, two_index, 7500, 400, sk,
+        11, 12, 999,
     );
 }
 
@@ -181,7 +166,6 @@ fn test_borrow_cannot_name_a_different_position() {
     let ok = w::owner_key(attacker_sk);
     let attacker_pos = l::position_commitment(0, 1000, 1, 0, ok, 11);
     let nf = w::nullifier(attacker_pos, attacker_sk);
-    let root = root_allzero(attacker_pos);
     let new_pos = l::position_commitment(0, 1000, 1, 700, ok, 12);
     let out = w::note_commitment(1, 700, ok, 999);
 
@@ -189,8 +173,8 @@ fn test_borrow_cannot_name_a_different_position() {
     let victim_pos = l::position_commitment(0, 1000, 1, 0, w::owner_key(8), 11);
 
     main(
-        root, victim_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500,
-        0, attacker_sk, [0; TD], [0; TD], 11, 12, 999,
+        victim_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500,
+        0, attacker_sk, 11, 12, 999,
     );
 }
 
@@ -200,13 +184,12 @@ fn test_borrow_cannot_mint_more_than_declared() {
     let ok = w::owner_key(sk);
     let old_pos = l::position_commitment(0, 1000, 1, 0, ok, 11);
     let nf = w::nullifier(old_pos, sk);
-    let root = root_allzero(old_pos);
     let new_pos = l::position_commitment(0, 1000, 1, 700, ok, 12);
     // Debt says 700 but the minted note claims 900.
     let out = w::note_commitment(1, 900, ok, 999);
 
     main(
-        root, old_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
-        [0; TD], [0; TD], 11, 12, 999,
+        old_pos, nf, new_pos, out, 0, 1000, 1, 700, ONE_PRICE, ONE_PRICE, ONE_INDEX, 7500, 0, sk,
+        11, 12, 999,
     );
 }

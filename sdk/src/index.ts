@@ -442,7 +442,7 @@ export class Obscura implements ObscuraSdk {
    */
   async borrow(params: {
     position: Position;
-    positionLeafIndex: number;
+
     debtAsset: Asset;
     borrowAmount: bigint;
     collateralPrice: bigint;
@@ -471,7 +471,6 @@ export class Obscura implements ObscuraSdk {
       );
     }
 
-    const merkle = this.tree.generateProof(params.positionLeafIndex);
     const nullifier = computeNullifier(old.commitment, old.spendingKey);
     const next = createPosition({
       collateralAsset: old.collateralAsset,
@@ -488,7 +487,6 @@ export class Obscura implements ObscuraSdk {
     if (params.debtAsset.address) outNote.assetAddress = params.debtAsset.address;
 
     const inputs = buildBorrowInputs({
-      merkleRoot: merkle.root,
       oldPositionCommitment: old.commitment,
       positionNullifier: nullifier,
       newPositionCommitment: next.commitment,
@@ -503,8 +501,6 @@ export class Obscura implements ObscuraSdk {
       maxLtvBps: params.maxLtvBps,
       oldDebtScaled: old.debtScaled,
       spendingKey: old.spendingKey,
-      merklePath: merkle.pathElements,
-      merkleIndices: merkle.pathIndices,
       oldNonce: old.nonce,
       newNonce: next.nonce,
       outBlinding: outNote.blinding,
@@ -525,7 +521,7 @@ export class Obscura implements ObscuraSdk {
   /** Repay debt from a balance note of the debt asset. */
   async repay(params: {
     position: Position;
-    positionLeafIndex: number;
+
     fromNote: BalanceNote;
     repayAmount: bigint;
     borrowIndex: bigint;
@@ -536,7 +532,6 @@ export class Obscura implements ObscuraSdk {
       throw new Error("funding note does not cover the repayment");
     }
 
-    const posMerkle = this.tree.generateProof(params.positionLeafIndex);
     const noteMerkle = this.merkleProofFor(fromNote);
     const posNullifier = computeNullifier(old.commitment, old.spendingKey);
     const noteNf = noteNullifier(fromNote);
@@ -563,7 +558,7 @@ export class Obscura implements ObscuraSdk {
         : undefined;
 
     const inputs = buildRepayInputs({
-      merkleRoot: posMerkle.root,
+      merkleRoot: noteMerkle.root,
       oldPositionCommitment: old.commitment,
       positionNullifier: posNullifier,
       noteNullifier: noteNf,
@@ -576,8 +571,6 @@ export class Obscura implements ObscuraSdk {
       borrowIndex: params.borrowIndex,
       oldDebtScaled: old.debtScaled,
       spendingKey: old.spendingKey,
-      positionPath: posMerkle.pathElements,
-      positionIndices: posMerkle.pathIndices,
       noteAmount: fromNote.amount,
       noteBlinding: fromNote.blinding,
       notePath: noteMerkle.pathElements,
@@ -608,7 +601,7 @@ export class Obscura implements ObscuraSdk {
   /** Withdraw part of a position's collateral; solvency is re-checked afterwards. */
   async withdrawCollateral(params: {
     position: Position;
-    positionLeafIndex: number;
+
     withdrawAmount: bigint;
     collateralAsset: Asset;
     collateralPrice: bigint;
@@ -636,7 +629,6 @@ export class Obscura implements ObscuraSdk {
       throw new Error("withdrawal would leave the position under-collateralised");
     }
 
-    const merkle = this.tree.generateProof(params.positionLeafIndex);
     const nullifier = computeNullifier(old.commitment, old.spendingKey);
     const next = createPosition({
       collateralAsset: old.collateralAsset,
@@ -653,7 +645,6 @@ export class Obscura implements ObscuraSdk {
     if (params.collateralAsset.address) outNote.assetAddress = params.collateralAsset.address;
 
     const inputs = buildWithdrawCollateralInputs({
-      merkleRoot: merkle.root,
       oldPositionCommitment: old.commitment,
       positionNullifier: nullifier,
       newPositionCommitment: next.commitment,
@@ -668,8 +659,6 @@ export class Obscura implements ObscuraSdk {
       maxLtvBps: params.maxLtvBps,
       debtScaled: old.debtScaled,
       spendingKey: old.spendingKey,
-      merklePath: merkle.pathElements,
-      merkleIndices: merkle.pathIndices,
       oldNonce: old.nonce,
       newNonce: next.nonce,
       outBlinding: outNote.blinding,

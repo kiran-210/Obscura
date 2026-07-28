@@ -271,9 +271,6 @@ pub fn open_position(
         f.get(3).unwrap(),
     );
 
-    if !merkle::is_known_root(env, &root) {
-        return Err(ObscuraError::UnknownRoot);
-    }
     if is_spent(env, &nullifier) {
         return Err(ObscuraError::NullifierUsed);
     }
@@ -326,27 +323,20 @@ pub fn borrow(
     borrow_amount: i128,
     memo: Bytes,
 ) -> Result<(), ObscuraError> {
-    let f = parse_fields(env, &public_inputs, 13)?;
-    let (root, nullifier, new_position, out_note) = (
-        f.get(0).unwrap(),
-        f.get(2).unwrap(),
-        f.get(3).unwrap(),
-        f.get(4).unwrap(),
-    );
+    let f = parse_fields(env, &public_inputs, 12)?;
+    let (nullifier, new_position, out_note) =
+        (f.get(1).unwrap(), f.get(2).unwrap(), f.get(3).unwrap());
 
     // Bind the registry entry we are about to mutate to the position this proof
     // is actually about. Without this the caller chooses `old_position` freely and
     // could prove against their own position while naming a victim's, deleting the
     // victim's entry.
-    if f.get(1).unwrap() != old_position {
+    if f.get(0).unwrap() != old_position {
         return Err(ObscuraError::InvalidPublicInputs);
     }
 
     let pos = get_position(env, &old_position).ok_or(ObscuraError::PositionNotFound)?;
     require_live(env, &pos)?;
-    if !merkle::is_known_root(env, &root) {
-        return Err(ObscuraError::UnknownRoot);
-    }
     if is_spent(env, &nullifier) {
         return Err(ObscuraError::NullifierUsed);
     }
@@ -356,20 +346,20 @@ pub fn borrow(
 
     // The collateral in the proof must be the collateral the registry holds,
     // otherwise a borrower could prove solvency against someone else's collateral.
-    bind_asset(env, &pos.collateral_asset, &f.get(5).unwrap())?;
-    bind_i128(pos.collateral_amount, &f.get(6).unwrap())?;
-    bind_asset(env, &debt_asset, &f.get(7).unwrap())?;
-    bind_amount(borrow_amount, &f.get(8).unwrap())?;
+    bind_asset(env, &pos.collateral_asset, &f.get(4).unwrap())?;
+    bind_i128(pos.collateral_amount, &f.get(5).unwrap())?;
+    bind_asset(env, &debt_asset, &f.get(6).unwrap())?;
+    bind_amount(borrow_amount, &f.get(7).unwrap())?;
 
     let c_id = asset_id_of(env, &pos.collateral_asset);
     let d_id = asset_id_of(env, &debt_asset);
-    bind_price(env, &c_id, &f.get(9).unwrap())?;
-    bind_price(env, &d_id, &f.get(10).unwrap())?;
+    bind_price(env, &c_id, &f.get(8).unwrap())?;
+    bind_price(env, &d_id, &f.get(9).unwrap())?;
 
     let params = risk_params(env);
     let mut reserve = reserve_accrued(env, &d_id);
-    bind_i128(reserve.borrow_index, &f.get(11).unwrap())?;
-    bind_bps(params.max_ltv_bps, &f.get(12).unwrap())?;
+    bind_i128(reserve.borrow_index, &f.get(10).unwrap())?;
+    bind_bps(params.max_ltv_bps, &f.get(11).unwrap())?;
 
     if available(&reserve) < borrow_amount {
         return Err(ObscuraError::InsufficientLiquidity);
@@ -430,7 +420,7 @@ pub fn repay(
         f.get(5).unwrap(),
     );
 
-    if f.get(1).unwrap() != old_position {
+    if f.get(0).unwrap() != old_position {
         return Err(ObscuraError::InvalidPublicInputs);
     }
 
@@ -508,23 +498,16 @@ pub fn withdraw_collateral(
     new_collateral_amount: i128,
     memo: Bytes,
 ) -> Result<(), ObscuraError> {
-    let f = parse_fields(env, &public_inputs, 13)?;
-    let (root, nullifier, new_position, out_note) = (
-        f.get(0).unwrap(),
-        f.get(2).unwrap(),
-        f.get(3).unwrap(),
-        f.get(4).unwrap(),
-    );
+    let f = parse_fields(env, &public_inputs, 12)?;
+    let (nullifier, new_position, out_note) =
+        (f.get(1).unwrap(), f.get(2).unwrap(), f.get(3).unwrap());
 
-    if f.get(1).unwrap() != old_position {
+    if f.get(0).unwrap() != old_position {
         return Err(ObscuraError::InvalidPublicInputs);
     }
 
     let pos = get_position(env, &old_position).ok_or(ObscuraError::PositionNotFound)?;
     require_live(env, &pos)?;
-    if !merkle::is_known_root(env, &root) {
-        return Err(ObscuraError::UnknownRoot);
-    }
     if is_spent(env, &nullifier) {
         return Err(ObscuraError::NullifierUsed);
     }
@@ -535,20 +518,20 @@ pub fn withdraw_collateral(
         return Err(ObscuraError::InvalidAmount);
     }
 
-    bind_asset(env, &pos.collateral_asset, &f.get(5).unwrap())?;
-    bind_i128(pos.collateral_amount, &f.get(6).unwrap())?;
-    bind_i128(new_collateral_amount, &f.get(7).unwrap())?;
-    bind_asset(env, &pos.debt_asset, &f.get(8).unwrap())?;
+    bind_asset(env, &pos.collateral_asset, &f.get(4).unwrap())?;
+    bind_i128(pos.collateral_amount, &f.get(5).unwrap())?;
+    bind_i128(new_collateral_amount, &f.get(6).unwrap())?;
+    bind_asset(env, &pos.debt_asset, &f.get(7).unwrap())?;
 
     let c_id = asset_id_of(env, &pos.collateral_asset);
     let d_id = asset_id_of(env, &pos.debt_asset);
-    bind_price(env, &c_id, &f.get(9).unwrap())?;
-    bind_price(env, &d_id, &f.get(10).unwrap())?;
+    bind_price(env, &c_id, &f.get(8).unwrap())?;
+    bind_price(env, &d_id, &f.get(9).unwrap())?;
 
     let params = risk_params(env);
     let reserve = reserve_accrued(env, &d_id);
-    bind_i128(reserve.borrow_index, &f.get(11).unwrap())?;
-    bind_bps(params.max_ltv_bps, &f.get(12).unwrap())?;
+    bind_i128(reserve.borrow_index, &f.get(10).unwrap())?;
+    bind_bps(params.max_ltv_bps, &f.get(11).unwrap())?;
 
     verify(env, DataKey::WithdrawCollateralVf, &public_inputs, &proof)?;
 
@@ -682,9 +665,6 @@ pub fn supply(
     let (root, nullifier, supply_commitment) =
         (f.get(0).unwrap(), f.get(1).unwrap(), f.get(2).unwrap());
 
-    if !merkle::is_known_root(env, &root) {
-        return Err(ObscuraError::UnknownRoot);
-    }
     if is_spent(env, &nullifier) {
         return Err(ObscuraError::NullifierUsed);
     }
@@ -732,9 +712,6 @@ pub fn redeem(
         f.get(3).unwrap(),
     );
 
-    if !merkle::is_known_root(env, &root) {
-        return Err(ObscuraError::UnknownRoot);
-    }
     if is_spent(env, &nullifier) {
         return Err(ObscuraError::NullifierUsed);
     }
