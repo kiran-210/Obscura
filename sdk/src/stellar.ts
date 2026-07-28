@@ -53,6 +53,75 @@ export const PUBLIC_INPUT_ORDER = {
     "refund_note_b",
   ],
   cancel_order: ["order_commitment", "refund_commitment", "refund_asset_id"],
+
+  // --- lending (LENDING_SPEC sec 7) ---
+  // `old_position_commitment` is index [1] of borrow / repay / withdraw_collateral:
+  // the contract binds the registry entry it mutates to the position the proof is
+  // about. Reordering these silently mis-binds on-chain checks.
+  position_open: ["merkle_root", "nullifier", "position_commitment", "collateral_asset", "collateral_amount"],
+  borrow: [
+    "merkle_root",
+    "old_position_commitment",
+    "position_nullifier",
+    "new_position_commitment",
+    "out_note_commitment",
+    "collateral_asset",
+    "collateral_amount",
+    "debt_asset",
+    "borrow_amount",
+    "collateral_price",
+    "debt_price",
+    "borrow_index",
+    "max_ltv_bps",
+  ],
+  repay: [
+    "merkle_root",
+    "old_position_commitment",
+    "position_nullifier",
+    "note_nullifier",
+    "new_position_commitment",
+    "change_commitment",
+    "collateral_asset",
+    "collateral_amount",
+    "debt_asset",
+    "repay_amount",
+    "borrow_index",
+  ],
+  withdraw_collateral: [
+    "merkle_root",
+    "old_position_commitment",
+    "position_nullifier",
+    "new_position_commitment",
+    "out_note_commitment",
+    "collateral_asset",
+    "old_collateral_amount",
+    "new_collateral_amount",
+    "debt_asset",
+    "collateral_price",
+    "debt_price",
+    "borrow_index",
+    "max_ltv_bps",
+  ],
+  solvency_attestation: [
+    "position_commitment",
+    "collateral_asset",
+    "collateral_amount",
+    "debt_asset",
+    "collateral_price",
+    "debt_price",
+    "borrow_index",
+    "liq_threshold_bps",
+  ],
+  supply: ["merkle_root", "nullifier", "supply_commitment", "asset", "supply_amount", "supply_index"],
+  redeem: [
+    "merkle_root",
+    "nullifier",
+    "out_note_commitment",
+    "remainder_commitment",
+    "asset",
+    "redeem_amount",
+    "supply_index",
+  ],
 } as const;
 
 export type CircuitName = keyof typeof PUBLIC_INPUT_ORDER;
@@ -214,6 +283,141 @@ export class ObscuraContract {
   cancelOrderOp(args: { proof: Uint8Array; publicInputs: Uint8Array }): xdr.Operation {
     this.assertProofLen(args.proof);
     return this.contract.call("cancel_order", scvBytes(args.proof), scvBytes(args.publicInputs));
+  }
+
+  // --- Lending (LENDING_SPEC) --------------------------------------------
+  //
+  // Collateral asset/amount appear as plain args because they are public by
+  // design; the contract binds them to the proof's public inputs. Debt never
+  // appears — the contract does not know it.
+
+  /** open_position(proof, public_inputs, collateral_asset, collateral_amount). */
+  openPositionOp(args: {
+    proof: Uint8Array;
+    publicInputs: Uint8Array;
+    collateralAsset: string;
+    collateralAmount: bigint;
+  }): xdr.Operation {
+    this.assertProofLen(args.proof);
+    return this.contract.call(
+      "open_position",
+      scvBytes(args.proof),
+      scvBytes(args.publicInputs),
+      scvAddress(args.collateralAsset),
+      scvI128(args.collateralAmount),
+    );
+  }
+
+  /** borrow(proof, public_inputs, old_position, debt_asset, borrow_amount, memo). */
+  borrowOp(args: {
+    proof: Uint8Array;
+    publicInputs: Uint8Array;
+    oldPosition: Field;
+    debtAsset: string;
+    borrowAmount: bigint;
+    memo?: Uint8Array;
+  }): xdr.Operation {
+    this.assertProofLen(args.proof);
+    return this.contract.call(
+      "borrow",
+      scvBytes(args.proof),
+      scvBytes(args.publicInputs),
+      scvField(args.oldPosition),
+      scvAddress(args.debtAsset),
+      scvI128(args.borrowAmount),
+      scvBytes(args.memo ?? new Uint8Array()),
+    );
+  }
+
+  /** repay(proof, public_inputs, old_position, debt_asset, repay_amount). */
+  repayOp(args: {
+    proof: Uint8Array;
+    publicInputs: Uint8Array;
+    oldPosition: Field;
+    debtAsset: string;
+    repayAmount: bigint;
+  }): xdr.Operation {
+    this.assertProofLen(args.proof);
+    return this.contract.call(
+      "repay",
+      scvBytes(args.proof),
+      scvBytes(args.publicInputs),
+      scvField(args.oldPosition),
+      scvAddress(args.debtAsset),
+      scvI128(args.repayAmount),
+    );
+  }
+
+  /** withdraw_collateral(proof, public_inputs, old_position, new_collateral_amount, memo). */
+  withdrawCollateralOp(args: {
+    proof: Uint8Array;
+    publicInputs: Uint8Array;
+    oldPosition: Field;
+    newCollateralAmount: bigint;
+    memo?: Uint8Array;
+  }): xdr.Operation {
+    this.assertProofLen(args.proof);
+    return this.contract.call(
+      "withdraw_collateral",
+      scvBytes(args.proof),
+      scvBytes(args.publicInputs),
+      scvField(args.oldPosition),
+      scvI128(args.newCollateralAmount),
+      scvBytes(args.memo ?? new Uint8Array()),
+    );
+  }
+
+  /** attest_solvency(proof, public_inputs). Refreshes the deadline; mutates no notes. */
+  attestSolvencyOp(args: { proof: Uint8Array; publicInputs: Uint8Array }): xdr.Operation {
+    this.assertProofLen(args.proof);
+    return this.contract.call("attest_solvency", scvBytes(args.proof), scvBytes(args.publicInputs));
+  }
+
+  /** liquidate_stale(liquidator, position). No proof — collateral is public. */
+  liquidateStaleOp(args: { liquidator: string; position: Field }): xdr.Operation {
+    return this.contract.call(
+      "liquidate_stale",
+      scvAddress(args.liquidator),
+      scvField(args.position),
+    );
+  }
+
+  /** supply(proof, public_inputs, asset, amount, memo). */
+  supplyOp(args: {
+    proof: Uint8Array;
+    publicInputs: Uint8Array;
+    asset: string;
+    amount: bigint;
+    memo?: Uint8Array;
+  }): xdr.Operation {
+    this.assertProofLen(args.proof);
+    return this.contract.call(
+      "supply",
+      scvBytes(args.proof),
+      scvBytes(args.publicInputs),
+      scvAddress(args.asset),
+      scvI128(args.amount),
+      scvBytes(args.memo ?? new Uint8Array()),
+    );
+  }
+
+  /** redeem(proof, public_inputs, asset, amount, memos). */
+  redeemOp(args: {
+    proof: Uint8Array;
+    publicInputs: Uint8Array;
+    asset: string;
+    amount: bigint;
+    memos?: Uint8Array[];
+  }): xdr.Operation {
+    this.assertProofLen(args.proof);
+    return this.contract.call(
+      "redeem",
+      scvBytes(args.proof),
+      scvBytes(args.publicInputs),
+      scvAddress(args.asset),
+      scvI128(args.amount),
+      xdr.ScVal.scvVec((args.memos ?? []).map(scvBytes)),
+    );
   }
 
   /**
