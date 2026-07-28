@@ -32,6 +32,10 @@ use crate::{amount_to_field, asset_id_of, is_spent, is_zero, mark_spent, merkle,
 pub const INDEX_SCALE: i128 = 1_000_000_000;
 /// Basis-points denominator — must equal `lending_lib::BPS_SCALE`.
 pub const BPS_SCALE: i128 = 10_000;
+/// Flat borrow APR in basis points (SHIELDBID_SPEC sec 2.3). 320 bps = 3.2%.
+pub const BORROW_APR_BPS: i128 = 320;
+/// Ledgers per year at ~5s each.
+pub const LEDGERS_PER_YEAR: i128 = 6_307_200;
 
 /// Placeholder risk parameters (`Verdex_PRD.md` not supplied). Every one of these
 /// reaches the circuits as a public input, so changing them recompiles nothing.
@@ -89,38 +93,63 @@ pub fn reserve_accrued(env: &Env, asset_id: &BytesN<32>) -> Reserve {
         });
 
     let elapsed = now.saturating_sub(r.last_accrual) as i128;
-    if elapsed > 0 && r.total_borrowed > 0 && r.total_supplied > 0 {
-        // PLACEHOLDER kinked rate model — replace with Verdex's curve.
-        // utilisation in bps, then a two-slope curve; per-ledger accrual is
-        // linear (not compounded) which is the usual on-chain simplification.
-        let util_bps = r.total_borrowed.saturating_mul(BPS_SCALE) / r.total_supplied;
-        let kink_bps: i128 = 8_000;
-        let base_bps: i128 = 200; // 2% APR floor
-        let slope1_bps: i128 = 600; // -> 8% at the kink
-        let slope2_bps: i128 = 6_000; // steep above the kink
-
-        let rate_bps = if util_bps <= kink_bps {
-            base_bps + slope1_bps * util_bps / kink_bps
-        } else {
-            let over = util_bps - kink_bps;
-            let span = BPS_SCALE - kink_bps;
-            base_bps + slope1_bps + slope2_bps * over / span
-        };
-
-        // Ledgers per year at ~5s.
-        let ledgers_per_year: i128 = 6_307_200;
-        let growth = r.borrow_index.saturating_mul(rate_bps).saturating_mul(elapsed)
-            / (BPS_SCALE * ledgers_per_year);
+    if elapsed > 0 {
+        // FLAT 3.2% APR (SHIELDBID_SPEC sec 2.3).
+        //
+        // Deliberately replaces the utilisation-based kinked curve. A utilisation
+        // rate needs `total_borrowed` to price a loan, which forces every borrow to
+        // publish a public delta -- and that is exactly what let a chain analyst
+        // rebuild a loan's debt by accumulation. With a flat rate the index is a
+        // pure function of ledger number, computable by anyone, so borrow amounts
+        // no longer have to be public for pricing.
+        //
+        // Accrual is linear rather than compounded -- the usual on-chain
+        // simplification; over a year the difference is a few basis points.
+        let growth = r
+            .borrow_index
+            .saturating_mul(BORROW_APR_BPS)
+            .saturating_mul(elapsed)
+            / (BPS_SCALE * LEDGERS_PER_YEAR);
         r.borrow_index = r.borrow_index.saturating_add(growth);
 
-        // Suppliers receive interest in proportion to utilisation.
-        let s_growth = growth.saturating_mul(util_bps) / BPS_SCALE;
-        r.supply_index = r.supply_index.saturating_add(s_growth);
-        r.last_accrual = now;
-    } else if elapsed > 0 {
+        // Suppliers earn only what borrowers actually pay, so the supply index still
+        // tracks utilisation. Supply is postponed for the MVP (SHIELDBID_SPEC sec
+        // 2.4); this keeps the accounting honest for when it returns.
+        if r.total_supplied > 0 {
+            let util_bps = r.total_borrowed.saturating_mul(BPS_SCALE) / r.total_supplied;
+            let s_growth = growth.saturating_mul(util_bps) / BPS_SCALE;
+            r.supply_index = r.supply_index.saturating_add(s_growth);
+        }
         r.last_accrual = now;
     }
     r
+}
+
+/// Treasury funding: credit the reserve so borrowers have liquidity, with no proof
+/// and no supplier (SHIELDBID_SPEC sec 2). The admin transfers real tokens in and
+/// `total_supplied` rises to match, so everything lent is backed 1:1.
+///
+/// Deliberately NOT shielded: this is the protocol's own capital and its size is
+/// public by design -- it is the proof the pool is funded.
+pub fn fund_reserve(
+    env: &Env,
+    admin: Address,
+    asset: Address,
+    amount: i128,
+) -> Result<i128, ObscuraError> {
+    admin.require_auth();
+    if amount <= 0 {
+        return Err(ObscuraError::InvalidAmount);
+    }
+    let tok = token::Client::new(env, &asset);
+    let contract: MuxedAddress = env.current_contract_address().into();
+    tok.transfer(&admin, &contract, &amount);
+
+    let id = asset_id_of(env, &asset);
+    let mut r = reserve_accrued(env, &id);
+    r.total_supplied = r.total_supplied.saturating_add(amount);
+    put_reserve(env, &id, &r);
+    Ok(r.total_supplied)
 }
 
 fn put_reserve(env: &Env, asset_id: &BytesN<32>, r: &Reserve) {
@@ -221,8 +250,12 @@ fn new_deadline(env: &Env) -> u32 {
 // ---------------------------------------------------------------------------
 
 /// `position_open` public inputs:
-///   [0] merkle_root [1] nullifier [2] position_commitment
-///   [3] collateral_asset [4] collateral_amount
+///   [0] merkle_root [1] nullifier [2] position_commitment [3] change_commitment
+///   [4] collateral_asset [5] collateral_amount
+///
+/// The funding note's total balance is private; only the locked portion is
+/// disclosed. The remainder returns to the portfolio as `change_commitment`, which
+/// is what lets a user pick an arbitrary collateral amount.
 pub fn open_position(
     env: &Env,
     proof: Bytes,
@@ -230,8 +263,13 @@ pub fn open_position(
     collateral_asset: Address,
     collateral_amount: i128,
 ) -> Result<(), ObscuraError> {
-    let f = parse_fields(env, &public_inputs, 5)?;
-    let (root, nullifier, position) = (f.get(0).unwrap(), f.get(1).unwrap(), f.get(2).unwrap());
+    let f = parse_fields(env, &public_inputs, 6)?;
+    let (root, nullifier, position, change) = (
+        f.get(0).unwrap(),
+        f.get(1).unwrap(),
+        f.get(2).unwrap(),
+        f.get(3).unwrap(),
+    );
 
     if !merkle::is_known_root(env, &root) {
         return Err(ObscuraError::UnknownRoot);
@@ -242,12 +280,15 @@ pub fn open_position(
     if get_position(env, &position).is_some() {
         return Err(ObscuraError::PositionExists);
     }
-    bind_asset(env, &collateral_asset, &f.get(3).unwrap())?;
-    bind_amount(collateral_amount, &f.get(4).unwrap())?;
+    bind_asset(env, &collateral_asset, &f.get(4).unwrap())?;
+    bind_amount(collateral_amount, &f.get(5).unwrap())?;
 
     verify(env, DataKey::PositionOpenVf, &public_inputs, &proof)?;
 
     mark_spent(env, &nullifier);
+    if !is_zero(&change) {
+        merkle::insert(env, &change);
+    }
     let deadline = new_deadline(env);
     put_position(
         env,

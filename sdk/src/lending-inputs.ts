@@ -19,33 +19,44 @@ const iv = (x: bigint | number): string => x.toString();
 
 /**
  * `position_open` — public: merkle_root, nullifier, position_commitment,
- * collateral_asset, collateral_amount
+ * change_commitment, collateral_asset, collateral_amount
+ *
+ * `noteAmount` is PRIVATE: only the locked portion is disclosed, so the size of
+ * the portfolio behind the collateral stays hidden. The remainder returns as
+ * `changeCommitment` (zero when the note is fully locked), which is what lets the
+ * user pick an arbitrary collateral amount.
  */
 export function buildPositionOpenInputs(p: {
   merkleRoot: Field;
   nullifier: Field;
   positionCommitment: Field;
+  changeCommitment: Field;
   collateralAsset: Field;
   collateralAmount: bigint;
+  noteAmount: bigint;
   noteBlinding: Field;
   spendingKey: Field;
   merklePath: Field[];
   merkleIndices: number[];
   debtAsset: Field;
   positionNonce: Field;
+  changeBlinding: Field;
 }): CircuitInputMap {
   return {
     merkle_root: fv(p.merkleRoot),
     nullifier: fv(p.nullifier),
     position_commitment: fv(p.positionCommitment),
+    change_commitment: fv(p.changeCommitment),
     collateral_asset: fv(p.collateralAsset),
     collateral_amount: iv(p.collateralAmount),
+    note_amount: iv(p.noteAmount),
     note_blinding: fv(p.noteBlinding),
     spending_key: fv(p.spendingKey),
     merkle_path: p.merklePath.map(fv),
     merkle_indices: p.merkleIndices.map(iv),
     debt_asset: fv(p.debtAsset),
     position_nonce: fv(p.positionNonce),
+    change_blinding: fv(p.changeBlinding),
   };
 }
 

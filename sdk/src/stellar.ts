@@ -58,7 +58,14 @@ export const PUBLIC_INPUT_ORDER = {
   // `old_position_commitment` is index [1] of borrow / repay / withdraw_collateral:
   // the contract binds the registry entry it mutates to the position the proof is
   // about. Reordering these silently mis-binds on-chain checks.
-  position_open: ["merkle_root", "nullifier", "position_commitment", "collateral_asset", "collateral_amount"],
+  position_open: [
+    "merkle_root",
+    "nullifier",
+    "position_commitment",
+    "change_commitment",
+    "collateral_asset",
+    "collateral_amount",
+  ],
   borrow: [
     "merkle_root",
     "old_position_commitment",

@@ -343,32 +343,48 @@ export class RealObscuraSdk implements ObscuraSdk {
   async openPosition(params: {
     note: StoredNote
     debtAssetCode: string
+    /** How much of the note to lock. Defaults to the whole note. */
+    collateralAmount?: bigint
   }): Promise<{ hash: string; position: StoredPosition }> {
     const from = await this.requireAddress()
     const spendingKey = getSpendingKey()
     const input = toBalanceNote(params.note)
+    const collateralAmount = params.collateralAmount ?? input.amount
+    if (collateralAmount <= 0n || collateralAmount > input.amount) {
+      throw new Error('Collateral must be positive and no more than the selected balance.')
+    }
     const witness = await this.spendWitness(params.note)
     const debtAssetId = assetIdFor(assetMeta(params.debtAssetCode))
 
     const position = createPosition({
       collateralAsset: input.assetId,
-      collateralAmount: input.amount,
+      collateralAmount,
       debtAsset: debtAssetId,
       spendingKey,
     })
+
+    // Whatever is not locked returns to the portfolio as change.
+    const changeAmount = input.amount - collateralAmount
+    const changeNote =
+      changeAmount > 0n
+        ? createNote({ assetId: input.assetId, amount: changeAmount, spendingKey })
+        : null
 
     const inputs = buildPositionOpenInputs({
       merkleRoot: witness.root,
       nullifier: noteNullifier(input),
       positionCommitment: position.commitment,
+      changeCommitment: changeNote ? changeNote.commitment : toField(0n),
       collateralAsset: input.assetId,
-      collateralAmount: input.amount,
+      collateralAmount,
+      noteAmount: input.amount,
       noteBlinding: input.blinding,
       spendingKey,
       merklePath: witness.pathElements,
       merkleIndices: witness.pathIndices,
       debtAsset: debtAssetId,
       positionNonce: position.nonce,
+      changeBlinding: changeNote ? changeNote.blinding : toField(0n),
     })
     const proof = await this.proveAndVerify('position_open', inputs)
 
@@ -376,10 +392,19 @@ export class RealObscuraSdk implements ObscuraSdk {
       proof: proof.proof,
       publicInputs: encodePublicInputs(proof.publicInputs),
       collateralAsset: this.assetAddressOf(params.note),
-      collateralAmount: input.amount,
+      collateralAmount,
     })
     const { hash } = await this.submitOp(op, from)
     markSpent(params.note.commitment)
+    if (changeNote) {
+      if (params.note.assetAddress) changeNote.assetAddress = params.note.assetAddress
+      addNote(changeNote, {
+        assetCode: params.note.assetCode,
+        decimals: assetMeta(params.note.assetCode).decimals,
+        txHash: hash,
+        source: 'change',
+      })
+    }
 
     const stored = fromSdkPosition(position, {
       collateralAssetCode: params.note.assetCode,

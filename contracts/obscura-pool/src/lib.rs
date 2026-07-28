@@ -473,6 +473,16 @@ impl ObscuraPool {
         Ok(())
     }
 
+    /// Fund the lending reserve from the protocol treasury (admin only).
+    pub fn fund_reserve(
+        env: Env,
+        admin: Address,
+        asset: Address,
+        amount: i128,
+    ) -> Result<i128, ObscuraError> {
+        lending::fund_reserve(&env, admin, asset, amount)
+    }
+
     pub fn open_position(
         env: Env,
         proof: Bytes,

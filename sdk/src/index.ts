@@ -371,39 +371,66 @@ export class Obscura implements ObscuraSdk {
   async openPosition(params: {
     collateralNote: BalanceNote;
     debtAssetId: Field;
+    /** How much of the note to lock. Defaults to the whole note. */
+    collateralAmount?: bigint;
   }): Promise<ProvenResult & { position: Position }> {
     const { collateralNote: note } = params;
+    const collateralAmount = params.collateralAmount ?? note.amount;
+    if (collateralAmount <= 0n || collateralAmount > note.amount) {
+      throw new Error("collateralAmount must be positive and no more than the note");
+    }
     const merkle = this.merkleProofFor(note);
     const nullifier = noteNullifier(note);
     const position = createPosition({
       collateralAsset: note.assetId,
-      collateralAmount: note.amount,
+      collateralAmount,
       debtAsset: params.debtAssetId,
       spendingKey: this.keys.spendingKey,
     });
+
+    // The unlocked remainder returns to the wallet as change.
+    const changeAmount = note.amount - collateralAmount;
+    const changeNote =
+      changeAmount > 0n
+        ? createNote({
+            assetId: note.assetId,
+            amount: changeAmount,
+            spendingKey: this.keys.spendingKey,
+          })
+        : null;
 
     const inputs = buildPositionOpenInputs({
       merkleRoot: merkle.root,
       nullifier,
       positionCommitment: position.commitment,
+      changeCommitment: changeNote ? changeNote.commitment : toField(0n),
       collateralAsset: note.assetId,
-      collateralAmount: note.amount,
+      collateralAmount,
+      noteAmount: note.amount,
       noteBlinding: note.blinding,
       spendingKey: note.spendingKey,
       merklePath: merkle.pathElements,
       merkleIndices: merkle.pathIndices,
       debtAsset: position.debtAsset,
       positionNonce: position.nonce,
+      changeBlinding: changeNote ? changeNote.blinding : toField(0n),
     });
     const proof = await this.prove("position_open", inputs);
     const operation = this.contract.openPositionOp({
       proof: proof.proof,
       publicInputs: encodePublicInputs(proof.publicInputs),
       collateralAsset: this.assetAddressOrThrow(note),
-      collateralAmount: note.amount,
+      collateralAmount,
     });
     this.wallet.markNoteSpent(note);
-    return { operation, proof, nullifiers: [nullifier], outputNotes: [], position };
+    if (changeNote) this.wallet.addNote(changeNote);
+    return {
+      operation,
+      proof,
+      nullifiers: [nullifier],
+      outputNotes: changeNote ? [changeNote] : [],
+      position,
+    };
   }
 
   /**
