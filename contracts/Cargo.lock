@@ -996,6 +996,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "obscura-bridge"
+version = "0.1.0"
+dependencies = [
+ "bridge-mpt",
+ "soroban-poseidon",
+ "soroban-sdk",
+]
+
+[[package]]
+name = "obscura-pool"
+version = "0.1.0"
+dependencies = [
+ "soroban-poseidon",
+ "soroban-sdk",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1873,23 +1890,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7837d08f69c77cf6b07689544538e017c1bfcf57e34b4c0ff58e6c2cd3b37091"
 dependencies = [
  "windows-link",
-]
-
-[[package]]
-name = "obscura-bridge"
-version = "0.1.0"
-dependencies = [
- "bridge-mpt",
- "soroban-poseidon",
- "soroban-sdk",
-]
-
-[[package]]
-name = "obscura-pool"
-version = "0.1.0"
-dependencies = [
- "soroban-poseidon",
- "soroban-sdk",
 ]
 
 [[package]]
