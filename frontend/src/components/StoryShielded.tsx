@@ -63,7 +63,7 @@ function Label({ children, className = '' }: { children: ReactNode; className?: 
 
 export function StoryShielded({ onEnter }: { onEnter: () => void }) {
   return (
-    <section className="relative w-full overflow-hidden bg-[#f4efe4] px-6 py-32 text-[#5CE8E8] sm:px-8 md:py-40">
+    <section className="relative w-full overflow-hidden bg-[#E6FFFF] px-6 py-32 text-[#5CE8E8] sm:px-8 md:py-40">
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-50"
         style={{
@@ -78,7 +78,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         {/* intro */}
         <Label>
           <span className="text-[#33DEDE]">public ledger</span>
-          <span aria-hidden className="text-[#b3a081]">→</span>
+          <span aria-hidden className="text-[#00CDCD]">→</span>
           <span className="text-[#33DEDE]">shielded layer</span>
         </Label>
         <h2
@@ -99,7 +99,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
               </p>
               <Label className="mt-6">
                 <span className="whitespace-nowrap text-[#33DEDE]">public ledger</span>
-                <span className="whitespace-nowrap text-[#9A9583]">[ every block · forever ]</span>
+                <span className="whitespace-nowrap text-[#00B8B8]">[ every block · forever ]</span>
               </Label>
             </div>
             <div className="order-1 mx-auto w-[clamp(240px,40vw,460px)] md:order-2">
@@ -133,7 +133,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         <div className={`mt-8 ${CARD}`} style={CARD_BG}>
           <Label>
             <span className="text-[#33DEDE]">the cryptography</span>
-            <span className="text-[#9A9583]">[ UltraHonk · Poseidon2 · BN254 ]</span>
+            <span className="text-[#00B8B8]">[ UltraHonk · Poseidon2 · BN254 ]</span>
           </Label>
           <p className="mt-6 max-w-xl text-[15px] font-medium leading-relaxed text-[#5CE8E8]">
             every move out of the shielded layer is a zero-knowledge proof, checked on-chain inside a
@@ -153,7 +153,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
                 <div key={b.label} className="border-t border-[#00B8B8]/12 pt-5">
                   <div className="flex flex-wrap items-baseline gap-x-3 font-mono text-[11px] uppercase tracking-[0.18em]">
                     <span className="text-[#33DEDE]">{b.label}</span>
-                    <span className="text-[#9A9583]">{b.coord}</span>
+                    <span className="text-[#00B8B8]">{b.coord}</span>
                   </div>
                   <h3 className="mt-3 font-display text-[19px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-[#00D6D6]">
                     {b.title}
@@ -169,7 +169,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         <div className={`mt-8 ${CARD}`} style={CARD_BG}>
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[1rem] border border-[#00B8B8]/12 bg-[#00B8B8]/12 sm:grid-cols-4">
             {MODULES.map((m) => (
-              <a key={m.k} href={`#${m.to}`} className="group block bg-[#f4efe4] px-5 py-7 transition hover:bg-[#00CDCD]">
+              <a key={m.k} href={`#${m.to}`} className="group block bg-[#E6FFFF] px-5 py-7 transition hover:bg-[#00CDCD]">
                 <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#33DEDE]">{m.k}</div>
                 <p className="mt-3 text-[13px] leading-relaxed text-[#5CE8E8]">{m.d}</p>
                 <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#8AF0F0] transition-colors group-hover:text-[#00FFFF]">

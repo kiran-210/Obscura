@@ -14,7 +14,7 @@ import {
 // preview is stable; when a live reference price is known the whole series is
 // rescaled so its last close sits on that price — the dark-pool testnet has no
 // historical feed of its own.
-const UP = '#d9c9a3'
+const UP = '#7FEFEF'
 const DOWN = '#00FFFF'
 
 function mockCandles(seed: string, anchor?: number, n = 90): CandlestickData[] {
@@ -66,11 +66,11 @@ export function PriceChart({ pair, price }: { pair: string; price?: number | nul
         attributionLogo: false,
       },
       grid: {
-        vertLines: { color: 'rgba(239,233,220,0.04)' },
-        horzLines: { color: 'rgba(239,233,220,0.04)' },
+        vertLines: { color: 'rgba(0,205,205,0.04)' },
+        horzLines: { color: 'rgba(0,205,205,0.04)' },
       },
-      rightPriceScale: { borderColor: 'rgba(239,233,220,0.08)' },
-      timeScale: { borderColor: 'rgba(239,233,220,0.08)', timeVisible: true, secondsVisible: false },
+      rightPriceScale: { borderColor: 'rgba(0,205,205,0.08)' },
+      timeScale: { borderColor: 'rgba(0,205,205,0.08)', timeVisible: true, secondsVisible: false },
       crosshair: { mode: 0 },
     })
     chartRef.current = chart

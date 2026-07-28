@@ -3,12 +3,12 @@ import type { CSSProperties } from 'react'
 import FluidVolume from './FluidVolume'
 import ScrambleCycle from './ScrambleCycle'
 import { StoryShielded } from './StoryShielded'
-import markUrl from '../assets/obscura-mark.png'
+import { ShieldBidMark } from './ShieldBidMark'
 
 const ROTATING = ['shielded', 'unlinkable', 'verified', 'private', 'yours']
 
 const LINE_STROKE = 'rgba(255,255,255,0.62)'
-const CIRCLE_STROKE = 'rgba(239,233,220,0.24)'
+const CIRCLE_STROKE = 'rgba(0,205,205,0.24)'
 
 /** Two large overlapping circles + three skewed lines + position labels — the
  *  coords background of the monopo.nyc intro, in Obscura's own words. Line and
@@ -112,7 +112,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           Grain is a separate static overlay; the field's own alpha bleeds the
           bottom edge into the footer cream. */}
       <div className="absolute inset-0">
-        <FluidVolume background="#f4efe4" quality="high" />
+        <FluidVolume background="#E6FFFF" quality="high" />
       </div>
 
       {/* Static film grain — fixed noise, does not shimmer. */}
@@ -138,7 +138,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
       <header className="fixed inset-x-0 top-0 z-50 mix-blend-difference">
         <div className="flex items-center justify-between px-8 py-5">
           <a href="#/" className="flex items-center gap-2.5">
-            <img src={markUrl} alt="Obscura" className="h-7 w-auto" />
+            <ShieldBidMark className="h-8 w-8 text-[#000000]" />
             <span className="font-display text-sm font-semibold tracking-tight">
               obscura <span className="align-super font-mono text-[10px] tracking-[0.2em] text-[#00CDCD]/60">ZK</span>
             </span>
@@ -177,21 +177,21 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
       </div>
 
       {/* Clean seam into the footer: a long, gradual cream wash over the bottom
-          (grain, lines and fluid alike) reaching pure #f4efe4 at the boundary so
+          (grain, lines and fluid alike) reaching pure #E6FFFF at the boundary so
           the section change is invisible. Below the z-10 content, so the headline
           and `scroll` stay crisp; the ramp stays transparent through their band. */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[32rem]"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(244,239,228,0) 0%, rgba(244,239,228,0) 44%, rgba(244,239,228,0.28) 64%, rgba(244,239,228,0.62) 80%, rgba(244,239,228,0.9) 92%, #f4efe4 100%)',
+            'linear-gradient(to bottom, rgba(0,255,255,0) 0%, rgba(0,255,255,0) 44%, rgba(0,255,255,0.28) 64%, rgba(0,255,255,0.62) 80%, rgba(0,255,255,0.9) 92%, #E6FFFF 100%)',
         }}
       />
       </section>
 
       <StoryShielded onEnter={onEnter} />
 
-      <footer className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#f4efe4] px-8 py-16 text-[#00B8B8]">
+      <footer className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#E6FFFF] px-8 py-16 text-[#00B8B8]">
         <div
           className="pointer-events-none absolute inset-0 opacity-50"
           style={{
@@ -205,13 +205,13 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <p className="max-w-xs text-[15px] font-medium leading-snug">
             Feel free to reach out if you want private money on Stellar — or simply have a chat.
           </p>
-          <img src={markUrl} alt="Obscura" className="h-11 w-auto opacity-80" style={{ filter: 'brightness(0)' }} />
+          <ShieldBidMark className="h-11 w-11 text-[#000000]" />
         </div>
 
         <div className="relative">
           <a
             href="mailto:hello@obscura.money"
-            className="block font-display font-light uppercase leading-none tracking-[-0.02em] text-[#b3a081] transition-colors hover:text-[#00FFFF]"
+            className="block font-display font-light uppercase leading-none tracking-[-0.02em] text-[#00CDCD] transition-colors hover:text-[#00FFFF]"
             style={{ fontSize: 'clamp(2rem, 8.2vw, 6.5rem)' }}
           >
             hello@obscura.money

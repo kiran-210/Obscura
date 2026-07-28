@@ -17,14 +17,14 @@ function Coords() {
         fill="none"
         aria-hidden
       >
-        <circle cx="500" cy="500" r="322" stroke="rgba(239,233,220,0.08)" strokeWidth="1.1" transform="translate(-150 -12)" />
-        <circle cx="500" cy="500" r="286" stroke="rgba(239,233,220,0.08)" strokeWidth="1.1" transform="translate(146 22)" />
+        <circle cx="500" cy="500" r="322" stroke="rgba(0,205,205,0.08)" strokeWidth="1.1" transform="translate(-150 -12)" />
+        <circle cx="500" cy="500" r="286" stroke="rgba(0,205,205,0.08)" strokeWidth="1.1" transform="translate(146 22)" />
       </svg>
       {lines.map((l, i) => (
         <div
           key={i}
           className="absolute left-[-25%] h-px w-[150%]"
-          style={{ top: l.top, background: 'rgba(239,233,220,0.09)', transform: `translateY(-50%) rotate(${l.deg}deg)`, transformOrigin: 'center' }}
+          style={{ top: l.top, background: 'rgba(0,205,205,0.09)', transform: `translateY(-50%) rotate(${l.deg}deg)`, transformOrigin: 'center' }}
         />
       ))}
     </div>

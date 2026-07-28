@@ -6,7 +6,7 @@
 
 @layer base {
   html {
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -117,7 +117,7 @@
 
   /* Uppercase grotesque display type — the masthead + act titles. */
   .display-hd {
-    @apply font-display font-semibold uppercase tracking-[-0.03em] text-[#f6f1e6];
+    @apply font-display font-semibold uppercase tracking-[-0.03em] text-[#000000];
     line-height: 0.98;
   }
 

@@ -1,3 +1,4 @@
+import { ShieldBidMark } from './ShieldBidMark'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useObscura } from '../hooks/useObscura'
 import { useReveal } from '../hooks/useReveal'
@@ -26,7 +27,7 @@ function ShieldedChip() {
   return (
     <div className="hidden items-center gap-2 md:flex">
       <span className="coord-label">shielded</span>
-      <ScrambleNumber value={formatUsd(total)} revealed={revealed} className="font-mono text-sm text-[#062626]" />
+      <ScrambleNumber value={formatUsd(total)} revealed={revealed} className="font-mono text-sm text-[#000000]" />
       <button
         type="button"
         onClick={toggle}
@@ -44,9 +45,9 @@ function AppNav() {
     <header className="sticky top-0 z-40 border-b border-[#00CDCD]/8 bg-[#FFFFFF]/40 backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-3">
         <NavLink to="/app" className="flex items-center gap-2">
-          <ObscuraMark className="h-5 w-5 text-spectral" />
-          <span className="font-display text-sm font-semibold tracking-tight text-[#062626]">
-            obscura <sup className="align-super font-mono text-[9px] tracking-[0.2em] text-spectral/60">ZK</sup>
+          <ShieldBidMark className="h-6 w-6 text-[#000000]" />
+          <span className="font-display text-sm font-semibold tracking-tight text-[#000000]">
+            shieldbid <sup className="align-super font-mono text-[9px] tracking-[0.2em] text-spectral/60">ZK</sup>
           </span>
         </NavLink>
         <nav className="hidden items-center gap-5 font-mono text-[10px] uppercase tracking-[0.16em] md:flex">
@@ -55,7 +56,7 @@ function AppNav() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                cx('transition hover:text-[#062626]', isActive ? 'text-[#062626]' : 'text-spectral/70')
+                cx('transition hover:text-[#000000]', isActive ? 'text-[#000000]' : 'text-spectral/70')
               }
             >
               {label}
@@ -133,7 +134,7 @@ export function AppLayout() {
         className="pointer-events-none relative h-[30rem]"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(244,239,228,0) 0%, rgba(244,239,228,0) 20%, rgba(244,239,228,0.14) 42%, rgba(244,239,228,0.42) 62%, rgba(244,239,228,0.74) 78%, rgba(244,239,228,0.93) 91%, #f4efe4 100%)',
+            'linear-gradient(to bottom, rgba(0,255,255,0) 0%, rgba(0,255,255,0) 20%, rgba(0,255,255,0.14) 42%, rgba(0,255,255,0.42) 62%, rgba(0,255,255,0.74) 78%, rgba(0,255,255,0.93) 91%, #E6FFFF 100%)',
         }}
       />
       <AppFooter />

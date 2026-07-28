@@ -51,16 +51,16 @@ const patina = {
 // teal and `text-zinc-500/600` (muted) are mid-teal, so existing classes stay
 // legible on the white surfaces above instead of turning invisible.
 const warmZinc = {
-  50: '#062626',
-  100: '#0B3333',
-  200: '#0F4244',
-  300: '#154F52',
-  400: '#2F6E71',
-  500: '#4F8C8F',
-  600: '#74A9AC',
-  700: '#9EC6C8',
-  800: '#C6E2E4',
-  900: '#E4F4F5',
+  50: '#000000',
+  100: '#000000',
+  200: '#0A0A0A',
+  300: '#141414',
+  400: '#262626',
+  500: '#3D3D3D',
+  600: '#545454',
+  700: '#8A8A8A',
+  800: '#C2C2C2',
+  900: '#E8E8E8',
   950: '#FFFFFF',
 }
 
