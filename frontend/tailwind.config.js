@@ -29,11 +29,11 @@ const mist = {
 
 // Accent — the two brand cyans.
 const halo = {
-  DEFAULT: '#00CDCD',
-  soft: '#00FFFF',
-  dim: '#4DD9D9',
-  glow: '#00FFFF',
-  deep: '#009B9B',
+  DEFAULT: '#000000',
+  soft: '#1A1A1A',
+  dim: '#3D3D3D',
+  glow: '#000000',
+  deep: '#000000',
 }
 
 // Warm antique-gold accent for positive/confirmed states — the sepia-world

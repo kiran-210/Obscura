@@ -54,17 +54,17 @@ function CoordsBackground() {
         />
       ))}
 
-      <ul className="absolute inset-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[#00CDCD]/55">
+      <ul className="absolute inset-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[#000000]/55">
         <li className="absolute left-[5%] top-[45%]">
-          <span className="block text-[#00CDCD]/80">Testnet</span>
+          <span className="block text-[#000000]/80">Testnet</span>
           <span className="block">[ Stellar · SDF Horizon ]</span>
         </li>
         <li className="absolute right-[5%] top-[38%] text-right">
-          <span className="block text-[#00CDCD]/80">Proof</span>
+          <span className="block text-[#000000]/80">Proof</span>
           <span className="block">[ Groth16 · BN254 ]</span>
         </li>
         <li className="absolute bottom-[16%] left-1/2 -translate-x-1/2 text-center">
-          <span className="block text-[#00CDCD]/80">Shielded</span>
+          <span className="block text-[#000000]/80">Shielded</span>
           <span className="block">[ Poseidon · Merkle ]</span>
         </li>
       </ul>
@@ -102,7 +102,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
   }, [])
 
   return (
-    <div className="relative w-full bg-[#00CDCD] text-[#00CDCD]">
+    <div className="relative w-full bg-[#00CDCD] text-[#000000]">
       <section
         ref={heroRef}
         className="relative min-h-screen w-full overflow-hidden"
@@ -140,14 +140,14 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           <a href="#/" className="flex items-center gap-2.5">
             <ShieldBidMark className="h-8 w-8 text-[#000000]" />
             <span className="font-display text-sm font-semibold tracking-tight">
-              obscura <span className="align-super font-mono text-[10px] tracking-[0.2em] text-[#00CDCD]/60">ZK</span>
+              obscura <span className="align-super font-mono text-[10px] tracking-[0.2em] text-[#000000]/60">ZK</span>
             </span>
           </a>
           <nav className="flex items-center gap-8 font-mono text-[11px] uppercase tracking-[0.18em]">
-            <a href="#/faucet" className="text-[#00CDCD]/70 transition hover:text-[#00CDCD]">
+            <a href="#/faucet" className="text-[#000000]/70 transition hover:text-[#000000]">
               Faucet
             </a>
-            <button onClick={onEnter} className="text-[#00CDCD]/70 transition hover:text-[#00CDCD]">
+            <button onClick={onEnter} className="text-[#000000]/70 transition hover:text-[#000000]">
               Enter →
             </button>
           </nav>
@@ -173,7 +173,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
           </span>
         </h1>
 
-        <span className="mt-10 font-mono text-[11px] uppercase tracking-[0.3em] text-[#00CDCD]/55">scroll</span>
+        <span className="mt-10 font-mono text-[11px] uppercase tracking-[0.3em] text-[#000000]/55">scroll</span>
       </div>
 
       {/* Clean seam into the footer: a long, gradual cream wash over the bottom
@@ -191,7 +191,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
 
       <StoryShielded onEnter={onEnter} />
 
-      <footer className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#E6FFFF] px-8 py-16 text-[#00B8B8]">
+      <footer className="relative flex min-h-screen flex-col justify-between overflow-hidden bg-[#E6FFFF] px-8 py-16 text-[#000000]">
         <div
           className="pointer-events-none absolute inset-0 opacity-50"
           style={{
@@ -211,7 +211,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         <div className="relative">
           <a
             href="mailto:hello@obscura.money"
-            className="block font-display font-light uppercase leading-none tracking-[-0.02em] text-[#00CDCD] transition-colors hover:text-[#00FFFF]"
+            className="block font-display font-light uppercase leading-none tracking-[-0.02em] text-[#000000] transition-colors hover:text-[#000000]"
             style={{ fontSize: 'clamp(2rem, 8.2vw, 6.5rem)' }}
           >
             hello@obscura.money
@@ -221,10 +221,10 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
 
         <div className="relative">
           <div className="flex flex-col gap-12 md:flex-row md:items-end md:justify-between">
-            <nav className="flex gap-6 font-mono text-[13px] uppercase tracking-[0.14em] text-[#00B8B8]/70">
-              <a href="#" className="transition hover:text-[#00B8B8]">X</a>
-              <a href="#" className="transition hover:text-[#00B8B8]">GitHub</a>
-              <a href="#" className="transition hover:text-[#00B8B8]">Discord</a>
+            <nav className="flex gap-6 font-mono text-[13px] uppercase tracking-[0.14em] text-[#000000]/70">
+              <a href="#" className="transition hover:text-[#000000]">X</a>
+              <a href="#" className="transition hover:text-[#000000]">GitHub</a>
+              <a href="#" className="transition hover:text-[#000000]">Discord</a>
             </nav>
 
             <div className="grid max-w-2xl grid-cols-1 gap-10 sm:grid-cols-2">
@@ -235,7 +235,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                   </svg>
                   Open source
                 </div>
-                <p className="text-[13px] leading-relaxed text-[#00B8B8]/70">
+                <p className="text-[13px] leading-relaxed text-[#000000]/70">
                   Obscura is open source and community-run. We're always looking for cryptographers, Soroban engineers and designers. Reach out with what you'd build.
                 </p>
               </div>
@@ -247,18 +247,18 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
                   </svg>
                   Security
                 </div>
-                <p className="text-[13px] leading-relaxed text-[#00B8B8]/70">
+                <p className="text-[13px] leading-relaxed text-[#000000]/70">
                   Found a vulnerability in the circuits or contracts? Disclose it responsibly at security@obscura.money — privacy protects everyone.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="mt-14 flex items-center justify-between border-t border-[#00B8B8]/12 pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-[#00B8B8]/50">
+          <div className="mt-14 flex items-center justify-between border-t border-[#00B8B8]/12 pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-[#000000]/50">
             <span>© Obscura 2026</span>
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="transition hover:text-[#00B8B8]"
+              className="transition hover:text-[#000000]"
             >
               Top ↑
             </button>

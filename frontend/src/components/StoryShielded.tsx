@@ -78,11 +78,11 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         {/* intro */}
         <Label>
           <span className="text-[#33DEDE]">public ledger</span>
-          <span aria-hidden className="text-[#00CDCD]">→</span>
+          <span aria-hidden className="text-[#000000]">→</span>
           <span className="text-[#33DEDE]">shielded layer</span>
         </Label>
         <h2
-          className="mt-8 max-w-3xl font-display font-medium lowercase leading-[1.04] tracking-[-0.03em] text-[#00D6D6]"
+          className="mt-8 max-w-3xl font-display font-medium lowercase leading-[1.04] tracking-[-0.03em] text-[#000000]"
           style={{ fontSize: 'clamp(2rem, 5.4vw, 3.6rem)' }}
         >
           public chains remember everything.{' '}
@@ -99,7 +99,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
               </p>
               <Label className="mt-6">
                 <span className="whitespace-nowrap text-[#33DEDE]">public ledger</span>
-                <span className="whitespace-nowrap text-[#00B8B8]">[ every block · forever ]</span>
+                <span className="whitespace-nowrap text-[#000000]">[ every block · forever ]</span>
               </Label>
             </div>
             <div className="order-1 mx-auto w-[clamp(240px,40vw,460px)] md:order-2">
@@ -118,7 +118,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
               </span>
             </div>
             <div className="order-2 max-w-md">
-              <h3 className="font-display text-[clamp(1.5rem,3.2vw,2.2rem)] font-medium lowercase leading-[1.08] tracking-[-0.02em] text-[#00D6D6]">
+              <h3 className="font-display text-[clamp(1.5rem,3.2vw,2.2rem)] font-medium lowercase leading-[1.08] tracking-[-0.02em] text-[#000000]">
                 value falls into the pool and disappears.
               </h3>
               <p className="mt-5 text-[15px] font-medium leading-relaxed text-[#5CE8E8]">
@@ -133,7 +133,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         <div className={`mt-8 ${CARD}`} style={CARD_BG}>
           <Label>
             <span className="text-[#33DEDE]">the cryptography</span>
-            <span className="text-[#00B8B8]">[ UltraHonk · Poseidon2 · BN254 ]</span>
+            <span className="text-[#000000]">[ UltraHonk · Poseidon2 · BN254 ]</span>
           </Label>
           <p className="mt-6 max-w-xl text-[15px] font-medium leading-relaxed text-[#5CE8E8]">
             every move out of the shielded layer is a zero-knowledge proof, checked on-chain inside a
@@ -153,9 +153,9 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
                 <div key={b.label} className="border-t border-[#00B8B8]/12 pt-5">
                   <div className="flex flex-wrap items-baseline gap-x-3 font-mono text-[11px] uppercase tracking-[0.18em]">
                     <span className="text-[#33DEDE]">{b.label}</span>
-                    <span className="text-[#00B8B8]">{b.coord}</span>
+                    <span className="text-[#000000]">{b.coord}</span>
                   </div>
-                  <h3 className="mt-3 font-display text-[19px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-[#00D6D6]">
+                  <h3 className="mt-3 font-display text-[19px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-[#000000]">
                     {b.title}
                   </h3>
                   <p className="mt-3 text-[14px] font-medium leading-relaxed text-[#5CE8E8]">{b.body}</p>
@@ -172,7 +172,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
               <a key={m.k} href={`#${m.to}`} className="group block bg-[#E6FFFF] px-5 py-7 transition hover:bg-[#00CDCD]">
                 <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#33DEDE]">{m.k}</div>
                 <p className="mt-3 text-[13px] leading-relaxed text-[#5CE8E8]">{m.d}</p>
-                <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#8AF0F0] transition-colors group-hover:text-[#00FFFF]">
+                <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#8AF0F0] transition-colors group-hover:text-[#000000]">
                   open →
                 </span>
               </a>
@@ -180,7 +180,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
           </div>
           <button
             onClick={onEnter}
-            className="mt-10 font-mono text-[12px] uppercase tracking-[0.18em] text-[#8AF0F0] transition hover:text-[#00FFFF]"
+            className="mt-10 font-mono text-[12px] uppercase tracking-[0.18em] text-[#8AF0F0] transition hover:text-[#000000]"
           >
             enter the shielded layer →
           </button>
