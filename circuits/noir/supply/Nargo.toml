@@ -1,0 +1,9 @@
+[package]
+name = "supply"
+type = "bin"
+authors = ["Obscura"]
+
+[dependencies]
+obscura_lib = { path = "../obscura_lib" }
+lending_lib = { path = "../lending_lib" }
+poseidon = { tag = "v0.2.0", git = "https://github.com/noir-lang/poseidon" }
