@@ -19,10 +19,10 @@ import {
   type RiskView,
 } from '../lib/lending-view'
 import { SOROBAN_RPC_URL } from '../lib/config'
-import { loadPositions, type StoredPosition } from '../lib/note-store'
-import { RealObscuraSdk, toBaseUnits } from '../lib/real-sdk'
+import { loadNotes, loadPositions, type StoredNote, type StoredPosition } from '../lib/note-store'
+import { RealObscuraSdk, baseUnitsToNumber, toBaseUnits } from '../lib/real-sdk'
 import { assetMeta } from '../lib/tokens'
-import { AssetAvatar, Badge, Button, Card, Field, SectionHeading, TextInput } from './ui'
+import { AssetAvatar, Badge, Button, Card, Field, SectionHeading, Select, TextInput } from './ui'
 
 type Action = 'borrow' | 'repay' | 'withdraw'
 
@@ -185,6 +185,108 @@ function PositionCard({
   )
 }
 
+/**
+ * Open a position by locking a deposited note as collateral.
+ *
+ * The whole note is locked — `position_open` spends it entirely, with no change
+ * output. To collateralise part of a balance, split it with a payment to yourself
+ * first.
+ */
+function OpenPositionForm({
+  notes,
+  busy,
+  onOpen,
+}: {
+  notes: StoredNote[]
+  busy: string | null
+  onOpen: (note: StoredNote, debtAssetCode: string) => void
+}) {
+  const [commitment, setCommitment] = useState(notes[0]?.commitment ?? '')
+  const [debtAsset, setDebtAsset] = useState('USDC')
+  const selected = notes.find((n) => n.commitment === commitment) ?? notes[0]
+
+  if (notes.length === 0) {
+    return (
+      <Card className="space-y-3 p-6 text-center">
+        <p className="text-sm text-zinc-300">No deposited notes available as collateral.</p>
+        <p className="text-xs leading-relaxed text-zinc-500">
+          Deposit into the shielded pool first — a position locks one whole note.
+        </p>
+      </Card>
+    )
+  }
+
+  const meta = selected ? assetMeta(selected.assetCode) : null
+  const amount = selected && meta ? baseUnitsToNumber(BigInt(selected.amount), meta.decimals) : 0
+  // The debt asset must differ from the collateral, or price binding is degenerate.
+  const debtOptions = ['USDC', 'XLM', 'ETH', 'BTC'].filter((c) => c !== selected?.assetCode)
+
+  return (
+    <Card className="space-y-4 p-5">
+      <SectionHeading title="Open a position" />
+
+      <Field label="Collateral note">
+        <Select
+          value={commitment}
+          onChange={(e) => setCommitment(e.target.value)}
+          options={notes.map((n) => {
+            const m = assetMeta(n.assetCode)
+            return {
+              value: n.commitment,
+              label: `${baseUnitsToNumber(BigInt(n.amount), m.decimals).toFixed(4)} ${n.assetCode} · ${n.commitment.slice(0, 10)}…`,
+            }
+          })}
+        />
+      </Field>
+
+      <Field label="Borrow asset">
+        <Select
+          value={debtAsset}
+          onChange={(e) => setDebtAsset(e.target.value)}
+          options={debtOptions.map((c) => ({ value: c, label: c }))}
+        />
+      </Field>
+
+      <div className="space-y-1 rounded-lg border border-[#efe9dc]/10 bg-[#efe9dc]/[0.03] px-3 py-2 text-xs">
+        <div className="flex justify-between">
+          <span className="text-zinc-500">Collateral locked</span>
+          <span className="font-mono tabular-nums text-zinc-200">
+            {amount.toFixed(4)} {selected?.assetCode}
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-zinc-500">Visible on-chain</span>
+          <span className="text-zinc-300">yes — this is what makes seizure trustless</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-zinc-500">Starting debt</span>
+          <span className="font-mono tabular-nums text-zinc-200">0</span>
+        </div>
+      </div>
+
+      <p className="text-xs leading-relaxed text-zinc-500">
+        The entire note is locked; there is no partial collateralisation. Once open you
+        must attest solvency before each deadline — miss it and the whole collateral can
+        be seized by anyone.
+      </p>
+
+      {selected?.leafIndex === undefined && (
+        <p className="text-xs text-amber-300">
+          This note has no leaf index yet — wait for the indexer to observe it on-chain.
+        </p>
+      )}
+
+      <Button
+        className="w-full"
+        disabled={!selected || selected.leafIndex === undefined || busy !== null}
+        onClick={() => selected && onOpen(selected, debtAsset)}
+      >
+        {busy === 'open' ? 'Proving…' : 'Open position'}
+      </Button>
+    </Card>
+  )
+}
+
 /** Borrow / repay / withdraw form. Mirrors the deposit/withdraw form patterns. */
 function ActionForm({
   view,
@@ -276,6 +378,7 @@ function ActionForm({
 
 export function Lend({ embedded = false }: { embedded?: boolean }) {
   const [stored, setStored] = useState<StoredPosition[]>([])
+  const [collateralNotes, setCollateralNotes] = useState<StoredNote[]>([])
   const [ledger, setLedger] = useState<number | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [active, setActive] = useState<{ view: PositionView; action: Action } | null>(null)
@@ -285,6 +388,7 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
 
   useEffect(() => {
     setStored(loadPositions().filter((p) => p.status === 'open'))
+    setCollateralNotes(loadNotes().filter((n) => !n.spent))
   }, [])
 
   // Poll the ledger so the attestation countdown is live. Deadlines are measured in
@@ -338,6 +442,14 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
 
   function refresh() {
     setStored(loadPositions().filter((p) => p.status === 'open'))
+    setCollateralNotes(loadNotes().filter((n) => !n.spent))
+  }
+
+  async function onOpen(note: StoredNote, debtAssetCode: string) {
+    await run('open', async () => {
+      const { hash, position } = await sdk.openPosition({ note, debtAssetCode })
+      return `Position opened — ${position.collateralAssetCode} collateral locked. tx ${hash.slice(0, 12)}…`
+    })
   }
 
   /** Run a lending action, surfacing the real error rather than a generic one. */
@@ -394,17 +506,21 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
       )}
 
       {views.length === 0 ? (
-        <Card className="space-y-3 p-6 text-center">
-          <p className="text-sm text-zinc-300">No lending positions yet.</p>
-          <p className="text-xs leading-relaxed text-zinc-500">
-            Open one by locking a shielded note as collateral. Your collateral is public
-            so the position can be liquidated trustlessly; how much you borrow against it
-            stays private.
-          </p>
-          <p className="text-xs text-zinc-500">
-            Open one from Portfolio by locking a deposited note as collateral.
-          </p>
-        </Card>
+        <>
+          <Card className="space-y-2 p-6 text-center">
+            <p className="text-sm text-zinc-300">No lending positions yet.</p>
+            <p className="text-xs leading-relaxed text-zinc-500">
+              Lock a deposited note as collateral below. The collateral amount is public so
+              the position can be liquidated trustlessly; how much you borrow against it
+              stays private.
+            </p>
+          </Card>
+          <OpenPositionForm
+            notes={collateralNotes}
+            busy={busy}
+            onOpen={(note, debtAssetCode) => void onOpen(note, debtAssetCode)}
+          />
+        </>
       ) : active ? (
         <ActionForm
           view={active.view}
@@ -430,6 +546,11 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
               onAct={(view, action) => setActive({ view, action })}
             />
           ))}
+          <OpenPositionForm
+            notes={collateralNotes}
+            busy={busy}
+            onOpen={(note, debtAssetCode) => void onOpen(note, debtAssetCode)}
+          />
         </div>
       )}
     </div>
