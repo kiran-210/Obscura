@@ -43,16 +43,13 @@ function sacEnv(code: string): string | undefined {
  * out of the box — the app can mint them to you. Override any SAC via `VITE_<CODE>_SAC`
  * (e.g. to point at the real mainnet assets).
  */
+// ShieldBid supports XLM and USDC only (SHIELDBID_SPEC §5). ETH / BTC / XRP were
+// removed here, which drops them from every picker at once -- deposit, withdraw,
+// pay and swap all derive their options from this list.
 export const CURATED_TOKENS: TokenMeta[] = [
   { code: 'XLM', name: 'Stellar Lumens', icon: 'XLM', decimals: 7, priceUsd: 0.39, sac: NATIVE_SAC, native: true },
-  { code: 'USDC', name: 'Test USD Coin', icon: 'USDC', decimals: 7, priceUsd: 1, faucet: true,
+  { code: 'USDC', name: 'USD Coin', icon: 'USDC', decimals: 7, priceUsd: 1, faucet: true,
     sac: sacEnv('USDC') ?? 'CB4F54CW6HRI57QUNOLBA3PWA6BTH65CXGJ6O7FNEDTU6OT6O6AMORMG' },
-  { code: 'ETH', name: 'Test Ethereum', icon: 'ETH', decimals: 7, priceUsd: 3500, faucet: true,
-    sac: sacEnv('ETH') ?? 'CCBJOP22H3SY3YYHT2PLTP6RDMM2P4B3JL7KVBVGQ57IQTPXMSS6MO2L' },
-  { code: 'BTC', name: 'Test Bitcoin', icon: 'BTC', decimals: 7, priceUsd: 65000, faucet: true,
-    sac: sacEnv('BTC') ?? 'CAVFI65WX6J4MUL7763UKWJMLJN7I2GCT2EXK4VV4HRYMDEL5B5WDFP4' },
-  { code: 'XRP', name: 'Test XRP', icon: 'XRP', decimals: 7, priceUsd: 0.6, faucet: true,
-    sac: sacEnv('XRP') ?? 'CCZV2PCLVCSFXIDOGE5N2TBC67CW3Y6JSTUIX5HKB4IU6C3O7KESB3IA' },
 ]
 
 const BRIDGED_META: TokenMeta[] = [

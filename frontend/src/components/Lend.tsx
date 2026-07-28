@@ -591,10 +591,32 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
         const { hash } = await sdk.borrowAgainst({ position: view.stored, borrowAmount: base })
         return `Borrowed ${amount} ${view.debtCode}. tx ${hash.slice(0, 12)}…`
       }
-      // repay and withdraw-collateral are implemented in the circuits, the contract
-      // and the SDK, but not yet wired through this client.
+      if (action === 'repay') {
+        // Pick the smallest unspent note of the debt asset that covers the payment,
+        // so large notes stay whole for future use.
+        const candidate = loadNotes()
+          .filter(
+            (n) =>
+              !n.spent &&
+              n.leafIndex !== undefined &&
+              n.assetCode === view.debtCode &&
+              BigInt(n.amount) >= base,
+          )
+          .sort((a, b) => (BigInt(a.amount) < BigInt(b.amount) ? -1 : 1))[0]
+        if (!candidate) {
+          throw new Error(
+            `You need a single ${view.debtCode} balance of at least ${amount} to repay that much. Deposit more, or repay a smaller amount.`,
+          )
+        }
+        const { hash } = await sdk.repayLoan({
+          position: view.stored,
+          fromNote: candidate,
+          repayAmount: base,
+        })
+        return `Repaid ${amount} ${view.debtCode}. tx ${hash.slice(0, 12)}…`
+      }
       throw new Error(
-        `${action === 'repay' ? 'Repay' : 'Withdraw collateral'} is not wired into the app yet — the circuit, contract entrypoint and verifier are all deployed, but this button has no client implementation.`,
+        'Withdraw collateral is not wired into the app yet — the circuit, contract entrypoint and verifier are all deployed, but this button has no client implementation.',
       )
     })
   }

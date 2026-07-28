@@ -37,6 +37,7 @@ import {
   ObscuraContract,
   buildBorrowInputs,
   buildPositionOpenInputs,
+  buildRepayInputs,
   buildSolvencyAttestationInputs,
   buildSupplyInputs,
   computeNullifier,
@@ -622,6 +623,110 @@ export class RealObscuraSdk implements ObscuraSdk {
     if (params.note.assetAddress) stored.assetAddress = params.note.assetAddress
     addSupply(stored)
     return { hash, supply: stored }
+  }
+
+  /**
+   * Repay debt from a shielded note of the debt asset.
+   *
+   * Launch-critical: without this a loan can never be closed, so every position
+   * eventually misses its deadline and freezes. Repaying always improves health,
+   * so it is never blocked on solvency — but a position past its deadline is
+   * already frozen and the contract refuses it, which is surfaced plainly.
+   */
+  async repayLoan(params: {
+    position: StoredPosition
+    fromNote: StoredNote
+    repayAmount: bigint
+  }): Promise<{ hash: string; position: StoredPosition }> {
+    const from = await this.requireAddress()
+    const old = toSdkPosition(params.position)
+    const note = toBalanceNote(params.fromNote)
+    if (note.amount < params.repayAmount) {
+      throw new Error('That note does not cover the repayment.')
+    }
+    const debtSac = this.assetAddressOf(params.fromNote)
+    const reserve = await this.getReserve(debtSac)
+
+    const posWitness = await this.positionWitness(params.position)
+    const noteWitness = await this.spendWitness(params.fromNote)
+
+    // The circuit floors scaled debt at zero, so overpaying simply closes the loan.
+    const repayScaled = toScaled(params.repayAmount, reserve.borrowIndex)
+    const nextScaled = old.debtScaled >= repayScaled ? old.debtScaled - repayScaled : 0n
+    const next = createPosition({
+      collateralAsset: old.collateralAsset,
+      collateralAmount: old.collateralAmount,
+      debtAsset: old.debtAsset,
+      debtScaled: nextScaled,
+      spendingKey: old.spendingKey as Field,
+    })
+
+    const changeAmount = note.amount - params.repayAmount
+    const changeNote =
+      changeAmount > 0n
+        ? createNote({
+            assetId: note.assetId,
+            amount: changeAmount,
+            spendingKey: getSpendingKey(),
+          })
+        : null
+
+    const inputs = buildRepayInputs({
+      merkleRoot: posWitness.root,
+      oldPositionCommitment: old.commitment,
+      positionNullifier: computeNullifier(old.commitment, old.spendingKey as Field),
+      noteNullifier: noteNullifier(note),
+      newPositionCommitment: next.commitment,
+      changeCommitment: changeNote ? changeNote.commitment : toField(0n),
+      collateralAsset: old.collateralAsset,
+      collateralAmount: old.collateralAmount,
+      debtAsset: old.debtAsset,
+      repayAmount: params.repayAmount,
+      borrowIndex: reserve.borrowIndex,
+      oldDebtScaled: old.debtScaled,
+      spendingKey: old.spendingKey as Field,
+      positionPath: posWitness.pathElements,
+      positionIndices: posWitness.pathIndices,
+      noteAmount: note.amount,
+      noteBlinding: note.blinding,
+      notePath: noteWitness.pathElements,
+      noteIndices: noteWitness.pathIndices,
+      oldNonce: old.nonce,
+      newNonce: next.nonce,
+      changeBlinding: changeNote ? changeNote.blinding : toField(0n),
+    })
+    const proof = await this.proveAndVerify('repay', inputs)
+
+    const op = this.contract.repayOp({
+      proof: proof.proof,
+      publicInputs: encodePublicInputs(proof.publicInputs),
+      oldPosition: old.commitment,
+      debtAsset: debtSac,
+      repayAmount: params.repayAmount,
+    })
+    const { hash } = await this.submitOp(op, from)
+
+    markSpent(params.fromNote.commitment)
+    if (changeNote) {
+      changeNote.assetAddress = debtSac
+      addNote(changeNote, {
+        assetCode: params.fromNote.assetCode,
+        decimals: assetMeta(params.fromNote.assetCode).decimals,
+        txHash: hash,
+        source: 'change',
+      })
+    }
+    const stored = fromSdkPosition(next, {
+      collateralAssetCode: params.position.collateralAssetCode,
+      debtAssetCode: params.position.debtAssetCode,
+      ...(params.position.collateralAssetAddress
+        ? { collateralAssetAddress: params.position.collateralAssetAddress }
+        : {}),
+      ...(params.position.deadline !== undefined ? { deadline: params.position.deadline } : {}),
+      txHash: hash,
+    })
+    replacePosition(params.position.commitment, stored)
+    return { hash, position: stored }
   }
 
   /** Merkle witness for a position commitment (same tree as balance notes). */
