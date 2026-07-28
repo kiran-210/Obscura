@@ -57,7 +57,74 @@ history over time — cadence and lifetime, never amounts.
 
 ---
 
-## 2. UNRESOLVED: freeze-only liquidation vs. the supply side
+## 2. RESOLVED: treasury-funded lending
+
+**Decision:** the MVP ships **borrow-only**, funded by a protocol treasury. Supply
+is postponed, not cancelled — see §2.4.
+
+The treasury preloads the pool (e.g. 100,000 USDC). Users borrow against private
+collateral. There are no suppliers.
+
+### 2.1 Why this dissolves the freeze-only problem
+
+The conflict in §2.2 was never really about liquidation — it was about *who bears
+an unrecoverable loss*. With no suppliers, the treasury bears it, on its own
+capital, knowingly. The asset-mismatch and unattributable-debt problems stop
+mattering, because no third party's yield depended on accurate recovery.
+
+Freeze-only is now fully coherent: a defaulting borrower forfeits their collateral
+into the pool and the treasury absorbs the shortfall. The treasury owns both sides.
+
+### 2.2 What the treasury deposit reveals
+
+The treasury funding transaction is a **public** Stellar payment — visible, and
+arguably desirable as proof the pool is funded.
+
+Consequence: **aggregate utilisation is inferable.** If the pool visibly holds
+100,000 USDC and 20,000 has been lent out, an observer learns 20,000 is outstanding
+in total. It reveals nothing about *who* borrowed or any *individual* amount.
+
+### 2.3 Fixed borrow APY — 3.2%
+
+**Replace the kinked utilisation curve with a flat 3.2% APR.** The borrow index
+becomes a pure function of time:
+
+```
+index(t) = INDEX_SCALE × (1 + 0.032 × elapsed_ledgers / LEDGERS_PER_YEAR)
+```
+
+computable by anyone from the ledger sequence alone — no oracle, no utilisation,
+no aggregate. Debt accrues exactly as today (`debt_now = debt_scaled × index`), so
+a 100 USDC loan owes 103.2 after a year.
+
+**This is a privacy upgrade, not just a simplification.** The only reason
+`borrow_amount` is public today is that a utilisation-based rate needs
+`total_borrowed`, which forced a public delta per operation — the leak documented
+in `LENDING_SPEC` §1.1, where following one loan's operation chain reconstructs its
+debt by accumulation. A fixed rate removes that requirement, so **borrow amounts
+can become private**, closing the last real hole in "your debt is private".
+
+Cost: a circuit change to `borrow.nr` (move `borrow_amount` from public to
+private), plus dropping the reserve's rate logic. Treasury solvency then rests on
+per-loan over-collateralisation — sound, because every loan is proven ≥154% backed
+in-circuit — rather than a running aggregate.
+
+**Recommended order:** ship the MVP with `borrow_amount` public (already built and
+deployed), then make it private as the first post-MVP change. Both work; the second
+is strictly more private.
+
+### 2.4 When Supply returns
+
+A privacy-preserving supply market needs accurate recovery, which needs real
+liquidation, which needs a party who can decrypt positions (§2.5 option d) or
+threshold decryption across N keepers. Design that after the borrow flow is stable.
+Do not ship supply yield that is not backed by a sound recovery mechanism.
+
+---
+
+## 2.5 HISTORICAL: freeze-only liquidation vs. the supply side
+
+*Superseded by §2 — retained because it explains why supply is postponed.*
 
 **Decision taken:** collateral, debt and health are all private, with **no keeper**.
 An unhealthy loan **freezes** rather than being liquidated.
@@ -255,19 +322,26 @@ Amounts hide behind the existing reveal toggle.
 
 ## 10. Work required against today's build
 
+**MVP scope: Portfolio · Deposit/Withdraw · Borrow · Repay · Pay · Swap.**
+Supply is postponed (§2.4). Build in this order — each item is independently
+shippable.
+
 | # | Task | Notes |
 |---|---|---|
-| 1 | Resolve §2.3 | **blocks the supply side** |
-| 2 | `set_risk_params` → 6500 bps | on-chain, no redeploy |
-| 3 | Remove ETH/BTC/XRP/bETH/bUSDC | `lib/tokens.ts`, config, faucet |
-| 4 | Restrict swap to XLM/USDC | Swap already takes arbitrary pairs |
-| 5 | Rebuild Portfolio as hub | loans, supplied, APY, health, limit |
-| 6 | Split Lend into Borrow / Supply tabs | |
-| 7 | Partial collateral | needs a change output in `position_open.nr` → recompile, new VK, redeploy that one verifier, update pool + SDK |
-| 8 | **Wire repay** | must ship with borrow |
-| 9 | Wire withdraw-collateral, redeem, claim | |
-| 10 | APY everywhere | replicate the kinked curve client-side; must match `lending.rs` |
+| 1 | Fund the treasury | deposit USDC into the pool; public tx, that is fine |
+| 2 | `set_risk_params` → 6500 bps | on-chain, no redeploy, no recompile |
+| 3 | Flat 3.2% borrow index | replace the kinked curve in `lending.rs`; index becomes a function of ledger number |
+| 4 | Remove ETH/BTC/XRP/bETH/bUSDC | `lib/tokens.ts`, `ASSET_CONFIG`, deposit picker, faucet |
+| 5 | Restrict swap to XLM/USDC | Swap already takes arbitrary pairs |
+| 6 | **Wire repay** | **launch blocker** — without it every loan eventually freezes |
+| 7 | Partial collateral | change output in `position_open.nr` → recompile, new VK, redeploy that one verifier, update pool + SDK. **The only circuit change in the MVP.** |
+| 8 | Rebuild Portfolio as hub | balances, loans, APY paid, health, borrow limit |
+| 9 | Lend → Borrow tab only | hide Supply until §2.4 |
+| 10 | Wire withdraw-collateral / add-collateral | loan card actions |
 | 11 | Language pass | §9 table |
+
+**Post-MVP, first change:** make `borrow_amount` private in `borrow.nr` (§2.3) —
+closes the last debt-privacy leak, now that a fixed rate makes it possible.
 
 **Already done and reusable:** all 7 circuits (compiled, VKs deployed), the pool
 contract with the full lending module, SDK primitives and input builders, position
