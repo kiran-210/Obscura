@@ -134,8 +134,10 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
         style={{ background: 'linear-gradient(to bottom, rgba(20,16,9,0.55), rgba(20,16,9,0.12) 42%, transparent 70%)' }}
       />
 
-      {/* Header — fixed, inverts against whatever scrolls behind it. */}
-      <header className="fixed inset-x-0 top-0 z-50 mix-blend-difference">
+      {/* Header - fixed. NO mix-blend-difference: that mode was for white text over
+          dark sections; against the cyan surface it computes difference(cyan,
+          black) = cyan, rendering black text exactly the background colour. */}
+      <header className="fixed inset-x-0 top-0 z-50 bg-[#00CDCD]/80 backdrop-blur-md">
         <div className="flex items-center justify-between px-8 py-5">
           <a href="#/" className="flex items-center gap-2.5">
             <ShieldBidMark className="h-8 w-8 text-[#000000]" />
@@ -157,7 +159,7 @@ export function Landing({ onEnter }: { onEnter: () => void }) {
       {/* Hero — two fixed word-lines + one rotating, scrambling line. */}
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6">
         <h1
-          className="text-center font-display font-medium uppercase leading-[0.98] tracking-[-0.04em] text-[#062626]"
+          className="text-center font-display font-medium uppercase leading-[0.98] tracking-[-0.04em] text-[#000000]"
           style={{ fontSize: 'clamp(2.6rem, 7.4vw, 5.75rem)', textShadow: '0 2px 30px rgba(20,16,9,0.45)' }}
         >
           <span className="flex flex-wrap justify-center gap-x-[0.26em]">

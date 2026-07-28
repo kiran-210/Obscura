@@ -63,7 +63,7 @@ function Label({ children, className = '' }: { children: ReactNode; className?: 
 
 export function StoryShielded({ onEnter }: { onEnter: () => void }) {
   return (
-    <section className="relative w-full overflow-hidden bg-[#E6FFFF] px-6 py-32 text-[#5CE8E8] sm:px-8 md:py-40">
+    <section className="relative w-full overflow-hidden bg-[#E6FFFF] px-6 py-32 text-[#000000] sm:px-8 md:py-40">
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-50"
         style={{
@@ -77,28 +77,28 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
       <div className="relative z-10 mx-auto max-w-6xl">
         {/* intro */}
         <Label>
-          <span className="text-[#33DEDE]">public ledger</span>
+          <span className="text-[#000000]">public ledger</span>
           <span aria-hidden className="text-[#000000]">→</span>
-          <span className="text-[#33DEDE]">shielded layer</span>
+          <span className="text-[#000000]">shielded layer</span>
         </Label>
         <h2
           className="mt-8 max-w-3xl font-display font-medium lowercase leading-[1.04] tracking-[-0.03em] text-[#000000]"
           style={{ fontSize: 'clamp(2rem, 5.4vw, 3.6rem)' }}
         >
           public chains remember everything.{' '}
-          <span className="text-[#5CE8E8]">the shielded layer forgets.</span>
+          <span className="text-[#000000]">the shielded layer forgets.</span>
         </h2>
 
         {/* PUBLIC LEDGER — one card: text + block stack */}
         <div className={`mt-14 md:mt-16 ${CARD}`} style={CARD_BG}>
           <div className="grid grid-cols-1 items-center gap-x-12 gap-y-8 md:grid-cols-[0.82fr_1.18fr]">
             <div className="order-2 max-w-md md:order-1">
-              <p className="text-[15px] font-medium leading-relaxed text-[#5CE8E8]">
+              <p className="text-[15px] font-medium leading-relaxed text-[#000000]">
                 every block on an open chain is permanent, public and linkable — amounts, balances,
                 counterparties, readable by anyone with the address, forever. the ledger never forgets.
               </p>
               <Label className="mt-6">
-                <span className="whitespace-nowrap text-[#33DEDE]">public ledger</span>
+                <span className="whitespace-nowrap text-[#000000]">public ledger</span>
                 <span className="whitespace-nowrap text-[#000000]">[ every block · forever ]</span>
               </Label>
             </div>
@@ -113,15 +113,15 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
           <div className="grid grid-cols-1 items-center gap-x-12 gap-y-8 md:grid-cols-[1fr_1fr]">
             <div className="order-1 mx-auto w-[clamp(220px,34vw,420px)]">
               <LoopAsset src={vortexUrl} poster={vortexPoster} className="block w-full" />
-              <span className="mt-3 block text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#8AF0F0]">
-                <span className="text-[#33DEDE]">shielded core</span> · value drawn in
+              <span className="mt-3 block text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#000000]">
+                <span className="text-[#000000]">shielded core</span> · value drawn in
               </span>
             </div>
             <div className="order-2 max-w-md">
               <h3 className="font-display text-[clamp(1.5rem,3.2vw,2.2rem)] font-medium lowercase leading-[1.08] tracking-[-0.02em] text-[#000000]">
                 value falls into the pool and disappears.
               </h3>
-              <p className="mt-5 text-[15px] font-medium leading-relaxed text-[#5CE8E8]">
+              <p className="mt-5 text-[15px] font-medium leading-relaxed text-[#000000]">
                 obscura bridges assets into a shielded layer on Stellar, where value moves behind
                 zero-knowledge proofs verified on-chain by Soroban contracts. no valid proof, no funds move.
               </p>
@@ -132,10 +132,10 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
         {/* THE CRYPTOGRAPHY — one card: copy + proof beats */}
         <div className={`mt-8 ${CARD}`} style={CARD_BG}>
           <Label>
-            <span className="text-[#33DEDE]">the cryptography</span>
+            <span className="text-[#000000]">the cryptography</span>
             <span className="text-[#000000]">[ UltraHonk · Poseidon2 · BN254 ]</span>
           </Label>
-          <p className="mt-6 max-w-xl text-[15px] font-medium leading-relaxed text-[#5CE8E8]">
+          <p className="mt-6 max-w-xl text-[15px] font-medium leading-relaxed text-[#000000]">
             every move out of the shielded layer is a zero-knowledge proof, checked on-chain inside a
             Soroban contract. privacy comes from the circuit; integrity from the verifier. the math is the lock.
           </p>
@@ -143,8 +143,8 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
           <div className="mt-10 grid grid-cols-1 items-center gap-x-14 gap-y-12 md:mt-12 md:grid-cols-[0.85fr_1.15fr]">
             <div className="order-1 mx-auto w-[clamp(220px,30vw,380px)]">
               <LoopAsset src={cubeUrl} poster={cubePoster} className="block w-full" />
-              <span className="mt-3 block text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#8AF0F0]">
-                <span className="text-[#33DEDE]">zero-knowledge</span> · the circuit
+              <span className="mt-3 block text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[#000000]">
+                <span className="text-[#000000]">zero-knowledge</span> · the circuit
               </span>
             </div>
 
@@ -152,13 +152,13 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
               {BEATS.map((b) => (
                 <div key={b.label} className="border-t border-[#00B8B8]/12 pt-5">
                   <div className="flex flex-wrap items-baseline gap-x-3 font-mono text-[11px] uppercase tracking-[0.18em]">
-                    <span className="text-[#33DEDE]">{b.label}</span>
+                    <span className="text-[#000000]">{b.label}</span>
                     <span className="text-[#000000]">{b.coord}</span>
                   </div>
                   <h3 className="mt-3 font-display text-[19px] font-medium lowercase leading-[1.1] tracking-[-0.02em] text-[#000000]">
                     {b.title}
                   </h3>
-                  <p className="mt-3 text-[14px] font-medium leading-relaxed text-[#5CE8E8]">{b.body}</p>
+                  <p className="mt-3 text-[14px] font-medium leading-relaxed text-[#000000]">{b.body}</p>
                 </div>
               ))}
             </div>
@@ -170,9 +170,9 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
           <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[1rem] border border-[#00B8B8]/12 bg-[#00B8B8]/12 sm:grid-cols-4">
             {MODULES.map((m) => (
               <a key={m.k} href={`#${m.to}`} className="group block bg-[#E6FFFF] px-5 py-7 transition hover:bg-[#00CDCD]">
-                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#33DEDE]">{m.k}</div>
-                <p className="mt-3 text-[13px] leading-relaxed text-[#5CE8E8]">{m.d}</p>
-                <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#8AF0F0] transition-colors group-hover:text-[#000000]">
+                <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#000000]">{m.k}</div>
+                <p className="mt-3 text-[13px] leading-relaxed text-[#000000]">{m.d}</p>
+                <span className="mt-4 inline-block font-mono text-[10px] uppercase tracking-[0.18em] text-[#000000] transition-colors group-hover:text-[#000000]">
                   open →
                 </span>
               </a>
@@ -180,7 +180,7 @@ export function StoryShielded({ onEnter }: { onEnter: () => void }) {
           </div>
           <button
             onClick={onEnter}
-            className="mt-10 font-mono text-[12px] uppercase tracking-[0.18em] text-[#8AF0F0] transition hover:text-[#000000]"
+            className="mt-10 font-mono text-[12px] uppercase tracking-[0.18em] text-[#000000] transition hover:text-[#000000]"
           >
             enter the shielded layer →
           </button>

@@ -104,13 +104,13 @@ export function PortfolioPage() {
                 >
                   <AssetAvatar code={b.asset} className="h-10 w-10" />
                   <div className="min-w-0">
-                    <div className="font-display text-sm font-semibold text-[#062626]">{b.asset}</div>
+                    <div className="font-display text-sm font-semibold text-[#000000]">{b.asset}</div>
                     <div className="truncate text-xs text-zinc-500">
                       {meta.name} · {notes.length} note{notes.length === 1 ? '' : 's'}
                     </div>
                   </div>
                   <div className="ml-auto text-right">
-                    <div className="font-mono text-sm tabular-nums text-[#062626]">{revealed ? b.amount : MASK}</div>
+                    <div className="font-mono text-sm tabular-nums text-[#000000]">{revealed ? b.amount : MASK}</div>
                     <div className="text-xs text-zinc-500">{revealed ? `≈ ${formatUsd(b.usdEstimate)}` : ''}</div>
                   </div>
                   <ChevronDownIcon
