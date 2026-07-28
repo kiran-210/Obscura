@@ -38,8 +38,10 @@ import {
   buildBorrowInputs,
   buildPositionOpenInputs,
   buildSolvencyAttestationInputs,
+  buildSupplyInputs,
   computeNullifier,
   createPosition,
+  createSupplyPosition,
   isSolvent,
   toScaled,
   type CircuitInputMap,
@@ -56,6 +58,7 @@ import {
   addNote,
   addOrder,
   addPosition,
+  addSupply,
   fromSdkPosition,
   getSpendingKey,
   loadNotes,
@@ -68,6 +71,7 @@ import {
   updatePosition,
   type StoredNote,
   type StoredPosition,
+  type StoredSupply,
 } from './note-store'
 import { dummyPath, readPoolTreeState, witnessesAfterInserts, type MerkleWitness } from './merkle-witness'
 import { getIndexer, syncIndexer } from './indexer-service'
@@ -552,6 +556,72 @@ export class RealObscuraSdk implements ObscuraSdk {
     const deadline = onChain?.deadline ?? 0
     updatePosition(params.position.commitment, { deadline })
     return { hash, deadline }
+  }
+
+  /**
+   * Supply a shielded note into the lending reserve, minting a supply position
+   * that accrues interest via the public `supply_index`.
+   *
+   * This is what creates borrowable liquidity: `borrow` checks
+   * `total_supplied - total_borrowed`, and `total_supplied` only ever moves here.
+   *
+   * Like `position_open`, the WHOLE note is consumed — the circuit has no change
+   * output. Split the note first if you want to supply part of a balance.
+   */
+  async supplyLiquidity(params: { note: StoredNote }): Promise<{ hash: string; supply: StoredSupply }> {
+    const from = await this.requireAddress()
+    const spendingKey = getSpendingKey()
+    const input = toBalanceNote(params.note)
+    const sac = this.assetAddressOf(params.note)
+    const reserve = await this.getReserve(sac)
+
+    const witness = await this.spendWitness(params.note)
+    const scaled = toScaled(input.amount, reserve.supplyIndex)
+    const supply = createSupplyPosition({
+      asset: input.assetId,
+      supplyScaled: scaled,
+      spendingKey,
+    })
+
+    const inputs = buildSupplyInputs({
+      merkleRoot: witness.root,
+      nullifier: noteNullifier(input),
+      supplyCommitment: supply.commitment,
+      asset: input.assetId,
+      supplyAmount: input.amount,
+      supplyIndex: reserve.supplyIndex,
+      noteBlinding: input.blinding,
+      spendingKey,
+      merklePath: witness.pathElements,
+      merkleIndices: witness.pathIndices,
+      supplyNonce: supply.nonce,
+    })
+    const proof = await this.proveAndVerify('supply', inputs)
+
+    const op = this.contract.supplyOp({
+      proof: proof.proof,
+      publicInputs: encodePublicInputs(proof.publicInputs),
+      asset: sac,
+      amount: input.amount,
+    })
+    const { hash } = await this.submitOp(op, from)
+    markSpent(params.note.commitment)
+
+    const stored: StoredSupply = {
+      commitment: fieldToHex(supply.commitment),
+      asset: fieldToHex(input.assetId),
+      assetCode: params.note.assetCode,
+      supplyScaled: scaled.toString(),
+      nonce: fieldToHex(supply.nonce),
+      ownerKey: fieldToHex(supply.ownerKey),
+      spendingKey: fieldToHex(spendingKey),
+      status: 'open',
+      createdAt: Date.now(),
+      txHash: hash,
+    }
+    if (params.note.assetAddress) stored.assetAddress = params.note.assetAddress
+    addSupply(stored)
+    return { hash, supply: stored }
   }
 
   /** Merkle witness for a position commitment (same tree as balance notes). */

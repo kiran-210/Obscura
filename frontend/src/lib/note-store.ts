@@ -26,6 +26,9 @@ const ORDERS_PREFIX = 'obscura.orders.v1'
 // them and the position can never be attested or repaid: it simply freezes and is
 // seized once its deadline lapses. This store is the only copy.
 const POSITIONS_PREFIX = 'obscura.positions.v1'
+// Supply positions (the lender side). Nothing about these is public on-chain, so
+// this store is the ONLY way to redeem them.
+const SUPPLIES_PREFIX = 'obscura.supplies.v1'
 
 // The shielded identity is derived per Stellar address (see lib/shielded-identity).
 // `activeAddress` namespaces both the notes list and the cached spending key, so
@@ -429,6 +432,60 @@ export function updatePosition(
   savePositions(
     loadPositions().map((p) => (p.commitment === commitmentHex ? { ...p, ...patch } : p)),
   )
+}
+
+// ---------------------------------------------------------------------------
+// Supply positions (the lender side)
+// ---------------------------------------------------------------------------
+
+function suppliesStorageKey(): string {
+  return `${SUPPLIES_PREFIX}:${POOL_TAG}:${activeAddress ?? 'anon'}`
+}
+
+/**
+ * A persisted supply position.
+ *
+ * Unlike a lending position, NOTHING about this is public on-chain — suppliers are
+ * never liquidated, so the amount stays private. That also means `supplyScaled`
+ * and `nonce` are the only way to ever redeem: lose them and the supplied funds
+ * are permanently unreachable, with no deadline and no seizure to recover them.
+ */
+export interface StoredSupply {
+  commitment: string
+  asset: string // 0x-hex asset_id
+  assetCode: AssetCode
+  assetAddress?: string
+  /** PRIVATE. Nominal value is `supplyScaled * supplyIndex / 1e9`. */
+  supplyScaled: string
+  /** PRIVATE. Part of the commitment preimage. */
+  nonce: string
+  ownerKey: string
+  spendingKey: string
+  leafIndex?: number
+  status: 'open' | 'redeemed'
+  createdAt: number
+  txHash?: string
+}
+
+export function loadSupplies(): StoredSupply[] {
+  return read<StoredSupply[]>(suppliesStorageKey(), [])
+}
+
+function saveSupplies(list: StoredSupply[]): void {
+  write(suppliesStorageKey(), list)
+}
+
+export function addSupply(entry: StoredSupply): void {
+  const rest = loadSupplies().filter((s) => s.commitment !== entry.commitment)
+  rest.push(entry)
+  saveSupplies(rest)
+}
+
+export function updateSupply(
+  commitmentHex: string,
+  patch: Partial<Pick<StoredSupply, 'leafIndex' | 'status' | 'txHash'>>,
+): void {
+  saveSupplies(loadSupplies().map((s) => (s.commitment === commitmentHex ? { ...s, ...patch } : s)))
 }
 
 /** Rehydrate an SDK {@link Position} from a stored record. */

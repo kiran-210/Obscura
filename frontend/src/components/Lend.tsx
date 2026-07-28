@@ -19,7 +19,14 @@ import {
   type RiskView,
 } from '../lib/lending-view'
 import { SOROBAN_RPC_URL } from '../lib/config'
-import { loadNotes, loadPositions, type StoredNote, type StoredPosition } from '../lib/note-store'
+import {
+  loadNotes,
+  loadPositions,
+  loadSupplies,
+  type StoredNote,
+  type StoredPosition,
+  type StoredSupply,
+} from '../lib/note-store'
 import { RealObscuraSdk, baseUnitsToNumber, toBaseUnits } from '../lib/real-sdk'
 import { assetMeta } from '../lib/tokens'
 import { AssetAvatar, Badge, Button, Card, Field, SectionHeading, Select, TextInput } from './ui'
@@ -287,6 +294,99 @@ function OpenPositionForm({
   )
 }
 
+/**
+ * Supply liquidity into the lending reserve.
+ *
+ * This is what makes borrowing possible at all: `borrow` checks
+ * `total_supplied - total_borrowed`, and only `supply` ever raises the former. An
+ * empty reserve means every borrow fails, however healthy the position.
+ *
+ * Supplier amounts stay private — suppliers are never liquidated, so nothing
+ * forces disclosure.
+ */
+function SupplyForm({
+  notes,
+  supplies,
+  busy,
+  onSupply,
+}: {
+  notes: StoredNote[]
+  supplies: StoredSupply[]
+  busy: string | null
+  onSupply: (note: StoredNote) => void
+}) {
+  const { revealed } = useReveal()
+  const [commitment, setCommitment] = useState(notes[0]?.commitment ?? '')
+  const selected = notes.find((n) => n.commitment === commitment) ?? notes[0]
+  const open = supplies.filter((s) => s.status === 'open')
+
+  return (
+    <Card className="space-y-4 p-5">
+      <SectionHeading title="Supply liquidity" />
+
+      {open.length > 0 && (
+        <div className="space-y-1 rounded-lg border border-[#efe9dc]/10 bg-[#efe9dc]/[0.03] px-3 py-2 text-xs">
+          <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+            Your supplied positions <span className="text-spectral/70">· private</span>
+          </div>
+          {open.map((s) => (
+            <div key={s.commitment} className="flex justify-between">
+              <span className="font-mono text-zinc-400">{s.commitment.slice(0, 10)}…</span>
+              <span className="font-mono tabular-nums text-zinc-200">
+                {revealed
+                  ? `${baseUnitsToNumber(BigInt(s.supplyScaled), assetMeta(s.assetCode).decimals).toFixed(4)} ${s.assetCode}`
+                  : `•••• ${s.assetCode}`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {notes.length === 0 ? (
+        <p className="text-xs leading-relaxed text-zinc-500">
+          No unspent notes to supply. Deposit into the shielded pool first.
+        </p>
+      ) : (
+        <>
+          <Field label="Note to supply">
+            <Select
+              value={commitment}
+              onChange={(e) => setCommitment(e.target.value)}
+              options={notes.map((n) => {
+                const m = assetMeta(n.assetCode)
+                return {
+                  value: n.commitment,
+                  label: `${baseUnitsToNumber(BigInt(n.amount), m.decimals).toFixed(4)} ${n.assetCode} · ${n.commitment.slice(0, 10)}…`,
+                }
+              })}
+            />
+          </Field>
+
+          <p className="text-xs leading-relaxed text-zinc-500">
+            Supplying makes this asset borrowable and earns interest via the supply index.
+            The whole note is consumed — there is no change output. Your supplied amount
+            stays private.
+          </p>
+
+          {selected?.leafIndex === undefined && (
+            <p className="text-xs text-amber-300">
+              This note has no leaf index yet — wait for the indexer to observe it on-chain.
+            </p>
+          )}
+
+          <Button
+            className="w-full"
+            disabled={!selected || selected.leafIndex === undefined || busy !== null}
+            onClick={() => selected && onSupply(selected)}
+          >
+            {busy === 'supply' ? 'Proving…' : 'Supply'}
+          </Button>
+        </>
+      )}
+    </Card>
+  )
+}
+
 /** Borrow / repay / withdraw form. Mirrors the deposit/withdraw form patterns. */
 function ActionForm({
   view,
@@ -379,6 +479,7 @@ function ActionForm({
 export function Lend({ embedded = false }: { embedded?: boolean }) {
   const [stored, setStored] = useState<StoredPosition[]>([])
   const [collateralNotes, setCollateralNotes] = useState<StoredNote[]>([])
+  const [supplies, setSupplies] = useState<StoredSupply[]>([])
   const [ledger, setLedger] = useState<number | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [active, setActive] = useState<{ view: PositionView; action: Action } | null>(null)
@@ -389,6 +490,7 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
   useEffect(() => {
     setStored(loadPositions().filter((p) => p.status === 'open'))
     setCollateralNotes(loadNotes().filter((n) => !n.spent))
+    setSupplies(loadSupplies())
   }, [])
 
   // Poll the ledger so the attestation countdown is live. Deadlines are measured in
@@ -443,12 +545,20 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
   function refresh() {
     setStored(loadPositions().filter((p) => p.status === 'open'))
     setCollateralNotes(loadNotes().filter((n) => !n.spent))
+    setSupplies(loadSupplies())
   }
 
   async function onOpen(note: StoredNote, debtAssetCode: string) {
     await run('open', async () => {
       const { hash, position } = await sdk.openPosition({ note, debtAssetCode })
       return `Position opened — ${position.collateralAssetCode} collateral locked. tx ${hash.slice(0, 12)}…`
+    })
+  }
+
+  async function onSupply(note: StoredNote) {
+    await run('supply', async () => {
+      const { hash } = await sdk.supplyLiquidity({ note })
+      return `Supplied ${note.assetCode} to the reserve — it is now borrowable. tx ${hash.slice(0, 12)}…`
     })
   }
 
@@ -520,6 +630,12 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
             busy={busy}
             onOpen={(note, debtAssetCode) => void onOpen(note, debtAssetCode)}
           />
+          <SupplyForm
+            notes={collateralNotes}
+            supplies={supplies}
+            busy={busy}
+            onSupply={(note) => void onSupply(note)}
+          />
         </>
       ) : active ? (
         <ActionForm
@@ -550,6 +666,12 @@ export function Lend({ embedded = false }: { embedded?: boolean }) {
             notes={collateralNotes}
             busy={busy}
             onOpen={(note, debtAssetCode) => void onOpen(note, debtAssetCode)}
+          />
+          <SupplyForm
+            notes={collateralNotes}
+            supplies={supplies}
+            busy={busy}
+            onSupply={(note) => void onSupply(note)}
           />
         </div>
       )}
