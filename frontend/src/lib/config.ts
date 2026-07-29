@@ -6,12 +6,13 @@
  * and every value can be overridden at build time via `VITE_*` env vars for other
  * networks / private deployments.
  *
- * deployments.json (testnet):
- *   pool        CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR
+ * deployments.json (testnet, redeployed 2026-07-29):
+ *   pool        CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE
  *   native SAC  CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC
+ *   USDC SAC    CDXJVN37QOE3L33WMHMH4XU2HXEICFOSOMM7TYLJAPIQIBI6OTRA4G4Z
  *   passphrase  "Test SDF Network ; September 2015"
  */
-import { assetFromSac, hash2, NATIVE_ASSET_ID, toField, type Field } from '@obscura/sdk'
+import { assetFromSac, NATIVE_ASSET_ID, type Field } from '@obscura/sdk'
 import type { AssetCode } from './obscura-sdk'
 
 // Tolerate a missing `import.meta.env` (Node/SSR/test contexts, where Vite hasn't injected it)
@@ -31,15 +32,17 @@ function flag(key: string): boolean {
 /**
  * ObscuraPool contract id on the configured network.
  *
- * Points at the match-memo pool (redeployed 2026-07-02): `transfer` AND `match_orders` carry
- * encrypted note payloads (+ full leaf set/indices) in their events, which the recipient's
- * indexer scans to auto-discover incoming notes and settlement fills. Fresh tree; reuses the
- * existing verifier contracts. Prior pools: memo pool CBVM7B622FSW47FDNUVU7GEU7TNRVRWEVOTNAUWVUOHFMIPSTDL2YVNG,
- * pre-memo pool CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR.
+ * Redeployed 2026-07-29 with a fresh Merkle tree and fresh UltraHonk verifier instances.
+ * `transfer` AND `match_orders` carry encrypted note payloads (+ full leaf set/indices) in
+ * their events, which the recipient's indexer scans to auto-discover incoming notes and
+ * settlement fills.
+ * Prior pools: CABEK4ZKQI3LSSFLUWC3MNMNE53QYVBE5Y6ZTM2ERVLNQFLTFAAYHFJH,
+ * CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD,
+ * CBVM7B622FSW47FDNUVU7GEU7TNRVRWEVOTNAUWVUOHFMIPSTDL2YVNG.
  */
 export const POOL_CONTRACT_ID = env(
   'VITE_OBSCURA_POOL',
-  'CA2CI7VKG27V3FIXD3OYXFYTN33DMI5QR4WFBX3N5SRC6JWEO3AWDILD',
+  'CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE',
 )
 
 /** Native (XLM) Stellar Asset Contract address. */
@@ -57,7 +60,7 @@ export const MATCHER_URL = env('VITE_MATCHER_URL', '')
 
 /** Ledger the pool was deployed at — the client indexer's cold-start floor (clamped to the
  *  RPC's event-retention window, so older history is unavailable). */
-export const POOL_DEPLOY_LEDGER = Number(env('VITE_POOL_DEPLOY_LEDGER', '3402675'))
+export const POOL_DEPLOY_LEDGER = Number(env('VITE_POOL_DEPLOY_LEDGER', '3849362'))
 
 /** Stellar network passphrase. */
 export const NETWORK_PASSPHRASE = env('VITE_NETWORK_PASSPHRASE', 'Test SDF Network ; September 2015')
@@ -65,66 +68,11 @@ export const NETWORK_PASSPHRASE = env('VITE_NETWORK_PASSPHRASE', 'Test SDF Netwo
 /** When true, the app uses the offline `MockObscuraSdk` instead of the live client. */
 export const USE_MOCK = flag('VITE_USE_MOCK')
 
-/** Optional USDC SAC address — not part of the single-asset testnet demo. */
-export const USDC_SAC = env('VITE_USDC_SAC', '')
-
-// ---------------------------------------------------------------------------
-// Cross-chain bridge (Ethereum Sepolia <-> Stellar). BRIDGE_SPEC §3/§7/§9.
-//
-// PLACEHOLDER addresses below ship with the app so the Bridge tab type-checks,
-// builds, and runs in mock mode TODAY. Fill the `VITE_BRIDGE_*` env vars (or edit
-// these defaults) with the real deployed addresses to take it live. Until the L1
-// bridge + Soroban light-client/bridge contracts are deployed, the live reads
-// fail gracefully and the UI shows a "simulated" light-client head.
-// ---------------------------------------------------------------------------
-
-/** When true, the Bridge tab runs a self-contained mock walkthrough (no wallets). */
-export const USE_MOCK_BRIDGE = USE_MOCK || flag('VITE_USE_MOCK_BRIDGE')
-
-/** Ethereum chain the L1 bridge is deployed on (Sepolia testnet = 11155111). */
-export const L1_CHAIN_ID = Number(env('VITE_L1_CHAIN_ID', '11155111'))
-
-/** Sepolia execution RPC used by viem reads (eth_getProof is done by the relayer). */
-export const SEPOLIA_RPC_URL = env('VITE_SEPOLIA_RPC_URL', 'https://ethereum-sepolia-rpc.publicnode.com')
-
-/** `ObscuraBridgeL1` escrow address on Sepolia (locks/unlocks the backing). */
-export const L1_BRIDGE_ADDRESS = env(
-  'VITE_L1_BRIDGE_ADDRESS',
-  '0x0000000000000000000000000000000000000000',
-)
-
-/** Soroban `EthLightClient` contract id (trusted Ethereum head on Stellar). */
-export const ETH_LIGHT_CLIENT_ID = env('VITE_ETH_LIGHT_CLIENT', '')
-
-/** Soroban `ObscuraBridge` contract id (bridge_in / bridge_out). */
-export const OBSCURA_BRIDGE_ID = env('VITE_OBSCURA_BRIDGE', '')
-
 /**
- * Optional relayer base URL. If set, `requestBridgeIn` POSTs the commitment to nudge
- * the relayer; otherwise the UI just polls the Stellar `BridgeInEvent` (the relayer
- * watches L1 `Locked` events on its own — BRIDGE_SPEC §8).
+ * USDC SAC address. Defaults to the testnet faucet-token mock deployed alongside the
+ * pool (contracts/faucet-token, 7 decimals) — override to point at real mainnet USDC.
  */
-export const RELAYER_URL = env('VITE_RELAYER_URL', '')
-
-/**
- * Bridge-asset domain separator (BRIDGE_SPEC §3):
- *   asset_id(bToken) = hash2( hash2(eth_chain_id, eth_token_address_as_field), BRIDGE_DOMAIN )
- * The numeric domain is not pinned by the spec; this default is deterministic and
- * overridable so it can be aligned with the contract when the derivation lands on-chain.
- */
-export const BRIDGE_DOMAIN: Field = toField(env('VITE_BRIDGE_DOMAIN', '0x627269646765')) // "bridge"
-
-/** Map a 20-byte L1 token address (hex) to its bridged Obscura `asset_id` field. */
-export function deriveBridgedAssetId(tokenAddressHex: string): Field {
-  const addrField = toField(BigInt(tokenAddressHex))
-  return hash2(hash2(L1_CHAIN_ID, addrField), BRIDGE_DOMAIN)
-}
-
-/** Native ETH is represented on L1 by the zero address (BRIDGE_SPEC §4). */
-export const ETH_L1_ADDRESS = '0x0000000000000000000000000000000000000000'
-
-/** Sepolia test-USDC (Circle faucet token) — override via env for other deployments. */
-export const USDC_L1_ADDRESS = env('VITE_BRIDGE_USDC_L1', '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238')
+export const USDC_SAC = env('VITE_USDC_SAC', 'CDXJVN37QOE3L33WMHMH4XU2HXEICFOSOMM7TYLJAPIQIBI6OTRA4G4Z')
 
 /** Per-asset on-chain config. `assetId` is the in-circuit field id (native XLM = 0). */
 export interface AssetConfig {
@@ -147,22 +95,6 @@ export const ASSET_CONFIG: Record<AssetCode, AssetConfig> = {
     assetId: USDC_SAC ? assetFromSac(USDC_SAC, 'USDC').assetId : 0n,
     sac: USDC_SAC || undefined,
     decimals: 7,
-    priceUsd: 1,
-  },
-  // Bridged assets: no Stellar SAC (the backing lives in the L1 escrow). The
-  // `assetId` follows BRIDGE_SPEC §3 so the minted note interoperates with the pool.
-  bETH: {
-    code: 'bETH',
-    assetId: deriveBridgedAssetId(ETH_L1_ADDRESS),
-    sac: undefined,
-    decimals: 18,
-    priceUsd: 3500,
-  },
-  bUSDC: {
-    code: 'bUSDC',
-    assetId: deriveBridgedAssetId(USDC_L1_ADDRESS),
-    sac: undefined,
-    decimals: 6,
     priceUsd: 1,
   },
 }
