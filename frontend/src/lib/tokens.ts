@@ -38,35 +38,27 @@ function sacEnv(code: string): string | undefined {
 }
 
 /**
- * Curated tokens shown in the deposit picker. XLM is the real native SAC; USDC/ETH/BTC/XRP
- * are testnet faucet tokens (deployed permissionless-mint mocks) so they're depositable
- * out of the box — the app can mint them to you. Override any SAC via `VITE_<CODE>_SAC`
+ * Curated tokens shown in the deposit picker. XLM is the real native SAC; USDC is a
+ * testnet faucet token (a deployed permissionless-mint mock) so it's depositable out
+ * of the box — the app can mint it to you. Override either SAC via `VITE_<CODE>_SAC`
  * (e.g. to point at the real mainnet assets).
+ *
+ * XLM and USDC are the only supported assets. This list is the single source of
+ * truth — deposit, withdraw, pay and swap all derive their options from it.
  */
-// ShieldBid supports XLM and USDC only (SHIELDBID_SPEC §5). ETH / BTC / XRP were
-// removed here, which drops them from every picker at once -- deposit, withdraw,
-// pay and swap all derive their options from this list.
 export const CURATED_TOKENS: TokenMeta[] = [
   { code: 'XLM', name: 'Stellar Lumens', icon: 'XLM', decimals: 7, priceUsd: 0.39, sac: NATIVE_SAC, native: true },
   { code: 'USDC', name: 'USD Coin', icon: 'USDC', decimals: 7, priceUsd: 1, faucet: true,
-    sac: sacEnv('USDC') ?? 'CB4F54CW6HRI57QUNOLBA3PWA6BTH65CXGJ6O7FNEDTU6OT6O6AMORMG' },
+    sac: sacEnv('USDC') ?? 'CDXJVN37QOE3L33WMHMH4XU2HXEICFOSOMM7TYLJAPIQIBI6OTRA4G4Z' },
 ]
 
-const BRIDGED_META: TokenMeta[] = [
-  { code: 'bETH', name: 'Bridged ETH', icon: 'bETH', decimals: 18, priceUsd: 3500, bridged: true },
-  { code: 'bUSDC', name: 'Bridged USDC', icon: 'bUSDC', decimals: 6, priceUsd: 1, bridged: true },
-]
-
-const REGISTRY = new Map<string, TokenMeta>([...CURATED_TOKENS, ...BRIDGED_META].map((t) => [t.code, t]))
+const REGISTRY = new Map<string, TokenMeta>(CURATED_TOKENS.map((t) => [t.code, t]))
 
 /** The canonical token codes (the global "enum") used by deposit / transfer / swap pickers. */
 export const TOKEN_CODES: string[] = CURATED_TOKENS.map((t) => t.code)
 
 /** Select options for the token pickers (code — name). */
 export const TOKEN_OPTIONS = CURATED_TOKENS.map((t) => ({ value: t.code, label: `${t.code} — ${t.name}` }))
-
-/** Cross-chain bridged asset codes (minted by the bridge; not curated deposit tokens). */
-export const BRIDGED_ASSET_CODES: string[] = BRIDGED_META.map((t) => t.code)
 
 /** Metadata for a code — falls back to a plain text badge for unknown/custom tokens. */
 export function assetMeta(code: string): TokenMeta {
