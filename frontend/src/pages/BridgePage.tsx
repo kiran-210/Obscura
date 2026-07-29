@@ -40,8 +40,8 @@ export function BridgePage() {
       no="Act 01"
       id="act-cross"
       title="Cross the veil"
-      standfirst="Move value across the veil between the public chains and the shielded pool. Every crossing is proven, not trusted — a real ZK proof out, or a light-client inclusion proof in."
-      coords={['Stellar · SDF Horizon', 'Ethereum · Sepolia']}
+      standfirst="Move value across the veil between the public Stellar network and the shielded pool. Every crossing out is proven, not trusted — a real ZK proof, verified on-chain."
+      coords={['Stellar · SDF Horizon', 'Obscura · Shielded pool']}
     >
       <CrossingRule progress={cross} />
       <Bridge embedded onProgress={setCross} />
