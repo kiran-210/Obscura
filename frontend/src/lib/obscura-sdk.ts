@@ -13,8 +13,8 @@ import { RealObscuraSdk } from './real-sdk'
 /**
  * A shielded asset's display code. The protocol is asset-agnostic — any Stellar Asset
  * Contract (SAC) can be deposited — so this is an open string, not a fixed union. Well-
- * known codes (XLM, USDC, ETH, BTC, XRP, bETH, bUSDC) have curated metadata in
- * `lib/tokens.ts`; custom tokens carry their own descriptor (see {@link DepositParams}).
+ * known codes (XLM, USDC) have curated metadata in `lib/tokens.ts`; custom tokens
+ * carry their own descriptor (see {@link DepositParams}).
  */
 export type AssetCode = string
 export type OrderSide = 'buy' | 'sell'
@@ -101,7 +101,7 @@ export interface ObscuraSdk {
 
 // --- Mock implementation ----------------------------------------------------
 
-const PRICES: Record<AssetCode, number> = { XLM: 0.39, USDC: 1, bETH: 3500, bUSDC: 1 }
+const PRICES: Record<AssetCode, number> = { XLM: 0.39, USDC: 1 }
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -128,7 +128,7 @@ function round2(value: number): number {
 }
 
 class MockObscuraSdk implements ObscuraSdk {
-  private balances: Record<AssetCode, number> = { XLM: 1240.5, USDC: 3500, bETH: 0, bUSDC: 0 }
+  private balances: Record<AssetCode, number> = { XLM: 1240.5, USDC: 3500 }
 
   private orders: OpenOrder[] = [
     {
