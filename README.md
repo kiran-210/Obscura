@@ -26,11 +26,6 @@ Supported assets: **XLM** and **USDC**. Network: **Stellar Testnet**.
 ---
 
 ## Contracts
-
-All deployed on Stellar Testnet from
-[`GDU34BU5…WJHT`](https://lab.stellar.org/r/testnet/account/GDU34BU5VFLXSZHM5K4D737TYU6XBATENI5RXCI54UKERV6NITMSWJHT).
-Pool deploy ledger `3849362`.
-
 ### Core
 
 | Contract | ID | Stellar Lab |
@@ -43,7 +38,7 @@ One `rs-soroban-ultrahonk` instance per circuit, each bound to that circuit's ve
 
 | Circuit | ID | Stellar Lab |
 |---|---|---|
-| withdraw | `CCRXL7SSUAYGNYED7IAW7O2FOBDCJN7AZFFPDYYRVJ2XGZET6M54MLY4` | [open](https://lab.stellar.org/r/testnet/contract/CCRXL7SSUAYGNYED7IAW7O2FOBDCJN7AZFFPDYYRVJ2XGZET6M54MLY4) |
+| withdraw | `CCRXL7SSUAYGNYED7IAW7O2FOBDCJN7AZFFPDYYRVJ2XGZET6M54MLY4` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCRXL7SSUAYGNYED7IAW7O2FOBDCJN7AZFFPDYYRVJ2XGZET6M54MLY4;;) |
 | transfer | `CDG5AYT5QBOQZ64YOCHGG4R4DSB6VO7MZATFLWZ4W3JHWON53OR7ZJUN` | [open](https://lab.stellar.org/r/testnet/contract/CDG5AYT5QBOQZ64YOCHGG4R4DSB6VO7MZATFLWZ4W3JHWON53OR7ZJUN) |
 | place_order | `CCIZ2TF7ZMGNGUBPGT3R2FXRFPWOC74MUFBOWEMMPPMZPT7RP3GSP7J7` | [open](https://lab.stellar.org/r/testnet/contract/CCIZ2TF7ZMGNGUBPGT3R2FXRFPWOC74MUFBOWEMMPPMZPT7RP3GSP7J7) |
 | match_orders | `CCANRVJHIZELERHN5VT4PEQPJJGMOCM433AK4YDDOKPZHTSAOJSJ5YRF` | [open](https://lab.stellar.org/r/testnet/contract/CCANRVJHIZELERHN5VT4PEQPJJGMOCM433AK4YDDOKPZHTSAOJSJ5YRF) |
