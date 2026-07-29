@@ -1,85 +1,163 @@
 # Obscura
 
-**A full-privacy platform on Stellar.** Bridge assets into a shielded layer, hold private multi-asset balances, send confidential payments, and trade on a zero-knowledge dark pool — all verified on-chain by Soroban smart contracts.
+**Private money on Stellar.** Deposit XLM or USDC into a shielded pool, hold balances nobody can
+see, pay someone without revealing the amount, trade on a dark pool, and borrow against private
+collateral — every exit from the shielded layer gated by a zero-knowledge proof verified inside a
+Soroban smart contract.
 
-> Submission for **Stellar Hacks: Real-World ZK**.
+Nothing here is trusted. Withdraw, transfer, order placement, matching, and every lending action
+each require a real Noir/UltraHonk proof that the contract checks on-chain. Without a valid proof,
+no funds move.
 
-## Deployed on Stellar Testnet
+Supported assets: **XLM** and **USDC**. Network: **Stellar Testnet**.
 
-The full system is live and the private round-trip is **verified on-chain**. Pool:
-[`CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR`](https://stellar.expert/explorer/testnet/contract/CD7EF4GG32IPVS2PGD2LMXEO3TPEWBZRUCBBSPXQ236CD6TMF5S4UUZR)
-(wired to 5 UltraHonk verifiers). Proven end-to-end:
+---
 
-**All six flows are verified live on testnet**, each gated by a real Noir/UltraHonk proof checked inside the Soroban contract:
+## The app
 
-- **Bridge** — deposit (root matches the SDK byte-for-byte) and **withdraw** with a real ZK proof ([tx](https://stellar.expert/explorer/testnet/tx/6be9162fa0fc0d1b1fbce175eab97ed90ab3faca486a4f0adad7c7c1b10dda0d)).
-- **Pay** — a 2-in/2-out **shielded transfer**, amounts hidden, value conserved in-circuit ([tx](https://stellar.expert/explorer/testnet/tx/8b8eed61eabd219c9d766f496ec19fc333549868fca2308cf7e63e00b8add90f)).
-- **Swap** — hidden orders **placed**, **matched at the midpoint** ([tx](https://stellar.expert/explorer/testnet/tx/5bc05ebfa3f95849e6c6e3bff8375e6cfe09544e8c3318feb4096f81c7c4bdb3)), and **cancelled** with refund ([tx](https://stellar.expert/explorer/testnet/tx/51023894faf88329a2bd937c55ba05731860a5189aafe998e4964cf9881a4063)).
-- **Soundness**: a tampered proof and a replayed nullifier are both rejected on-chain.
+![Landing page](./screenshot/landing_page.png)
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for every transaction.
+| Swap — the sealed book | Receive — your cipher |
+|---|---|
+| ![Swap](./screenshot/sealed_book.png) | ![Receive](./screenshot/received-address.png) |
 
-Full contract IDs, transactions, and a one-command reproduction are in [DEPLOYMENT.md](./DEPLOYMENT.md).
+![Lend](./screenshot/lending_page.png)
 
-## Trustless cross-chain bridge — Ethereum → Stellar (verified live)
+---
 
-The **Bridge** is a genuine **trust-minimized cross-chain bridge**, not a relayer: assets locked on
-Ethereum Sepolia arrive as **shielded notes** on Stellar, with provenance proven on-chain. The full
-loop is verified live (no trusted relayer):
+## Contracts
 
-1. **Lock** 0.001 ETH on Sepolia (`ObscuraBridgeL1` `0xcF40c553…`).
-2. An **Ethereum sync-committee BLS signature** is verified **natively on Soroban** (`EthLightClient`),
-   recording a real Ethereum execution `state_root` on Stellar — the same trust model as Helios, but
-   with **no SNARK-wrap** because Stellar has native BLS12-381 (the check is ~30M of the 100M budget,
-   vs ~80M gas on the EVM).
-3. **`bridge_in`** proves the lock with an **in-contract Merkle-Patricia storage proof** against that
-   `state_root` and **mints a shielded note** ([tx `4b3760d1…`](https://stellar.expert/explorer/testnet/tx/4b3760d1f31b50da6a54bec54fe5f5645fe1719429f5acc05544c3a431289ffc), SUCCESS).
+All deployed on Stellar Testnet from
+[`GDU34BU5…WJHT`](https://lab.stellar.org/r/testnet/account/GDU34BU5VFLXSZHM5K4D737TYU6XBATENI5RXCI54UKERV6NITMSWJHT).
+Pool deploy ledger `3849362`.
 
-This is the hackathon's "wild" idea — a *cross-chain private bridge using Stellar's BN254/BLS12-381
-compatibility to verify another chain's consensus*. Full evidence + reproduction in
-[BRIDGE_DEPLOYMENT.md](./BRIDGE_DEPLOYMENT.md); design in [BRIDGE_SPEC.md](./BRIDGE_SPEC.md).
+### Core
 
-## Modules
+| Contract | ID | Stellar Lab |
+|---|---|---|
+| **ObscuraPool** | `CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE` | [open](https://lab.stellar.org/r/testnet/contract/CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE) |
+| XLM (native SAC) | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` | [open](https://lab.stellar.org/r/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC) |
+| USDC (faucet token) | `CDXJVN37QOE3L33WMHMH4XU2HXEICFOSOMM7TYLJAPIQIBI6OTRA4G4Z` | [open](https://lab.stellar.org/r/testnet/contract/CDXJVN37QOE3L33WMHMH4XU2HXEICFOSOMM7TYLJAPIQIBI6OTRA4G4Z) |
 
-| Module | Description |
-|--------|-------------|
-| **Bridge** | Move classic Stellar assets (XLM, USDC, …) in/out of Obscura via the Stellar Asset Contract. |
-| **Portfolio** | View and manage shielded, multi-asset balances. |
-| **Pay** | Send private payments — amounts and participants hidden. |
-| **Swap** | Dark-pool DEX — hidden orders, ZK-proven fair matching, atomic settlement. |
+### Proof verifiers
 
-## How the ZK is load-bearing
+One `rs-soroban-ultrahonk` instance per circuit, each bound to that circuit's verifying key.
 
-Every state transition out of the shielded layer (withdraw, transfer, place/cancel order, match) is gated by an **UltraHonk (Noir) zero-knowledge proof** verified inside a Soroban contract. Without a valid proof, no funds move. Privacy comes from the circuit design (hidden inputs), and integrity from on-chain verification of BN254 / Poseidon2 — the primitives Stellar shipped in Protocol 25–26.
+| Circuit | ID | Stellar Lab |
+|---|---|---|
+| withdraw | `CCRXL7SSUAYGNYED7IAW7O2FOBDCJN7AZFFPDYYRVJ2XGZET6M54MLY4` | [open](https://lab.stellar.org/r/testnet/contract/CCRXL7SSUAYGNYED7IAW7O2FOBDCJN7AZFFPDYYRVJ2XGZET6M54MLY4) |
+| transfer | `CDG5AYT5QBOQZ64YOCHGG4R4DSB6VO7MZATFLWZ4W3JHWON53OR7ZJUN` | [open](https://lab.stellar.org/r/testnet/contract/CDG5AYT5QBOQZ64YOCHGG4R4DSB6VO7MZATFLWZ4W3JHWON53OR7ZJUN) |
+| place_order | `CCIZ2TF7ZMGNGUBPGT3R2FXRFPWOC74MUFBOWEMMPPMZPT7RP3GSP7J7` | [open](https://lab.stellar.org/r/testnet/contract/CCIZ2TF7ZMGNGUBPGT3R2FXRFPWOC74MUFBOWEMMPPMZPT7RP3GSP7J7) |
+| match_orders | `CCANRVJHIZELERHN5VT4PEQPJJGMOCM433AK4YDDOKPZHTSAOJSJ5YRF` | [open](https://lab.stellar.org/r/testnet/contract/CCANRVJHIZELERHN5VT4PEQPJJGMOCM433AK4YDDOKPZHTSAOJSJ5YRF) |
+| cancel_order | `CCT2QC2MQJWQNYCZLDDVRUYG4EXUE7VZPEIZ2ELY5YURJJG6POLFS7AJ` | [open](https://lab.stellar.org/r/testnet/contract/CCT2QC2MQJWQNYCZLDDVRUYG4EXUE7VZPEIZ2ELY5YURJJG6POLFS7AJ) |
 
-## Repository layout
+### Lending verifiers
+
+Registered on the pool via `set_lending_verifiers`.
+
+| Circuit | ID | Stellar Lab |
+|---|---|---|
+| position_open | `CBKEPMXWPZRB5CWMZW5S732BXEL3ZV56NPKHS7S4ABFJHIFFHM2SFSO2` | [open](https://lab.stellar.org/r/testnet/contract/CBKEPMXWPZRB5CWMZW5S732BXEL3ZV56NPKHS7S4ABFJHIFFHM2SFSO2) |
+| borrow | `CCOZBAFGCZVPSP4YDS7RGFCBLHHDYEFGUTML3L6VP4G3ESTCB6VAPF3F` | [open](https://lab.stellar.org/r/testnet/contract/CCOZBAFGCZVPSP4YDS7RGFCBLHHDYEFGUTML3L6VP4G3ESTCB6VAPF3F) |
+| repay | `CBYAT3O5IVE32HQCWXKI6ORGOHGVP44SK4KSJ75TSCD7TNMAYNCT4KC7` | [open](https://lab.stellar.org/r/testnet/contract/CBYAT3O5IVE32HQCWXKI6ORGOHGVP44SK4KSJ75TSCD7TNMAYNCT4KC7) |
+| withdraw_collateral | `CCNOT52H3T6HWDNXBAOFAGVZZTVCZWAOOFP6PJ3IBZXWLULQAVO4CO6Z` | [open](https://lab.stellar.org/r/testnet/contract/CCNOT52H3T6HWDNXBAOFAGVZZTVCZWAOOFP6PJ3IBZXWLULQAVO4CO6Z) |
+| solvency_attestation | `CB35YP66Y6YND3YHK7OCTZHN6EDQU2OHKG3H2CISSTQARGCAX3KQLVKY` | [open](https://lab.stellar.org/r/testnet/contract/CB35YP66Y6YND3YHK7OCTZHN6EDQU2OHKG3H2CISSTQARGCAX3KQLVKY) |
+| supply | `CCK5SHU7SLMMV2JOLMFDATOH7YPAPFQX2SK2Z7VECE5U7FGKMJUQK4CU` | [open](https://lab.stellar.org/r/testnet/contract/CCK5SHU7SLMMV2JOLMFDATOH7YPAPFQX2SK2Z7VECE5U7FGKMJUQK4CU) |
+| redeem | `CAWWAHUAEFB4KOH56IFWF4D75YNIZICR2SW4VXZTBTRC5Y4RTFZNDT7N` | [open](https://lab.stellar.org/r/testnet/contract/CAWWAHUAEFB4KOH56IFWF4D75YNIZICR2SW4VXZTBTRC5Y4RTFZNDT7N) |
+
+Machine-readable copy: [`deployments.json`](./deployments.json).
+
+---
+
+## Wallets
+
+Connect with any Stellar wallet — Freighter, xBull, Albedo, Rabet, Lobstr — via
+[Stellar Wallets Kit](https://github.com/Creit-Tech/Stellar-Wallets-Kit).
+
+![Wallet picker](./screenshot/different_wallet.png)
+
+Once connected, your shielded total is derived locally from notes only you can decrypt:
+
+![Shielded balance](./screenshot/wallet_balance.png)
+
+Every action is a normal Stellar transaction you can inspect in any explorer:
+
+![Transaction in explorer](./screenshot/explorer_tx.png)
+
+---
+
+## Responsive
+
+The whole app works on mobile.
+
+<img src="./screenshot/phone_responsive.png" alt="Mobile layout" width="320" />
+
+---
+
+## Tech stack
+
+| Layer | What |
+|---|---|
+| Circuits | Noir `1.0.0-beta.9`, Barretenberg `0.87.0` (UltraHonk, keccak transcript) |
+| Contracts | Rust + Soroban SDK `26.1.0`, target `wasm32v1-none` |
+| Verifier | [`rs-soroban-ultrahonk`](https://github.com/yugocabrio/rs-soroban-ultrahonk) — on-chain UltraHonk over BN254 |
+| Crypto | Poseidon2 hashing, 32-level Merkle tree, ChaCha20-Poly1305 note encryption |
+| SDK | TypeScript, `@noble/*`, `@stellar/stellar-sdk`, built with tsup |
+| Frontend | React 18, Vite 5, Tailwind, React Router, TanStack Query, three.js |
+| Wallets | Stellar Wallets Kit (Freighter / xBull / Albedo / Rabet / Lobstr) |
+| Tooling | pnpm workspaces, Rust stable, Stellar CLI |
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    U[Browser] -->|deposit XLM / USDC| P[ObscuraPool]
+    U -->|prove in-browser| BB[Barretenberg WASM]
+    BB -->|proof + public inputs| P
+    P -->|verify_proof| V[UltraHonk verifiers<br/>12 instances, one per circuit]
+    P -->|events| IDX[Client indexer]
+    IDX -->|encrypted notes| U
+    M[Matcher service] -->|match_orders| P
+```
+
+**How a private payment works.** Your balance is a set of *notes* — commitments in an on-chain
+Merkle tree. Only you hold the secrets that open them. To spend, the browser builds a Noir proof
+that you know a valid note, that its nullifier is fresh, and that value is conserved. The contract
+checks the proof, records the nullifier so it can't be replayed, and inserts the new output
+commitments. Amounts and parties never appear on-chain; the encrypted note payload rides along in
+the event so the recipient can find it.
 
 ```
-circuits/noir/   Noir circuits (withdraw, transfer, place_order, match_orders, cancel_order)
-contracts/       Soroban smart contracts (obscura-pool + UltraHonk verifier integration)
-sdk/             TypeScript client library (notes, proofs, Merkle tree, tx building)
-matcher/         Off-chain order-matching service
-frontend/        React app (Bridge / Portfolio / Pay / Swap)
-vendor/          Reference repos (rs-soroban-ultrahonk, noir-poseidon) — gitignored
-SPEC.md          Full technical specification
-SHARED.md        Cross-component invariants (crypto params, encodings) — source of truth
-TOOLCHAIN.md     Pinned tool versions and install steps
+circuits/noir/   12 Noir circuits (5 core + 7 lending) + shared libs
+contracts/       Soroban contracts — obscura-pool, faucet-token, bridge-mpt, obscura-bridge
+sdk/             TypeScript client — notes, Poseidon2, Merkle, proofs, tx building
+frontend/        React app — Portfolio / Deposit / Pay / Swap / Lend / Receive
+matcher/         Off-chain dark-pool order matching
+screenshot/      Images used in this README
 ```
+
+---
 
 ## Quick start
 
 ```bash
-source ./env.sh        # put nargo / bb / stellar on PATH
-# circuits
-cd circuits/noir/withdraw && nargo test
-# contracts
-cd contracts && cargo build --target wasm32-unknown-unknown --release
-# sdk / frontend
-pnpm install && pnpm -r build
+pnpm install                            # workspace deps
+pnpm --filter @obscura/sdk build        # frontend imports the SDK from dist/
+pnpm --filter frontend dev              # http://localhost:5173
 ```
 
-See [SPEC.md](./SPEC.md) for the full design and [TOOLCHAIN.md](./TOOLCHAIN.md) for setup.
+Need test USDC? Mint it in the app at `/faucet`.
 
-## Status
+Contracts:
 
-Hackathon work-in-progress. Built on Stellar **testnet**. Components marked as MVP / mock in their READMEs where applicable.
+```bash
+cd contracts
+cargo test                                      # 22 tests
+cargo build --target wasm32v1-none --release    # wasm artifacts
+```
+
+## License
+
+MIT
