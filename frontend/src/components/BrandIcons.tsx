@@ -75,15 +75,9 @@ type GlyphComponent = FC<SVGProps<SVGSVGElement>>
 /** Registry keyed by both chain ids and token codes. */
 const GLYPHS: Record<string, GlyphComponent> = {
   stellar: StellarGlyph,
-  ethereum: EthereumGlyph,
   obscura: ObscuraMark,
   XLM: StellarGlyph,
-  ETH: EthereumGlyph,
-  bETH: EthereumGlyph,
   USDC: UsdcGlyph,
-  bUSDC: UsdcGlyph,
-  BTC: BitcoinGlyph,
-  XRP: XrpGlyph,
 }
 
 const SIZES = {
@@ -94,7 +88,7 @@ const SIZES = {
 
 /**
  * A chain or token logo inside a round monochrome chip. `name` is a chain id
- * (`stellar`/`ethereum`/`obscura`) or a token code (`XLM`, `ETH`, `bETH`, …).
+ * (`stellar`/`obscura`) or a token code (`XLM`, `USDC`).
  * Unknown names fall back to a short mono label so nothing renders empty.
  */
 export function CoinBadge({
