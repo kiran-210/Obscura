@@ -15,7 +15,7 @@ Supported assets: **XLM** and **USDC**. Network: **Stellar Testnet**.
 ## demo video: [youtube](https://youtu.be/V784qyovn18)
 ## live demo: [vercel](https://obscura-frontend-eight.vercel.app/)
 ## feedback form: [click here](https://docs.google.com/forms/d/e/1FAIpQLSdAN9N9lLViBQpSj_Su7jhe32nQDi7kn8PdqYI_jnYqXfXXpQ/viewform?usp=publish-editor)
-## Feedback Response: [google sheet]()
+## Feedback Response: [google sheet](https://docs.google.com/spreadsheets/d/1ZJTks1jdDFqe7BxHqkU9mMksBGCsnJjBxanI8mWsVzE/edit?usp=sharing)
 ## The app
 
 ![Landing page](./screenshot/landing_page.png)
