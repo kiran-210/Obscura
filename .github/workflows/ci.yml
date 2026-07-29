@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: SDK + frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Version comes from the "packageManager" field in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The frontend imports @obscura/sdk from dist/, so the SDK builds first.
+      - name: Build SDK
+        run: pnpm --filter @obscura/sdk build
+
+      - name: Test SDK
+        run: pnpm --filter @obscura/sdk test
+
+      - name: Typecheck frontend
+        run: pnpm --filter frontend typecheck
+
+      - name: Lint frontend
+        run: pnpm --filter frontend lint
+
+      - name: Build frontend
+        run: pnpm --filter frontend build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          retention-days: 7
+
+  contracts:
+    name: Soroban contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts
+
+      - name: Test
+        working-directory: contracts
+        run: cargo test --release
+
+      - name: Build wasm
+        working-directory: contracts
+        run: cargo build --target wasm32v1-none --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: contract-wasm
+          path: contracts/target/wasm32v1-none/release/*.wasm
+          retention-days: 7
