@@ -10,7 +10,7 @@ import { ConnectWallet } from './ConnectWallet'
 const FAUCET_TOKENS = CURATED_TOKENS.filter((t) => t.faucet && t.sac)
 const DRIP = 1000
 
-/** Testnet faucet: mint mock tokens (USDC/ETH/BTC/XRP) to the connected wallet. */
+/** Testnet faucet: mint mock USDC to the connected wallet. */
 export function Faucet() {
   const wallet = useWallet()
   const [busy, setBusy] = useState<string | null>(null)
