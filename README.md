@@ -12,6 +12,8 @@ no funds move.
 Supported assets: **XLM** and **USDC**. Network: **Stellar Testnet**.
 
 ---
+## demo video: [youtube](https://youtu.be/V784qyovn18)
+
 
 ## The app
 
