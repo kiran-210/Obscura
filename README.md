@@ -35,9 +35,7 @@ Pool deploy ledger `3849362`.
 
 | Contract | ID | Stellar Lab |
 |---|---|---|
-| **ObscuraPool** | `CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE` | [open](https://lab.stellar.org/r/testnet/contract/CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE) |
-| XLM (native SAC) | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` | [open](https://lab.stellar.org/r/testnet/contract/CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC) |
-| USDC (faucet token) | `CDXJVN37QOE3L33WMHMH4XU2HXEICFOSOMM7TYLJAPIQIBI6OTRA4G4Z` | [open](https://lab.stellar.org/r/testnet/contract/CDXJVN37QOE3L33WMHMH4XU2HXEICFOSOMM7TYLJAPIQIBI6OTRA4G4Z) |
+| **ObscuraPool** | `CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE) |
 
 ### Proof verifiers
 
