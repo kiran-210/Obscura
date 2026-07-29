@@ -1,0 +1,90 @@
+name: Deploy
+
+# CD: on a green push to main, publish the production frontend bundle and the
+# contract wasm artifacts. Deployment to a host is opt-in — set the VERCEL_TOKEN
+# secret to enable the Vercel step; without it the job still succeeds and simply
+# leaves the built bundle as a downloadable artifact.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend bundle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Version comes from the "packageManager" field in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @obscura/sdk build
+
+      - run: pnpm --filter frontend build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: obscura-frontend-${{ github.sha }}
+          path: frontend/dist
+
+      - name: Check for Vercel token
+        id: vercel
+        env:
+          TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -n "$TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "VERCEL_TOKEN not set — skipping deploy, bundle uploaded as an artifact."
+          fi
+
+      - name: Deploy to Vercel
+        if: steps.vercel.outputs.enabled == 'true'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+
+  contracts:
+    name: Contract wasm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32v1-none
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: contracts
+
+      - name: Build release wasm
+        working-directory: contracts
+        run: cargo build --target wasm32v1-none --release
+
+      - name: Report artifact hashes
+        working-directory: contracts/target/wasm32v1-none/release
+        run: sha256sum *.wasm | tee wasm-sha256.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: obscura-contracts-${{ github.sha }}
+          path: |
+            contracts/target/wasm32v1-none/release/*.wasm
+            contracts/target/wasm32v1-none/release/wasm-sha256.txt
