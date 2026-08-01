@@ -42,10 +42,10 @@ One `rs-soroban-ultrahonk` instance per circuit, each bound to that circuit's ve
 | Circuit | ID | Stellar Lab |
 |---|---|---|
 | withdraw | `CAOGOBVQJ2AYQDYG5NU4UX3E3IMRS7OHT2UEDZ4JGMJQG6ACAOCD7FED` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CAOGOBVQJ2AYQDYG5NU4UX3E3IMRS7OHT2UEDZ4JGMJQG6ACAOCD7FED;;) |
-| transfer | `CBKI4SXLJP64MRBO7L2CFRLW2HKDOXITH3MZCG22TCPRPVLCUDBN5JZK` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CBKI4SXLJP64MRBO7L2CFRLW2HKDOXITH3MZCG22TCPRPVLCUDBN5JZK;;)
-| place_order | `CCIZ2TF7ZMGNGUBPGT3R2FXRFPWOC74MUFBOWEMMPPMZPT7RP3GSP7J7` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCIZ2TF7ZMGNGUBPGT3R2FXRFPWOC74MUFBOWEMMPPMZPT7RP3GSP7J7;;) |
-| match_orders | `CCANRVJHIZELERHN5VT4PEQPJJGMOCM433AK4YDDOKPZHTSAOJSJ5YRF` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCANRVJHIZELERHN5VT4PEQPJJGMOCM433AK4YDDOKPZHTSAOJSJ5YRF;;) |
-| cancel_order | `CCT2QC2MQJWQNYCZLDDVRUYG4EXUE7VZPEIZ2ELY5YURJJG6POLFS7AJ` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCT2QC2MQJWQNYCZLDDVRUYG4EXUE7VZPEIZ2ELY5YURJJG6POLFS7AJ;;) |
+| transfer | `CBKI4SXLJP64MRBO7L2CFRLW2HKDOXITH3MZCG22TCPRPVLCUDBN5JZK` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CBKI4SXLJP64MRBO7L2CFRLW2HKDOXITH3MZCG22TCPRPVLCUDBN5JZK;;) |
+| place_order | `CDUCCBG6STUU53DV3LQ3R6FYNS65DSP4S2GIYKWIOSK5QFVL2VMXK7NG` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CDUCCBG6STUU53DV3LQ3R6FYNS65DSP4S2GIYKWIOSK5QFVL2VMXK7NG;;) |
+| match_orders | `CDXCR3C4EDMYXFG7KHSZUWAUIVZSWTP35PUQFUPGD3Q7V4JKJS2LBFQO` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CDXCR3C4EDMYXFG7KHSZUWAUIVZSWTP35PUQFUPGD3Q7V4JKJS2LBFQO;;) |
+| cancel_order | `CD24NXY7C52IFLRHBHSGGTYFBX3HAJHNT22DYP3RY4QX7WJ6YQS66JT5` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CD24NXY7C52IFLRHBHSGGTYFBX3HAJHNT22DYP3RY4QX7WJ6YQS66JT5;;) |
 
 ### Lending verifiers
 
@@ -53,15 +53,32 @@ Registered on the pool via `set_lending_verifiers`.
 
 | Circuit | ID | Stellar Lab |
 |---|---|---|
-| position_open | `CBKEPMXWPZRB5CWMZW5S732BXEL3ZV56NPKHS7S4ABFJHIFFHM2SFSO2` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CBKEPMXWPZRB5CWMZW5S732BXEL3ZV56NPKHS7S4ABFJHIFFHM2SFSO2;;) |
-| borrow | `CCOZBAFGCZVPSP4YDS7RGFCBLHHDYEFGUTML3L6VP4G3ESTCB6VAPF3F` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCOZBAFGCZVPSP4YDS7RGFCBLHHDYEFGUTML3L6VP4G3ESTCB6VAPF3F;;) |
-| repay | `CBYAT3O5IVE32HQCWXKI6ORGOHGVP44SK4KSJ75TSCD7TNMAYNCT4KC7` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CBYAT3O5IVE32HQCWXKI6ORGOHGVP44SK4KSJ75TSCD7TNMAYNCT4KC7;;) |
-| withdraw_collateral | `CCNOT52H3T6HWDNXBAOFAGVZZTVCZWAOOFP6PJ3IBZXWLULQAVO4CO6Z` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCNOT52H3T6HWDNXBAOFAGVZZTVCZWAOOFP6PJ3IBZXWLULQAVO4CO6Z;;) |
-| solvency_attestation | `CB35YP66Y6YND3YHK7OCTZHN6EDQU2OHKG3H2CISSTQARGCAX3KQLVKY` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CB35YP66Y6YND3YHK7OCTZHN6EDQU2OHKG3H2CISSTQARGCAX3KQLVKY;;) |
-| supply | `CCK5SHU7SLMMV2JOLMFDATOH7YPAPFQX2SK2Z7VECE5U7FGKMJUQK4CU` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCK5SHU7SLMMV2JOLMFDATOH7YPAPFQX2SK2Z7VECE5U7FGKMJUQK4CU;;) |
-| redeem | `CAWWAHUAEFB4KOH56IFWF4D75YNIZICR2SW4VXZTBTRC5Y4RTFZNDT7N` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CAWWAHUAEFB4KOH56IFWF4D75YNIZICR2SW4VXZTBTRC5Y4RTFZNDT7N;;) |
+| position_open | `CA2MUPW4STKOFS3GFAVUDBLYBETNKDN6EGBMICJIRHB43S4JST5UWT55` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CA2MUPW4STKOFS3GFAVUDBLYBETNKDN6EGBMICJIRHB43S4JST5UWT55;;) |
+| borrow | `CAPJQR6LVWVUCCNQHJ244ZIWXMFEZEQEIRCHKI6GHE7SLJSKPPYWRU4X` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CAPJQR6LVWVUCCNQHJ244ZIWXMFEZEQEIRCHKI6GHE7SLJSKPPYWRU4X;;) |
+| repay | `CBGPD4LDLRLWAZXSUD6TGSP4O6FN5NOXRCQETAQFJIPRA2KHLPN3UGFA` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CBGPD4LDLRLWAZXSUD6TGSP4O6FN5NOXRCQETAQFJIPRA2KHLPN3UGFA;;) |
+| withdraw_collateral | `CD2E7XCGWB5UDFJ73ALHPSP7DKEFQDOKLIKFOLENT5OYWK747GEWGE54` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CD2E7XCGWB5UDFJ73ALHPSP7DKEFQDOKLIKFOLENT5OYWK747GEWGE54;;) |
+| solvency_attestation | `CCIER7JVR7XRDO4BLYIVON2M4PXEQN5MDWTJDXVWP2WCNR3YSZP75LTG` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCIER7JVR7XRDO4BLYIVON2M4PXEQN5MDWTJDXVWP2WCNR3YSZP75LTG;;) |
+| supply | `CBSRFPPOHIILJWPAQK7A3SUD25XTSKUJ7PGRSOEIBHDRXXLOATLEIJE2` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CBSRFPPOHIILJWPAQK7A3SUD25XTSKUJ7PGRSOEIBHDRXXLOATLEIJE2;;) |
+| redeem | `CCUEOK7JZ6LLLZRCZJF2RMSA7ELEE5B2X3EMDHPCVMIC67EUVC5KDVYN` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CCUEOK7JZ6LLLZRCZJF2RMSA7ELEE5B2X3EMDHPCVMIC67EUVC5KDVYN;;) |
 
 Machine-readable copy: [`deployments.json`](./deployments.json).
+
+---
+
+## Wallets
+
+Connect with any Stellar wallet — Freighter, xBull, Albedo, Rabet, Lobstr — via
+[Stellar Wallets Kit](https://github.com/Creit-Tech/Stellar-Wallets-Kit).
+
+![Wallet picker](./screenshot/different_wallet.png)
+
+Once connected, your shielded total is derived locally from notes only you can decrypt:
+
+![Shielded balance](./screenshot/wallet_balance.png)
+
+Every action is a normal Stellar transaction you can inspect in any explorer:
+
+![Transaction in explorer](./screenshot/explorer_tx.png)
 
 ---
 
