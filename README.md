@@ -33,7 +33,7 @@ Supported assets: **XLM** and **USDC**. Network: **Stellar Testnet**.
 
 | Contract | ID | Stellar Lab |
 |---|---|---|
-| **ObscuraPool** | `CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CA6KV2PFQ3IRTJNFCWRDRBJLNI2VB47AOGH57HMUDSLLSIC2RX5WMQJE) |
+| **ObscuraPool** | `CC6VTQPPA7RB7S5NJXLHV3LNYOOARXRTJEMLUT32ZABIRQEUWESGPOJI` | [open](https://lab.stellar.org/smart-contracts/contract-explorer?$=network$id=testnet&label=Testnet&horizonUrl=https:////horizon-testnet.stellar.org&rpcUrl=https:////soroban-testnet.stellar.org&passphrase=Test%20SDF%20Network%20/;%20September%202015;&smartContracts$explorer$contractId=CC6VTQPPA7RB7S5NJXLHV3LNYOOARXRTJEMLUT32ZABIRQEUWESGPOJI) |
 
 ### Proof verifiers
 
